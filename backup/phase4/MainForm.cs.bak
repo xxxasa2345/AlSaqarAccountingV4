@@ -1,0 +1,54 @@
+using System.Data;
+using AlSaqarAccounting.Core;
+using AlSaqarAccounting.Services;
+
+namespace AlSaqarAccounting.Forms;
+
+public sealed class MainForm : Form
+{
+    private readonly AppSession _session;
+    private readonly SchemaService _schema;
+    private readonly StoredProcedureExecutor _sp;
+    private readonly DataGridView _grid = new() { Dock=DockStyle.Fill, ReadOnly=true, AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill };
+    private readonly Label _status = new() { Dock=DockStyle.Bottom, Height=32 };
+
+    public MainForm(AppSession session, SchemaService schema, StoredProcedureExecutor sp)
+    {
+        _session=session; _schema=schema; _sp=sp;
+        Text = $"الصقر للمحاسبة — {_session.UserName}";
+        WindowState = FormWindowState.Maximized;
+        RightToLeft=RightToLeft.Yes; RightToLeftLayout=true;
+
+        var menu = new MenuStrip();
+        var db = new ToolStripMenuItem("قاعدة البيانات");
+        db.DropDownItems.Add("الجداول", null, async (_,_) => await LoadTablesAsync());
+        db.DropDownItems.Add("الإجراءات المخزنة", null, (_,_) => ShowProcedureCatalog());
+        menu.Items.Add(db);
+
+        Controls.Add(_grid);
+        Controls.Add(_status);
+        Controls.Add(menu);
+        MainMenuStrip = menu;
+        Shown += async (_,_) => await LoadTablesAsync();
+    }
+
+    private async Task LoadTablesAsync()
+    {
+        var dt = await _schema.GetTablesAsync();
+        _grid.DataSource = dt;
+        _status.Text = $"المستخدم: {_session.UserName} | الفرع: {_session.BranchId} | الجداول: {dt.Rows.Count}";
+    }
+
+    private void ShowProcedureCatalog()
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "catalogs", "Procedure_Catalog_With_Signatures.csv");
+        if (!File.Exists(path))
+        {
+            MessageBox.Show("لم يتم نشر فهرس الإجراءات مع التطبيق.");
+            return;
+        }
+        var lines = File.ReadAllLines(path);
+        _grid.DataSource = new BindingSource { DataSource = lines.Select((x,i)=>new { Row=i+1, Text=x }).ToList() };
+        _status.Text = "فهرس الإجراءات المخزنة";
+    }
+}

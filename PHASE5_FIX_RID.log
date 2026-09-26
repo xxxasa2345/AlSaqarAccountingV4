@@ -1,0 +1,18 @@
+﻿2026-09-26 10:20:08  === AlSaqarAccounting Phase 5 - RID Publish Fix ===
+2026-09-26 10:20:08  Root: H:\الصقر\AlSaqarAccountingV4
+2026-09-26 10:20:08  1) Restore مع -r win-x64
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+2026-09-26 10:20:10  2) Build Release
+  AlSaqarAccounting -> H:\الصقر\AlSaqarAccountingV4\src\AlSaqarAccounting\bin\Release\net8.0-windows\AlSaqarAccounting.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.83
+2026-09-26 10:20:11  3) Publish win-x64 self-contained
+  AlSaqarAccounting -> H:\الصقر\AlSaqarAccountingV4\src\AlSaqarAccounting\bin\Release\net8.0-windows\win-x64\AlSaqarAccounting.dll
+  AlSaqarAccounting -> H:\الصقر\AlSaqarAccountingV4\publish\
+2026-09-26 10:20:17  تم النشر بنجاح.
+2026-09-26 10:20:17  EXE: H:\الصقر\AlSaqarAccountingV4\publish\AlSaqarAccounting.exe

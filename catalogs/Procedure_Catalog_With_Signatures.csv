@@ -1,0 +1,342 @@
+﻿Schema,Procedure,DefinitionLength,ParameterCount,Signature
+dbo,Account_YearEnd,6931,0,
+dbo,AccountCharge,277,1,@sn_Account int
+dbo,AddTemp_Budget,12043,3,@ToDate datetime; @BranchID int; @UserID int
+dbo,AddTemp_BudgetAllBranch,5452,3,@ToDate datetime; @BranchID int; @UserID int
+dbo,AddTempAgeingAnalysis,1018,2,@FromDate datetime; @ToDate datetime
+dbo,AddTempTranMaterDetails,4253,4,@FromDate datetime; @ToDate datetime; @Account_No numeric; @CompID int
+dbo,AddTempTrialBalance_New,21778,7,@pflag int; @FromDate datetime; @ToDate datetime; @FromAccount_No numeric; @ToAccount_No numeric; @BranchID int; @HideBalance bit
+dbo,AddTempTrialBalanceByTotal,32696,9,@pflag int; @FromDate datetime; @ToDate datetime; @FromAccount_No numeric; @ToAccount_No numeric; @BranchID int; @UserID int; @Account_Level int; @HideBalance bit
+dbo,api_CategoriesGetAllGategories,520,0,
+dbo,api_Get_RoomDetails,389,2,@BranchID int; @RoomNum int
+dbo,api_Get_TableDetails,397,2,@BranchID int; @TableNum int
+dbo,api_GetAllBranches,461,0,
+dbo,api_GetAllItemsByGategories,253,1,@GategoryID int
+dbo,api_GetAllRestaurant_Room,184,1,@BranchID int
+dbo,api_GetAllRestaurant_RoomByPause,207,1,@BranchID int
+dbo,api_GetAllRestaurant_Table,186,1,@BranchID int
+dbo,api_GetAllRestaurant_TableByPause,209,1,@BranchID int
+dbo,api_Login,280,3,@BranchID int; @UserID int; @PassWord nvarchar
+dbo,ClearDB,3771,0,
+dbo,ClearEmptyDB,4741,0,
+dbo,Cloud,2164,2,@ItemID int; @SupplierID int
+dbo,CreateTableType,1375,0,
+dbo,DebtReconstruction,3144,2,@Date date; @SupplierIds nvarchar
+dbo,Delete_Order_OpenQuantity,218,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_OpenQuantity_ALL,491,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_OpenQuantityDetails,2770,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_Order_ALL,1177,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_Order_ALL_Draft,529,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_Orders,209,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_OrdersDetails,3641,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_OrdersDetailsDraft,1155,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_OrdersDraft,219,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_Purchases,212,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_Purchases_ALL,1199,2,@PurBranchID int; @BranchID int
+dbo,Delete_Order_PurchasesDetails,2766,2,@PurBranchID int; @BranchID int
+dbo,Delete_Tran_Tran,271,3,@ReferenceCode int; @BranchID int; @TranTypeID int
+dbo,Delete_Tran_TranDetails,202,2,@TranSn int; @BranchID int
+dbo,Drop_Procedures_And_Type,379,0,
+dbo,Fix_Item,5480,0,
+dbo,Get_Account_Tree,781,0,
+dbo,Get_AfterRoots,706,1,@Account_No bigint
+dbo,Get_All_Items,2658,0,
+dbo,Get_Averg_AllItems,500,0,
+dbo,Get_AvergItem,16138,2,@ItemID int; @AvergItm decimal OUTPUT
+dbo,Get_AvergItemByTable,614,1,@AvergItem Averg_Item
+dbo,Get_ContractActive_DisActive,2377,3,@BranchID int; @Date1 date; @IsBigger bit
+dbo,Get_ContractCustomer,921,2,@CustID int; @BranchID int
+dbo,Get_Cust_Guarantee,1023,2,@CustID int; @BranchID int
+dbo,Get_EmployeeAllowances,483,1,@EmpID int
+dbo,Get_ExitItems_ByContractID,762,1,@ContractID int
+dbo,Get_Item_ByCodeALL,2435,2,@Code nvarchar; @BranchID int
+dbo,Get_Item_ByID,1906,2,@Code int; @BranchID int
+dbo,Get_Item_ByItemCode,1705,1,@ItemCode nvarchar
+dbo,Get_Item_BySearchOpenQauntity,884,2,@Purchese_ID int; @BranchID int
+dbo,Get_Item_BySearchPurchases,1098,2,@Purchese_ID int; @BranchID int
+dbo,Get_ItemGroupToPrintCashier,885,1,@ID int
+dbo,Get_ItemGroupToPrintCashierItem,1094,1,@ID int
+dbo,Get_Items_ByCode,822,1,@Code nvarchar
+dbo,Get_Items_Stock_Report,2498,0,
+dbo,Get_MizanBarcode,861,0,
+dbo,Get_ProfitAndLossAccount,5088,4,@FromDate datetime; @ToDate datetime; @BranchID int; @CostID int
+dbo,Get_ProfitAndLossAccountAllBranch,7245,2,@FromDate datetime; @ToDate datetime
+dbo,Get_Report_OrdersPurches,6624,4,@BranchID int; @Date1 datetime; @Date2 datetime; @Category_ID int
+dbo,Get_Report_OrdersPurches_ByGroups,7081,2,@BranchID int; @Category_ID int
+dbo,Get_Report_QuantityOrdersPurches,6596,4,@BranchID int; @Date1 datetime; @Date2 datetime; @Category_ID int
+dbo,Get_Restaurant_Delivery,567,1,@BranchID int
+dbo,Get_Scaffolds_Contracts_Filter,1666,4,@DateType nvarchar; @Status int; @DateFrom date; @DateTo date
+dbo,Get_Serial,1598,1,@HDD nvarchar
+dbo,Get_Supplier_Items_Scaffold,1504,1,@SupplierID int
+dbo,Get_SupplierAccount,119,0,
+dbo,Get_virginByStatuse,2297,2,@StatuseID int; @FranchiseID int
+dbo,GetAccountBalance,914,1,@ID int
+dbo,GetAccountBalanceByAccID,757,1,@ID int
+dbo,GetAccountPath,287,1,@Account_No numeric
+dbo,GetAccountTree,1260,0,
+dbo,GetAllBranches,97,0,
+dbo,GetAllitems_Alternatives,4154,3,@ItemID int; @StoreID int; @UnitType int
+dbo,GetBalanceGroupAccounts,6852,5,@FromDate datetime; @ToDate datetime; @Account_No numeric; @BranchID int; @NowBalance int
+dbo,GetCostCenterDetails,1135,5,@Date1 datetime; @Date2 datetime; @CostID int; @BranchID int; @TypeID int
+dbo,GetCsrZakat,451,2,@BranchId int; @UserId int
+dbo,GetDataForZakatToCrm,741,1,@BranchId int
+dbo,GetItemDetails,551,1,@Code nvarchar
+dbo,GetItemQuantityByBranch,486,1,@ItemID int
+dbo,GetLastOrderDetailsByItemID,740,1,@ItemID int
+dbo,GetLedger_Employee,287,1,@AccountID int
+dbo,GetOrderDetailsByInvoiceID,3898,1,@ID int
+dbo,GetOrderDetailsWithReturns,4246,1,@OrderID int
+dbo,GetOrderRentalDetails,3674,1,@ID int
+dbo,GetOrderReservations,4563,3,@Date1 date; @Date2 date; @MM int
+dbo,GetOrdersWithDetails,6298,2,@PurBranchID int; @BranchID int
+dbo,GetOrdersWithDetailsDraft,6161,2,@PurBranchID int; @BranchID int
+dbo,GetPriceOffersWithDetails,6140,2,@PurBranchID int; @BranchID int
+dbo,GetPrinter_ID_Name,471,3,@ItemID int; @PrintersID int OUTPUT; @PrintersName nvarchar OUTPUT
+dbo,GetQuantityFromItem_ByItemCode_StoreId,9440,2,@ItmCode nvarchar; @StoreNum int
+dbo,GetRecpitInvoiceDetails,3251,3,@Date1 date; @Date2 date; @BranchID int
+dbo,GetRentalInvoiceDetails,2954,3,@Date1 date; @Date2 date; @BranchID int
+dbo,GetRented,908,3,@ItemID int; @BranchID int; @StoreID int
+dbo,GetRepairWithDetails,638,1,@RepairId int
+dbo,GetReport_BounceContract,1050,4,@BounceID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_Car,1500,3,@DriverID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_Contract,1483,3,@BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_CostCenters,7704,6,@FromDate datetime; @ToDate datetime; @Account_No numeric; @CostCentersID numeric; @BranchID int; @pflag int
+dbo,GetReport_CostCentersByFather,3727,6,@FromDate datetime; @ToDate datetime; @Account_No numeric; @CostCentersID numeric; @BranchID int; @pflag int
+dbo,GetReport_EmployeeSales,12062,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,GetReport_EmployeeSales_2,7272,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,GetReport_Guarantee,1347,3,@BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_ItemsMenu,757,0,
+dbo,GetReport_MovementAllItemActive,11108,3,@BranchID int; @DateFrom datetime; @DateTo datetime
+dbo,GetReport_MovementAllItemActive_Summary,6124,3,@BranchID int; @DateFrom datetime; @DateTo datetime
+dbo,GetReport_MovementItem,12570,2,@ItemID int; @BranchID int
+dbo,GetReport_MovementItemActive,12110,4,@ItemID int; @BranchID int; @DateFrom datetime; @DateTo datetime
+dbo,GetReport_MovementItemBetweenToDate,11267,4,@ItemID int; @BranchID int; @DateFrom datetime; @DateTo datetime
+dbo,GetReport_MovementsDailyReport,11299,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,GetReport_MovementsDailyReport2,14109,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,GetReport_MovementsDailyReport2_ByUser,12584,4,@Date1 datetime; @Date2 datetime; @BranchID int; @UserID int
+dbo,GetReport_MovementsDailyReportAllBranch,10948,2,@Date1 datetime; @Date2 datetime
+dbo,GetReport_MovementsDailyReportCloseDay,14907,4,@Date1 datetime; @Date2 datetime; @BranchID int; @UserID int
+dbo,GetReport_NetProfitOrdersBySalesMan,5072,6,@CashType int; @CustID int; @SalesManID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_Order_Reservation,1100,3,@Date1 datetime; @Date2 datetime; @TypeID int
+dbo,GetReport_Order_TransferfromBranch,1201,4,@Date1 datetime; @Date2 datetime; @TypeID int; @BranchID int
+dbo,GetReport_Order_TransferToBranch,1157,4,@Date1 datetime; @Date2 datetime; @TypeID int; @BranchID int
+dbo,GetReport_OrderDalala_Dalala,1386,3,@BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderDalala_Sending,1114,3,@BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderDetails,1163,6,@CashType int; @BranchID int; @CustID int; @Date1Ord datetime; @Date2Ord datetime; @StoreId int
+dbo,GetReport_OrderDetailsByBounce,1278,4,@BranchID int; @BounceID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderDetailsByCatogry,4185,9,@CashType int; @BranchID int; @CustID int; @EmpID int; @GroupID int; @ClassID int; @CompanyID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderDetailsByGroups,3128,4,@GroupID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderDetailsBySalesMan,3621,6,@CashType int; @CustID int; @SalesManID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderDetailsSmall,999,3,@BranchID int; @Date1Ord datetime; @Date2Ord datetime
+dbo,GetReport_OrderProfit,2952,4,@CashType int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderProfitByGroup,1038,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,GetReport_OrderProfitByGroupBySalesMan,1884,5,@CustID int; @SalesManID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderProfitByItem,1418,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,GetReport_OrderProfitByItem_ItemOnly,1489,4,@Date1 datetime; @Date2 datetime; @ItemID int; @BranchID int
+dbo,GetReport_OrderProfitByItem_ItemOnlyBySalesMan,2252,6,@CustID int; @SalesManID int; @BranchID int; @Date1 datetime; @Date2 datetime; @ItemID int
+dbo,GetReport_OrderProfitByItemCashierSafryMahly,4245,4,@CashType int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderProfitBySalesMan,2262,6,@CashType int; @CustID int; @SalesManID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderRent,1981,3,@BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderReturnDetails,7648,4,@CashType int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrderReturnDetailsBySalesMan,4568,6,@CashType int; @CustID int; @SalesManID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_Orders,5833,5,@CashType int; @BranchID int; @CustID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_Orders_ByProperties,4357,10,@CashType int; @Date2 datetime; @CustID int; @EmpID int; @GroupID int; @CompanyID int; @BranchID int; @ClassID int; @StoreID int; @Date1 datetime
+dbo,GetReport_Orders_CashierSafryMahly,4875,4,@CashType int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrdersBounce,5567,5,@CashType int; @BranchID int; @BounceID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrdersBySalesMan,1886,6,@CashType int; @CustID int; @SalesManID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrdersDateHold,5801,5,@CashType int; @BranchID int; @CustID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrdersNet_ByProperties,6898,10,@CashType int; @Date2 datetime; @CustID int; @EmpID int; @GroupID int; @CompanyID int; @BranchID int; @ClassID int; @StoreID int; @Date1 datetime
+dbo,GetReport_OrdersNetPurchOnly_ByProperties,10762,10,@CashType int; @Date2 datetime; @CustID int; @EmpID int; @GroupID int; @CompanyID int; @BranchID int; @ClassID int; @StoreID int; @Date1 datetime
+dbo,GetReport_OrdersPurchNet_ByProperties,12732,10,@CashType int; @Date2 datetime; @CustID int; @EmpID int; @GroupID int; @CompanyID int; @BranchID int; @ClassID int; @StoreID int; @Date1 datetime
+dbo,GetReport_OrdersReturn,3437,4,@CashType int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_OrdersReturn_ByProperties,4366,10,@CashType int; @Date2 datetime; @CustID int; @EmpID int; @GroupID int; @CompanyID int; @BranchID int; @ClassID int; @StoreID int; @Date1 datetime
+dbo,GetReport_OrdersReturnBySalesMan,2509,6,@CashType int; @CustID int; @SalesManID int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_Project,6068,4,@FromDate datetime; @ToDate datetime; @ProjectID int; @BranchID int
+dbo,GetReport_PurchaesReturnDetails,7526,4,@CashType int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_PurchasesNet_ByProperties,6915,10,@CashType int; @Date2 datetime; @CustID int; @EmpID int; @GroupID int; @CompanyID int; @BranchID int; @ClassID int; @StoreID int; @Date1 datetime
+dbo,GetReport_Purches,5520,5,@CashType int; @BranchID int; @SupID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_Purches_ByProperties,4385,10,@CashType int; @Date2 datetime; @CustID int; @EmpID int; @GroupID int; @CompanyID int; @BranchID int; @ClassID int; @StoreID int; @Date1 datetime
+dbo,GetReport_PurchesDetails,29276,6,@CashType int; @BranchID int; @CustID int; @Date1 datetime; @Date2 datetime; @StoreId int
+dbo,GetReport_PurchesReturn,3687,4,@CashType int; @BranchID int; @Date1 datetime; @Date2 datetime
+dbo,GetReport_PurchesReturn_ByProperties,4256,10,@CashType int; @Date2 datetime; @CustID int; @EmpID int; @GroupID int; @CompanyID int; @BranchID int; @ClassID int; @StoreID int; @Date1 datetime
+dbo,GetReport_RentalExpensesDetails,594,2,@Date1 date; @Date2 date
+dbo,GetReport_RevenuesAndExpensesByItemCode,2239,3,@ItemCode nvarchar; @Date1 date; @Date2 date
+dbo,GetReport_TobaccoTax,1436,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,GetReport_TransActionItems,2730,1,@StoreID int
+dbo,GetReport_VatReport,12185,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,GetReport_Wedding,2519,2,@Date1 date; @Date2 date
+dbo,GetReportItemLimit,1630,1,@StoreID int
+dbo,GetRes,1134,1,@Id int
+dbo,GetTotal_DalalaQuantity,216,2,@ID int; @ItemID int
+dbo,GetTotalAvergForSore_ByGroup,1033,1,@BranchID int
+dbo,GetTotalAvergForSore_ByItem,991,1,@BranchID int
+dbo,GetTotalAvergForSoreScaffolds_ByItem,1297,1,@BranchID int
+dbo,GetTotalMoneyByProjectId,237,1,@Id int
+dbo,GetTranTeacher,1957,4,@Date1 datetime; @Date2 datetime; @BranchID int; @TranType int
+dbo,GetTranTeacherByAccountCashBox,2497,5,@Date1 datetime; @Date2 datetime; @BranchID int; @TranType int; @AccountID int
+dbo,GetUnitNameByID,110,1,@ID int
+dbo,Insert_Gard,784,7,@BranchID int; @GardDate datetime; @NoteNum nvarchar; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @Items Items_Gard
+dbo,Insert_GardDetails,3062,2,@Items Items_Gard; @PurBranchID int
+dbo,Insert_Item_Unit,552,4,@Name nvarchar; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar
+dbo,Insert_Items,3806,1,@Items Item_Items
+dbo,Insert_ItemsByExecl,3940,1,@Items ItemsFromExcel
+dbo,Insert_OpenQuantity,1106,8,@BranchID int; @Purchases_Date datetime; @NoteNum nvarchar; @TotalPrices decimal; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @Items Items_OpenQuantity
+dbo,Insert_OpenQuantityDetails,4223,2,@Items Items_OpenQuantity; @PurBranchID int
+dbo,Insert_Order_Order_ALL,18060,61,@BranchID int; @Country nvarchar; @PostalCode nvarchar; @AdditionalNum nvarchar; @CommercialRecord nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @CostCentersID int; @SupplierID int; @BounceID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @DiscountPerantage decimal; @HasmPer decimal; @IsWaiting bit; @HasmAmount decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @CashBank decimal; @OrderCashierType bit; @ProjectID int; @SupplierName nvarchar; @RoomNum int; @TableNum int; @Sectoral int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @DateHold datetime; @Charge decimal; @AllDiscount decimal; @SupplierPhone nvarchar; @BounsAmount decimal; @DisCode nvarchar; @AmountPaid decimal; @Rest decimal; @CarName nvarchar; @CarModel nvarchar; @PlateNumber nvarchar; @ChassisNum nvarchar; @CarColor nvarchar; @Counter nvarchar; @BuildingNum nvarchar; @CashBox int; @Items Items_Orders; @Street nvarchar; @District nvarchar; @City nvarchar
+dbo,Insert_Order_Order_ALL_Draft,4051,60,@BranchID int; @Country nvarchar; @PostalCode nvarchar; @AdditionalNum nvarchar; @CommercialRecord nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @CostCentersID int; @SupplierID int; @BounceID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @DiscountPerantage decimal; @HasmPer decimal; @IsWaiting bit; @HasmAmount decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @CashBank decimal; @OrderCashierType bit; @ProjectID int; @SupplierName nvarchar; @RoomNum int; @TableNum int; @Sectoral int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @DateHold datetime; @Charge decimal; @AllDiscount decimal; @SupplierPhone nvarchar; @BounsAmount decimal; @DisCode nvarchar; @AmountPaid decimal; @Rest decimal; @CarName nvarchar; @CarModel nvarchar; @PlateNumber nvarchar; @ChassisNum nvarchar; @CarColor nvarchar; @Counter nvarchar; @BuildingNum nvarchar; @Items Items_Orders; @Street nvarchar; @District nvarchar; @City nvarchar
+dbo,Insert_Order_Order_ALL2,14782,47,@BranchID int; @Country nvarchar; @PostalCode nvarchar; @AdditionalNum nvarchar; @CommercialRecord nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @CostCentersID int; @SupplierID int; @BounceID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @DiscountPerantage decimal; @HasmPer decimal; @IsWaiting bit; @HasmAmount decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @CashBank decimal; @OrderCashierType bit; @RoomNum int; @SupplierName nvarchar; @TableNum int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @DateHold datetime; @Charge decimal; @Items Items_Orders; @SupplierPhone nvarchar; @BuildingNum nvarchar; @Street nvarchar; @District nvarchar; @City nvarchar
+dbo,Insert_Order_OrdersDetails,4460,3,@Items Items_Orders; @ISWaitng bit; @PurBranchID int
+dbo,Insert_Order_OrdersDetails_Restaurant_A,4463,3,@Items Items_Orders_Restaurant; @ISWaitng bit; @PurBranchID int
+dbo,Insert_Order_OrdersDetailsDraft,3503,3,@Items Items_Orders; @ISWaitng bit; @PurBranchID int
+dbo,Insert_Order_Purchases,11713,29,@BranchID int; @NoteNum nvarchar; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @DiscountPerantage decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @Net decimal; @Cash decimal; @SupplierID int; @Bank decimal; @Acc_Cash int; @Acc_Bank int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @Charge decimal; @ProjectId int; @Items Items_Purches; @SupplierName nvarchar; @SupplierPhone nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int; @CostCentersID int; @Note nvarchar
+dbo,Insert_Order_PurchasesDetails,5687,2,@Purchese_ID int; @Items Items_Purches
+dbo,Insert_Order_Restaurant_A,15688,40,@BranchID int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @CostCentersID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @SupplierID int; @DiscountPerantage decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @CashBank decimal; @OrderCashierType bit; @RoomNum int; @AccountID int; @TableNum int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @ISPasue bit; @ISPayment bit; @ISDelivery bit; @DeliveryStatus int; @DeliveryID int; @Time1 datetime; @IsWaiting bit; @Items Items_Orders_Restaurant; @SupplierName nvarchar; @SupplierPhone nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int
+dbo,Insert_Order_Restaurant_Delivery,1459,8,@DeliveryID int; @CustName nvarchar; @CustPhone nvarchar; @CustPlace nvarchar; @MONEY decimal; @OrderID int; @DeliveryStatus int; @BranchID int
+dbo,Insert_Order_Restaurant_TakeAway,17080,48,@BranchID int; @Country nvarchar; @PostalCode nvarchar; @AdditionalNum nvarchar; @CommercialRecord nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @CostCentersID int; @SupplierID int; @BounceID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @DiscountPerantage decimal; @HasmPer decimal; @IsWaiting bit; @HasmAmount decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @CashBank decimal; @OrderCashierType bit; @RoomNum int; @SupplierName nvarchar; @TableNum int; @Sectoral bit; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @DateHold datetime; @Charge decimal; @Items Items_Orders_Restaurant; @SupplierPhone nvarchar; @BuildingNum nvarchar; @Street nvarchar; @District nvarchar; @City nvarchar
+dbo,Insert_Tran_Tran,946,11,@ReferenceCode int; @ProjectId int; @Transn int OUTPUT; @TranTypeID int; @DocCode nvarchar; @TranDate datetime; @Note nvarchar; @BranchID int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar
+dbo,INSERT_Tran_TranDetails,575,8,@TranSn int; @Account_Sn int; @AccounIindex int; @TranDesc nvarchar; @Debit decimal; @Credit decimal; @CostCentersID int; @BranchID int
+dbo,InsertDataExcelToSql,2305,0,
+dbo,InvoiceTax,2075,2,@DateFrom date; @DateTo date
+dbo,ItemComponentQuantity_IN,2764,3,@ItemID int; @StoreID int; @Quantity decimal
+dbo,ItemComponentQuantity_Out,2795,3,@ItemID int; @StoreID int; @Quantity decimal
+dbo,ItemQuantity_IN,3984,5,@ItemID int; @StoreID int; @Quantity decimal; @UnitNumber decimal; @ItemUnitType nvarchar
+dbo,ItemQuantity_Out,4011,5,@ItemID int; @StoreID int; @Quantity decimal; @UnitNumber decimal; @ItemUnitType nvarchar
+dbo,Ledger_Account,27721,4,@AccountID int; @Date1 datetime; @Date2 datetime; @TypeID bit
+dbo,Ledger_Account_ByGroups,2150,4,@AccountID int; @Credit decimal OUTPUT; @Debit decimal OUTPUT; @Total decimal OUTPUT
+dbo,Ledger_Account_ByItems,27238,4,@AccountID int; @Date1 datetime; @Date2 datetime; @TypeID bit
+dbo,Ledger_Account_Car,17164,4,@AccountID int; @Date1 datetime; @Date2 datetime; @TypeID bit
+dbo,Ledger_AccountDetails,13986,3,@AccountID int; @Date1 datetime; @Date2 datetime
+dbo,Print_Account_Cuss,1732,0,
+dbo,Print_Account_CussByTotal,1976,0,
+dbo,Print_Account_DailyRestrictions_ALL,1756,3,@ReferenceCode int; @TranTypeID int; @BranchID int
+dbo,Print_Account_Receipts,1003,3,@TranTypeID int; @ReferenceCode int; @BranchID int
+dbo,Print_Account_Receipts2,1003,3,@TranTypeID int; @ReferenceCode int; @BranchID int
+dbo,Print_Account_Supp,1910,0,
+dbo,Print_Car,1408,2,@Id int; @IsDone bit
+dbo,Print_Contract_Contract,4968,2,@ID int; @BranchID int
+dbo,Print_Emp_Payroll,1452,2,@ID int; @EmpIDs IntList
+dbo,Print_Emp_Payroll_All,1740,1,@ID int
+dbo,Print_Emp_PayrollTemp,1146,1,@ID int
+dbo,Print_EntrustedEmployee,643,2,@ID int; @BranchID int
+dbo,Print_Order_Cashier,6981,3,@ID int; @PrinterID int; @BranchID int
+dbo,Print_Order_CashierByItem,4790,3,@ID int; @PrinterID int; @BranchID int
+dbo,Print_Order_CashierByItemCook,5825,3,@ID int; @PrinterID int; @BranchID int
+dbo,Print_Order_CashierNoPrint,4836,3,@ID int; @PrinterID int; @BranchID int
+dbo,Print_Order_CashierRes,13303,3,@ID int; @PrinterID int; @BranchID int
+dbo,Print_Order_CheckoutOrders,5960,2,@ID int; @BranchID int
+dbo,Print_Order_InventorySettlementMinus,1496,2,@ID int; @BranchID int
+dbo,Print_Order_ManufacturingOrder,3292,2,@ID int; @BranchID int
+dbo,Print_Order_OpenQuantity,1388,2,@ID int; @BranchID int
+dbo,Print_Order_OrderDalala_ISPrint,4277,2,@ID int; @BranchID int
+dbo,Print_Order_OrderReturn,8676,3,@ID int; @BranchID int; @CreditNote int
+dbo,Print_Order_Orders,23688,2,@ID int; @BranchID int
+dbo,Print_Order_Orders_Res,7721,2,@ID int; @BranchID int
+dbo,Print_Order_OrdersAfterReturn,4967,2,@ID int; @BranchID int
+dbo,Print_Order_OrdersDraft,24853,2,@ID int; @BranchID int
+dbo,Print_Order_PaymentItem,4969,2,@ID int; @BranchID int
+dbo,Print_Order_PriceOffer,6279,2,@ID int; @BranchID int
+dbo,Print_Order_Purchases,6009,2,@ID int; @BranchID int
+dbo,Print_Order_PurchasesOrder,3491,2,@ID int; @BranchID int
+dbo,Print_Order_PurchasesReturn,6178,2,@ID int; @BranchID int
+dbo,Print_Order_RecItem,5252,2,@ID int; @BranchID int
+dbo,Print_Order_Rent,5972,2,@ID int; @BranchID int
+dbo,Print_Order_Rent_Recipt,6108,2,@ID int; @BranchID int
+dbo,Print_Order_StoreTransfer,1508,2,@ID int; @BranchID int
+dbo,Print_Order_TransferFromBranch,6011,2,@ID int; @BranchID int
+dbo,Print_Order_TransferToBranch,5439,2,@ID int; @BranchID int
+dbo,Print_OrderDalala_Dalala,5503,2,@ID int; @BranchID int
+dbo,Print_PriceShowRentalInvoice,2620,2,@ID int; @BranchID int
+dbo,Print_Recipt3,4308,2,@ID int; @BranchID int
+dbo,Print_RentalExpenses,674,1,@ID int
+dbo,Print_RentalInvoice,2607,2,@ID int; @BranchID int
+dbo,Print_Scaffold_EntryPermission,1354,1,@ID int
+dbo,Print_Scaffold_ExitPermission,1347,1,@ID int
+dbo,Print_Scaffold_PriceOffer,5845,2,@ID int; @BranchID int
+dbo,Print_Scaffolds_Contract,5943,2,@ID int; @BranchID int
+dbo,Print_Scaffolds_MinutesEnd,1298,1,@ID int
+dbo,Print_Scaffolds_MinutesStarted,1317,1,@ID int
+dbo,Print_SearchAccountTranDetailsByCode,1207,2,@ID int; @BranchID int
+dbo,Print_SearchAccountTranTempDetailsByCode,1221,2,@ID int; @BranchID int
+dbo,Processing_OF_Profits,632,0,
+dbo,RebuildCGEAllIndexes,1869,1,@MicroDataBase nvarchar
+dbo,RepairDB,7653,0,
+dbo,Report_AllOrdersCheckOut,1662,3,@BranchID int; @Date1 datetime; @Date2 datetime
+dbo,Report_CloseDayByUser,1080,1,@UserID int
+dbo,Report_DailyOrderByDate,2001,3,@Date1 datetime; @Date2 datetime; @BranchID int
+dbo,ReportMizanCustSupp,2210,2,@Date1 datetime; @Date2 datetime
+dbo,SearchNameCus_Sup,144,1,@Name nvarchar
+dbo,Select_Account_CusTailor,957,1,@CustCode int
+dbo,Select_AccountCustomer,416,1,@BranchID int
+dbo,Select_AccountDefualt,417,1,@BranchID int
+dbo,Select_BarCode,2012,1,@ItemCode nvarchar
+dbo,Select_BarCodeExpireOpenQuantity,1329,3,@Purchese_ID nvarchar; @BranchID int; @ItemID int
+dbo,Select_BarCodePurchase,1330,3,@Purchese_ID nvarchar; @BranchID int; @ItemID int
+dbo,Select_Car_Receive,754,1,@Status bit
+dbo,Select_Contract_Contract,428,1,@BranchID int
+dbo,SELECT_Contract_EJAR,1123,1,@ID int
+dbo,SELECT_Contract_EJAR_Search,1104,0,
+dbo,Select_Contract_Guarantee,429,1,@BranchID int
+dbo,Select_ItemQuantity,10738,5,@ID int; @StoreID int; @TypeID int; @GroupID int; @CompID int
+dbo,Select_ItemQuantity_ByProperties,11694,6,@ID int; @StoreID int; @TypeID int; @GroupID int; @CompID int; @ClassID int
+dbo,Select_ItemQuantity_Only,6289,2,@ID int; @StoreID int
+dbo,Select_Order_CheckoutOrders,646,2,@ISNum bit; @BranchID int
+dbo,Select_Order_InventorySettlementMinus,307,1,@BranchID int
+dbo,Select_Order_Manufacturing,375,1,@BranchID int
+dbo,Select_Order_ManufacturingOrder,385,1,@BranchID int
+dbo,Select_Order_OpenQuantity,286,1,@BranchID int
+dbo,Select_Order_OrderReturn,688,2,@ISNum bit; @BranchID int
+dbo,Select_Order_Orders,2117,1,@BranchID int
+dbo,Select_Order_OrdersDraft,2148,1,@BranchID int
+dbo,Select_Order_PaymentItem,559,1,@BranchID int
+dbo,Select_Order_PriceOffer,1027,1,@BranchID int
+dbo,Select_Order_Purchases,1268,1,@BranchID int
+dbo,Select_Order_PurchasesOrder,573,1,@BranchID int
+dbo,Select_Order_PurchasesReturn,646,2,@ISNum bit; @BranchID int
+dbo,Select_Order_RecItem,551,1,@BranchID int
+dbo,Select_Order_Reservation,453,1,@ID int
+dbo,Select_Order_StoreTransfer,478,1,@BranchID int
+dbo,Select_Order_Transfer_Master,1022,1,@BranchID int
+dbo,Select_Order_TransferFromBranch,791,1,@BranchID int
+dbo,Select_Order_TransferToBranch,785,1,@BranchID int
+dbo,Select_OrderDalala_Dalala,559,1,@BranchID int
+dbo,Select_OrderDalala_Sending,318,1,@BranchID int
+dbo,Select_OrderGard,703,1,@ID int
+dbo,Select_OrderRent_Rent,641,1,@BranchID int
+dbo,Select_Remember,155,0,
+dbo,Select_Scaffold_EntryPermission,467,1,@BranchID int
+dbo,Select_Scaffold_ExitPermission,465,1,@BranchID int
+dbo,Select_scaffold_PriceOffer,461,1,@BranchID int
+dbo,Select_Scaffolds_Contract,449,1,@BranchID int
+dbo,Select_Scaffolds_ContractNotMinutesStarted,798,1,@BranchID int
+dbo,Select_Scaffolds_MinutesEnd,465,1,@BranchID int
+dbo,Select_Scaffolds_MinutesStarted,462,1,@BranchID int
+dbo,Select_Search_Account_Receipts,2804,2,@TranTypeID int; @BranchID int
+dbo,Select_SearchAccount,409,0,
+dbo,Select_SearchAccount_ByAccountNumber,495,1,@ID int
+dbo,Select_SearchAccountCostCenter,544,1,@BranchID int
+dbo,Select_SearchAccountCostCenterAll,499,1,@BranchID int
+dbo,Select_SearchAccountCostCenterByProject,711,2,@ProjectId int; @BranchID int
+dbo,Select_SearchAccountProjects,613,1,@BranchID int
+dbo,Select_SearchAccountReceipt,543,1,@BranchID int
+dbo,Select_SearchAccountReceiptForAccountTree,398,0,
+dbo,Select_SearchAccountTran,887,1,@BranchID int
+dbo,Select_SearchAccountTranDetailsByCode,298,1,@ID int
+dbo,Select_SearchAccountTranTemp,703,1,@BranchID int
+dbo,Select_SearchAccountTranTempDetailsByCode,307,1,@ID int
+dbo,Select_Virgins,1566,2,@CustID int; @SN int
+dbo,SetActivate,144,0,
+dbo,UPDATE_ItemProfit,722,4,@Perc decimal; @GroupID int; @CompanyID int; @ClassID int
+dbo,Update_OpenQuantity,944,9,@PurBranchID int; @BranchID int; @Purchases_Date datetime; @NoteNum nvarchar; @TotalPrices decimal; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @Items Items_OpenQuantity
+dbo,Update_Order_Order_ALL,16626,55,@PurBranchID int; @City nvarchar; @Country nvarchar; @PostalCode nvarchar; @AdditionalNum nvarchar; @CommercialRecord nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @BranchID int; @CostCentersID int; @BounceID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @DiscountPerantage decimal; @SupplierID int; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @CashBank decimal; @OrderCashierType bit; @ProjectID int; @RoomNum int; @IsWaiting bit; @TableNum int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @DateHold datetime; @Charge decimal; @AllDiscount decimal; @BounsAmount decimal; @CarName nvarchar; @SupplierName nvarchar; @CarModel nvarchar; @PlateNumber nvarchar; @ChassisNum nvarchar; @CarColor nvarchar; @Counter nvarchar; @Items Items_Orders; @SupplierPhone nvarchar; @BuildingNum nvarchar; @Street nvarchar; @District nvarchar
+dbo,Update_Order_Order_ALL_Draft,4820,54,@PurBranchID int; @City nvarchar; @Country nvarchar; @PostalCode nvarchar; @AdditionalNum nvarchar; @CommercialRecord nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @BranchID int; @CostCentersID int; @BounceID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @DiscountPerantage decimal; @SupplierID int; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @CashBank decimal; @OrderCashierType bit; @RoomNum int; @TableNum int; @IsWaiting bit; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @DateHold datetime; @Charge decimal; @AllDiscount decimal; @BounsAmount decimal; @CarName nvarchar; @CarModel nvarchar; @SupplierName nvarchar; @PlateNumber nvarchar; @ChassisNum nvarchar; @CarColor nvarchar; @Counter nvarchar; @Items Items_Orders; @SupplierPhone nvarchar; @BuildingNum nvarchar; @Street nvarchar; @District nvarchar
+dbo,Update_Order_Order_ALL2,14139,40,@PurBranchID int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @CostCentersID int; @BounceID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @BranchID int; @DiscountNum decimal; @DiscountPerantage decimal; @HasmPer decimal; @HasmAmount decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @SupplierID int; @CashBank decimal; @OrderCashierType bit; @RoomNum int; @TableNum int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @DateHold datetime; @Charge decimal; @IsWaiting bit; @Items Items_Orders; @SupplierName nvarchar; @SupplierPhone nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int
+dbo,Update_Order_Purchases,11470,30,@PurBranchID int; @Note nvarchar; @NoteNum nvarchar; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @DiscountPerantage decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @Net decimal; @BranchID int; @Cash decimal; @Bank decimal; @Acc_Cash int; @Acc_Bank int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @SalesMan nvarchar; @Charge decimal; @ProjectId int; @SupplierID int; @Items Items_Purches; @SupplierName nvarchar; @SupplierPhone nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int; @CostCentersID int
+dbo,Update_Order_Restaurant_B,15543,37,@PurBranchID int; @Restaurant_PayType nvarchar; @Restaurant_TypeID int; @CostCentersID int; @Note nvarchar; @NoteNum nvarchar; @CostOrder decimal; @Tax decimal; @TotalPrices decimal; @Safy decimal; @DiscountNum decimal; @BranchID int; @DiscountPerantage decimal; @Tax_Discount decimal; @TotalPrices_Discount decimal; @TobaccoTax decimal; @AllTax decimal; @Net decimal; @CashMoney decimal; @CashBank decimal; @OrderCashierType bit; @RoomNum int; @SupplierID int; @TableNum int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar; @ISPasue bit; @ISPayment bit; @Time1 datetime; @Items Items_Orders_Restaurant; @IsWaiting bit; @SupplierName nvarchar; @SupplierPhone nvarchar; @SupplierVatNum nvarchar; @Purchases_Date datetime; @Order_Paymant_Type int
+dbo,Update_Restaurant_Mahly,12368,10,@PurBranchID int; @UserMacAddress_Add nvarchar; @BranchID int; @CostCentersID int; @Cash decimal; @Bank decimal; @IsPaymant bit; @RoomNum int; @TableNum int; @UserID_Add int
+dbo,Update_Restaurant_Tawsel,7801,5,@PurBranchID int; @BranchID int; @CostCentersID int; @Cash decimal; @Bank decimal
+dbo,Update_Room_A,762,7,@ID int; @ISPasue bit; @Money decimal; @OrderID int; @Branch int; @ISPaymentType bit; @TimeA datetime
+dbo,Update_Table_A,763,7,@ID int; @ISPasue bit; @Money decimal; @OrderID int; @Branch int; @ISPaymentType bit; @TimeA datetime
+dbo,Update_Tran_Tran,1072,11,@ReferenceCode int; @ProjectId int; @Transn int OUTPUT; @TranTypeID int; @DocCode nvarchar; @TranDate datetime; @Note nvarchar; @BranchID int; @UserID_Add int; @UserBranch_Add int; @UserMacAddress_Add nvarchar
+dbo,UpdateCsr,914,8,@BranchId int; @CsIdForUser bit; @CSR nvarchar; @PublicKey nvarchar; @PrivateKey nvarchar; @SecretKey nvarchar; @ModeInvoice nvarchar; @UserId int
+dbo,UpdateOrderCosts,1432,1,@Purchese_ID int
+dbo,UpdateOrderCostsAll,1871,0,

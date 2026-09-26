@@ -1,0 +1,13 @@
+﻿FKName;ParentSchema;ParentTable;ParentColumn;RefSchema;RefTable;RefColumn;ColOrdinal;OnDelete;OnUpdate;Disabled
+FK_Account_Accounts_Account_Type;dbo;Account_Accounts;Account_Type;dbo;Account_Type;ID;1;NO_ACTION;NO_ACTION;0
+FK_Account_ReceiptsDetails_Account_Receipts;dbo;Account_ReceiptsDetails;TranSn;dbo;Account_Receipts;ID;1;NO_ACTION;NO_ACTION;0
+FK_Item_Items_Item_Unit;dbo;Item_Items;UnitSmall;dbo;Item_Unit;ID;1;NO_ACTION;NO_ACTION;0
+FK_Item_Items_Item_Unit1;dbo;Item_Items;UnitMedium;dbo;Item_Unit;ID;1;NO_ACTION;NO_ACTION;0
+FK_Item_Items_Item_Unit2;dbo;Item_Items;UnitLarge;dbo;Item_Unit;ID;1;NO_ACTION;NO_ACTION;0
+FK_ItemQuantity_Item_StoreLuk;dbo;ItemQuantity;StoreID;dbo;Account_Stores;ID;1;NO_ACTION;NO_ACTION;0
+FK_Order_PurchasesDetails_Item_Unit;dbo;Order_PurchasesDetails;ItemUnitID;dbo;Item_Unit;ID;1;NO_ACTION;NO_ACTION;0
+FK_Order_PurchasesOrderDetails_Item_Unit;dbo;Order_PurchasesOrderDetails;ItemUnitID;dbo;Item_Unit;ID;1;NO_ACTION;NO_ACTION;0
+FK__Repairs_M__Group__28B808A7;dbo;Repairs_Malfunctions;GroupId;dbo;Repairs_Groups;Id;1;NO_ACTION;NO_ACTION;0
+FK__Repairs_R__Group__29AC2CE0;dbo;Repairs_RepairDetails;GroupId;dbo;Repairs_Groups;Id;1;NO_ACTION;NO_ACTION;0
+FK__Repairs_R__Malfu__2AA05119;dbo;Repairs_RepairDetails;MalfunctionId;dbo;Repairs_Malfunctions;Id;1;NO_ACTION;NO_ACTION;0
+FK__Repairs_R__Repai__2B947552;dbo;Repairs_RepairDetails;RepairId;dbo;Repairs_Repair;Id;1;NO_ACTION;NO_ACTION;0
