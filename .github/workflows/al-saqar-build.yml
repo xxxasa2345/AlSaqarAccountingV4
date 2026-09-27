@@ -1,0 +1,53 @@
+﻿name: AlSaqarAccounting Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore .\AlSaqarAccounting.sln -p:EnableWindowsTargeting=true
+
+      - name: Build Release
+        run: dotnet build .\AlSaqarAccounting.sln -c Release --no-restore -p:EnableWindowsTargeting=true
+
+      - name: Publish win-x64
+        run: dotnet publish .\src\AlSaqarAccounting\AlSaqarAccounting.csproj -c Release -r win-x64 --self-contained true --no-restore -p:EnableWindowsTargeting=true -o .\ci-publish
+
+      - name: Verify published runtime files
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:GITHUB_WORKSPACE 'ci-publish\AlSaqarAccounting.exe'
+          if (-not (Test-Path $exe)) { throw "Published EXE not found: $exe" }
+          $cfg = Join-Path $env:GITHUB_WORKSPACE 'ci-publish\appsettings.json'
+          if (Test-Path $cfg) {
+            Remove-Item $cfg -Force
+            Write-Host 'appsettings.json removed from CI artifact to avoid publishing local connection settings.'
+          }
+          Write-Host "Published EXE verified: $exe"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AlSaqarAccounting-win-x64
+          path: .\ci-publish
+          if-no-files-found: error
+          retention-days: 7

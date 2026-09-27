@@ -1,4 +1,4 @@
-# Prerequisites
+﻿# Prerequisites
 *.d
 
 # Compiled Object files
@@ -67,3 +67,16 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+bin/
+obj/
+publish/
+backup/
+*.user
+*.suo
+phase7-install.log
+phase6-v61-run.log
+screen-linking-install-report.txt
+erp-shell-install-report.txt
+phase6-appsettings-*.log
+
+

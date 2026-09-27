@@ -1,0 +1,4 @@
+AlSaqarAccounting V7.1
+- Fixed PowerShell root path resolution.
+- CMD runner no longer passes a trailing path argument.
+- Preserves the V7 CI/CD workflow and local verification.

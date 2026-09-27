@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AlSaqarAccounting.Core;
@@ -15,7 +15,7 @@ internal static class Program
         ApplicationConfiguration.Initialize();
 
         var builder = Host.CreateApplicationBuilder();
-        builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+        builder.Configuration.AddJsonFile(System.IO.Path.Combine(AppContext.BaseDirectory, "appsettings.json"), optional: false, reloadOnChange: true);
 
         builder.Services.AddSingleton<SqlConnectionFactory>();
         builder.Services.AddSingleton<StoredProcedureExecutor>();
@@ -33,3 +33,4 @@ internal static class Program
             scope.ServiceProvider.GetRequiredService<SecurityService>()));
     }
 }
+
