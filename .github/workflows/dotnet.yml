@@ -1,27 +1,41 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Windows CI
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore -p:EnableWindowsTargeting=true
-    - name: Build
-      run: dotnet build --no-restore -p:EnableWindowsTargeting=true
-    - name: Test
-      run: dotnet test --no-build --verbosity normal -p:EnableWindowsTargeting=true
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore with runtime
+        shell: pwsh
+        run: |
+          dotnet restore .\AlSaqarAccounting.sln -r win-x64 -p:EnableWindowsTargeting=true
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build
+        shell: pwsh
+        run: |
+          dotnet build .\AlSaqarAccounting.sln -c Release -r win-x64 --no-restore -p:EnableWindowsTargeting=true
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test
+        shell: pwsh
+        run: |
+          dotnet test .\AlSaqarAccounting.sln -c Release -r win-x64 --no-build --verbosity normal -p:EnableWindowsTargeting=true
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
