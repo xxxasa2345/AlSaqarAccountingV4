@@ -1,4 +1,4 @@
-﻿name: AlSaqarAccounting Build
+name: AlSaqarAccounting Build
 
 on:
   push:
@@ -16,18 +16,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore .\AlSaqarAccounting.sln -p:EnableWindowsTargeting=true
+        run: dotnet restore .\AlSaqarAccounting.sln -r win-x64 -p:EnableWindowsTargeting=true
 
       - name: Build Release
-        run: dotnet build .\AlSaqarAccounting.sln -c Release --no-restore -p:EnableWindowsTargeting=true
+        run: dotnet build .\AlSaqarAccounting.sln -c Release -r win-x64 --no-restore -p:EnableWindowsTargeting=true
 
       - name: Publish win-x64
         run: dotnet publish .\src\AlSaqarAccounting\AlSaqarAccounting.csproj -c Release -r win-x64 --self-contained true --no-restore -p:EnableWindowsTargeting=true -o .\ci-publish
@@ -45,7 +45,7 @@ jobs:
           Write-Host "Published EXE verified: $exe"
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: AlSaqarAccounting-win-x64
           path: .\ci-publish
