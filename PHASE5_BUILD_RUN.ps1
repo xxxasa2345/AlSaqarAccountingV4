@@ -1,67 +1,46 @@
+#requires -Version 5.1
 [CmdletBinding()]
-param(
-    [switch]$Publish,
-    [switch]$Run
-)
+param([switch]$Run)
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Project = Join-Path $Root 'src\AlSaqarAccounting\AlSaqarAccounting.csproj'
 $Solution = Join-Path $Root 'AlSaqarAccounting.sln'
+$OutputDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
 $PublishDir = Join-Path $Root 'publish'
-$BackupDir = Join-Path $Root ('.phase5-backup\' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-$Router = Join-Path $Root 'src\AlSaqarAccounting\UI\ScreenRouter.cs'
-$Operational = Join-Path $Root 'src\AlSaqarAccounting\UI\OperationalDataScreen.cs'
-$Definition = Join-Path $Root 'src\AlSaqarAccounting\UI\OperationalScreenDefinition.cs'
 
-Write-Host '=== AlSaqarAccounting Phase 5 ===' -ForegroundColor Cyan
-Write-Host "Root: $Root"
+function Find-MSBuild {
+    $cmd = Get-Command msbuild -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
 
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    throw 'dotnet SDK غير موجود في PATH.'
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    if (Test-Path -LiteralPath $vswhere) {
+        $found = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null |
+            Select-Object -First 1
+        if ($found) { return $found }
+    }
+
+    throw 'MSBuild غير موجود. ثبّت Visual Studio 2022 مع workload Desktop development with .NET ثم شغّل Developer PowerShell.'
 }
-if (-not (Test-Path $Project)) { throw "المشروع غير موجود: $Project" }
+$msbuild = Find-MSBuild
 if (-not (Test-Path $Solution)) { throw "الحل غير موجود: $Solution" }
-if (-not (Test-Path $Router)) { throw "ScreenRouter.cs غير موجود." }
-if (-not (Test-Path $Operational)) { throw "OperationalDataScreen.cs غير موجود." }
-if (-not (Test-Path $Definition)) { throw "OperationalScreenDefinition.cs غير موجود." }
-
-New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
-Copy-Item $Router (Join-Path $BackupDir 'ScreenRouter.cs')
-Copy-Item $Operational (Join-Path $BackupDir 'OperationalDataScreen.cs')
-Copy-Item $Definition (Join-Path $BackupDir 'OperationalScreenDefinition.cs')
-
-Write-Host 'Backup:' $BackupDir -ForegroundColor DarkGray
 
 Push-Location $Root
 try {
-    dotnet restore $Solution
-    if ($LASTEXITCODE -ne 0) { throw 'dotnet restore فشل.' }
+    Write-Host '=== AlSaqarAccounting Phase 5 - .NET Framework 4.8 ===' -ForegroundColor Cyan
+    & $msbuild $Solution /t:Restore /p:Configuration=Release /p:Platform="Any CPU" /m
+    if ($LASTEXITCODE -ne 0) { throw 'MSBuild Restore فشل.' }
 
-    dotnet build $Solution -c Release --no-restore
-    if ($LASTEXITCODE -ne 0) { throw 'dotnet build فشل.' }
+    & $msbuild $Solution /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:minimal
+    if ($LASTEXITCODE -ne 0) { throw 'MSBuild Build فشل.' }
 
-    if ($Publish) {
-        if (Test-Path $PublishDir) { Remove-Item $PublishDir -Recurse -Force }
-        dotnet publish $Project -c Release -r win-x64 --self-contained true --no-restore -o $PublishDir
-        if ($LASTEXITCODE -ne 0) { throw 'dotnet publish فشل.' }
-    }
-}
-finally {
-    Pop-Location
-}
+    if (Test-Path $PublishDir) { Remove-Item $PublishDir -Recurse -Force }
+    New-Item -ItemType Directory -Force -Path $PublishDir | Out-Null
+    Copy-Item (Join-Path $OutputDir '*') $PublishDir -Recurse -Force
 
-Write-Host 'Phase 5 build completed successfully.' -ForegroundColor Green
-
-if ($Run) {
-    if ($Publish) {
-        $exe = Join-Path $PublishDir 'AlSaqarAccounting.exe'
-    }
-    else {
-        $exe = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net8.0-windows\AlSaqarAccounting.exe'
-    }
-
+    $exe = Join-Path $PublishDir 'AlSaqarAccounting.exe'
     if (-not (Test-Path $exe)) { throw "ملف التشغيل غير موجود: $exe" }
-    Write-Host "Running: $exe" -ForegroundColor Yellow
-    Start-Process -FilePath $exe -WorkingDirectory (Split-Path $exe -Parent)
+
+    Write-Host "Release copied to: $PublishDir" -ForegroundColor Green
+    if ($Run) { Start-Process -FilePath $exe -WorkingDirectory $PublishDir }
 }
+finally { Pop-Location }
