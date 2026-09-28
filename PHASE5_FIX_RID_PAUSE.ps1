@@ -1,24 +1,30 @@
-﻿#requires -Version 5.1
+#requires -Version 5.1
 [CmdletBinding()]
-param(
-    [string]$Root = "",
-    [switch]$Run
-)
+param([string]$Root = "",[switch]$Run)
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
+if ([string]::IsNullOrWhiteSpace($Root)) { $Root = (Get-Location).Path }
+$Root = (Resolve-Path $Root).Path
+$Solution = Join-Path $Root 'AlSaqarAccounting.sln'
+$BuildDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$PublishDir = Join-Path $Root 'publish'
+$LogFile = Join-Path $Root 'PHASE5_FIX_RID.log'
 
-if ([string]::IsNullOrWhiteSpace($Root)) {
-    $Root = (Get-Location).Path
+function Find-MSBuild {
+    $cmd = Get-Command msbuild -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    if (Test-Path -LiteralPath $vswhere) {
+        $found = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null |
+            Select-Object -First 1
+        if ($found) { return $found }
+    }
+
+    throw 'MSBuild غير موجود. ثبّت Visual Studio 2022 مع workload Desktop development with .NET ثم شغّل Developer PowerShell.'
 }
-
-$Root = [IO.Path]::GetFullPath($Root)
-$Project = Join-Path $Root "src\AlSaqarAccounting\AlSaqarAccounting.csproj"
-$Solution = Join-Path $Root "AlSaqarAccounting.sln"
-$PublishDir = Join-Path $Root "publish"
-$LogFile = Join-Path $Root "PHASE5_FIX_RID.log"
-
-function Write-Log {
-    param([string]$Message)
+$msbuild = Find-MSBuild
+function Log([string]$Message) {
     $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $Message"
     Write-Host $line
     Add-Content -LiteralPath $LogFile -Value $line -Encoding UTF8
@@ -26,71 +32,30 @@ function Write-Log {
 
 try {
     Set-Location $Root
+    Remove-Item $LogFile -Force -ErrorAction SilentlyContinue
+    Log '=== AlSaqarAccounting .NET Framework 4.8 build ==='
 
-    Remove-Item -LiteralPath $LogFile -Force -ErrorAction SilentlyContinue
-    Write-Log "=== AlSaqarAccounting Phase 5 - RID Publish Fix ==="
-    Write-Log "Root: $Root"
+    & $msbuild $Solution /t:Restore /p:Configuration=Release /p:Platform="Any CPU" /m 2>&1 |
+        ForEach-Object { Write-Host $_; Add-Content $LogFile $_ -Encoding UTF8 }
+    if ($LASTEXITCODE -ne 0) { throw 'MSBuild Restore فشل.' }
 
-    if (-not (Test-Path -LiteralPath $Project)) {
-        throw "لم يتم العثور على المشروع: $Project"
-    }
+    & $msbuild $Solution /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:minimal 2>&1 |
+        ForEach-Object { Write-Host $_; Add-Content $LogFile $_ -Encoding UTF8 }
+    if ($LASTEXITCODE -ne 0) { throw 'MSBuild Build فشل.' }
 
-    if (-not (Test-Path -LiteralPath $Solution)) {
-        throw "لم يتم العثور على الحل: $Solution"
-    }
+    if (Test-Path $PublishDir) { Remove-Item $PublishDir -Recurse -Force }
+    New-Item -ItemType Directory -Force -Path $PublishDir | Out-Null
+    Copy-Item (Join-Path $BuildDir '*') $PublishDir -Recurse -Force
 
-    if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-        throw "dotnet غير موجود في PATH."
-    }
-
-    Write-Log "1) Restore مع -r win-x64"
-    & dotnet restore $Project -r win-x64 2>&1 |
-        ForEach-Object { Write-Host $_; Add-Content -LiteralPath $LogFile -Value $_ -Encoding UTF8 }
-    if ($LASTEXITCODE -ne 0) { throw "dotnet restore -r win-x64 فشل. راجع السجل: $LogFile" }
-
-    Write-Log "2) Build Release"
-    & dotnet build $Solution -c Release --no-restore 2>&1 |
-        ForEach-Object { Write-Host $_; Add-Content -LiteralPath $LogFile -Value $_ -Encoding UTF8 }
-    if ($LASTEXITCODE -ne 0) { throw "dotnet build فشل. راجع السجل: $LogFile" }
-
-    if (Test-Path -LiteralPath $PublishDir) {
-        Remove-Item -LiteralPath $PublishDir -Recurse -Force
-    }
-
-    Write-Log "3) Publish win-x64 self-contained"
-    & dotnet publish $Project -c Release -r win-x64 --self-contained true -o $PublishDir --no-restore 2>&1 |
-        ForEach-Object { Write-Host $_; Add-Content -LiteralPath $LogFile -Value $_ -Encoding UTF8 }
-    if ($LASTEXITCODE -ne 0) { throw "dotnet publish فشل. راجع السجل: $LogFile" }
-
-    $Exe = Join-Path $PublishDir "AlSaqarAccounting.exe"
-    if (-not (Test-Path -LiteralPath $Exe)) {
-        throw "تمت عملية publish لكن ملف التشغيل غير موجود: $Exe"
-    }
-
-    Write-Log "تم النشر بنجاح."
-    Write-Log "EXE: $Exe"
-
-    if ($Run) {
-        Write-Log "4) تشغيل البرنامج"
-        Start-Process -FilePath $Exe -WorkingDirectory $PublishDir
-        Write-Log "تم تشغيل البرنامج."
-    }
-
-    Write-Host ""
-    Write-Host "انتهى السكربت بنجاح." -ForegroundColor Green
-    Write-Host "السجل: $LogFile" -ForegroundColor Green
+    $exe = Join-Path $PublishDir 'AlSaqarAccounting.exe'
+    if (-not (Test-Path $exe)) { throw "EXE غير موجود: $exe" }
+    Log "تم إنشاء: $exe"
+    if ($Run) { Start-Process -FilePath $exe -WorkingDirectory $PublishDir; Log 'تم تشغيل البرنامج.' }
 }
 catch {
-    Write-Host ""
-    Write-Host "============================================" -ForegroundColor Red
-    Write-Host "حدث خطأ:" -ForegroundColor Red
-    Write-Host $_.Exception.Message -ForegroundColor Red
-    Write-Host "============================================" -ForegroundColor Red
-
-    Add-Content -LiteralPath $LogFile -Value $_ -Encoding UTF8
-    Write-Host "السجل محفوظ هنا: $LogFile" -ForegroundColor Yellow
+    Log ("ERROR: " + $_.Exception.Message)
+    throw
 }
 finally {
-    Write-Host ""
-    Read-Host "اضغط Enter لإغلاق نافذة السكربت"
+    Write-Host "السجل: $LogFile" -ForegroundColor Green
 }
