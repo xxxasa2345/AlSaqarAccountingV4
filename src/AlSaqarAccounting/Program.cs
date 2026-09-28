@@ -27,7 +27,7 @@ internal static class Program
             var schema = new SchemaService(connectionFactory);
             var security = new SecurityService(connectionFactory);
 
-            Application.Run(new LoginForm(auth, schema, storedProcedures, security));
+            Application.Run(new LoginForm(auth, schema, storedProcedures, security, connectionFactory.ConnectionString));
         }
         catch (Exception ex)
         {
