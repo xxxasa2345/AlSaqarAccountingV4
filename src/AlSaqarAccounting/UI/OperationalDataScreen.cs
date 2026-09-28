@@ -349,7 +349,7 @@ public sealed class OperationalDataScreen : Form
         preview.Controls.Add(copy); preview.Controls.Add(close); preview.ShowDialog(this);
     }
 
-    private static string EscapeCsv(string value) => value.Contains(',') || value.Contains('"') || value.Contains('\r') || value.Contains('\n') ? "\"" + value.Replace("\"", "\"\"", StringComparison.Ordinal) + "\"" : value;
+    private static string EscapeCsv(string value) => value.Contains(',') || value.Contains('"') || value.Contains('\r') || value.Contains('\n') ? "\"" + value.Replace("\"", "\"\"") + "\"" : value;
     private static string SanitizeFileName(string value) { foreach (var c in Path.GetInvalidFileNameChars()) value = value.Replace(c, '_'); return string.IsNullOrWhiteSpace(value) ? "export" : value; }
 
     private static void TranslateColumns(DataTable table)
