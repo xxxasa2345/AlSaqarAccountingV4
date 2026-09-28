@@ -10,5 +10,7 @@ public sealed class SqlConnectionFactory
         => _connectionString = configuration.GetConnectionString("GtsDb2026")
             ?? throw new InvalidOperationException("ConnectionStrings:GtsDb2026 is missing.");
 
+    public string ConnectionString => _connectionString;
+
     public SqlConnection Create() => new(_connectionString);
 }
