@@ -47,4 +47,39 @@ public sealed class DbExecutor
         await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
         return await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
+
+    public async Task<DataTable> ExecuteStoredProcedureAsync(
+        string procedureName,
+        Action<SqlParameterCollection>? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(procedureName, cn)
+        {
+            CommandType = CommandType.StoredProcedure,
+            CommandTimeout = 120
+        };
+        parameters?.Invoke(cmd.Parameters);
+        await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
+        using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        var table = new DataTable();
+        table.Load(reader);
+        return table;
+    }
+
+    public async Task<int> ExecuteStoredProcedureNonQueryAsync(
+        string procedureName,
+        Action<SqlParameterCollection>? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(procedureName, cn)
+        {
+            CommandType = CommandType.StoredProcedure,
+            CommandTimeout = 120
+        };
+        parameters?.Invoke(cmd.Parameters);
+        await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
+        return await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+    }
 }
