@@ -1,11 +1,11 @@
-# AlSaqarAccounting — Phase 7
+# AlSaqarAccounting — Phase 7 (NET48)
 
 ## الهدف
 تثبيت طبقة CI/CD بسيطة للمشروع بحيث يتحقق GitHub Actions من:
 
-- Restore على Windows + .NET 8
+- Restore عبر MSBuild على Windows لمشروع .NET Framework 4.8
 - Build Release
-- Publish win-x64 self-contained
+- إنشاء ZIP من ملفات Release الخاصة بـ .NET Framework 4.8
 - التحقق من وجود `AlSaqarAccounting.exe`
 - إنشاء Artifact للتجربة
 
@@ -37,16 +37,16 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 يُنشأ:
 
 ```text
-.github\workflows\al-saqar-build.yml
+.github\workflows\AlSaqarAccounting-NET48.yml
 Phase7_Verify.ps1
 phase7-install.log
 backup\phase7-YYYYMMDD-HHMMSS
 ```
 
-بعد `git push` سيظهر Workflow باسم **AlSaqarAccounting Build** في GitHub Actions، وسيُنشر Artifact باسم:
+بعد `git push` سيظهر Workflow باسم **AlSaqarAccounting .NET Framework 4.8** في GitHub Actions، وسيُنشر Artifact باسم:
 
 ```text
-AlSaqarAccounting-win-x64
+AlSaqarAccounting-NET48
 ```
 
 ## لا يغيّر قاعدة البيانات
