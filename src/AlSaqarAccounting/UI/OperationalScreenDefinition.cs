@@ -52,16 +52,16 @@ public static class OperationalScreenRegistry
         }
 
         // Avoid stealing reports/search/print screens whose names merely mention a module.
-        if (value.Contains("بحث", StringComparison.OrdinalIgnoreCase) ||
-            value.Contains("تقرير", StringComparison.OrdinalIgnoreCase) ||
-            value.Contains("طباعة", StringComparison.OrdinalIgnoreCase) ||
-            value.Contains("مصمم", StringComparison.OrdinalIgnoreCase))
+        if (value.IndexOf("بحث", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            value.IndexOf("تقرير", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            value.IndexOf("طباعة", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            value.IndexOf("مصمم", StringComparison.OrdinalIgnoreCase) >= 0)
             return false;
 
         foreach (var d in Definitions
                      .OrderByDescending(x => x.MatchName.Length))
         {
-            if (value.Contains(d.MatchName, StringComparison.OrdinalIgnoreCase))
+            if (value.IndexOf(d.MatchName, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 definition = d;
                 return true;
