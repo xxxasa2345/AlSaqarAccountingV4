@@ -123,7 +123,7 @@ public sealed class CatalogDataScreen : Form
                 return;
             }
 
-            var safeTable = table.Replace("]", "]]", StringComparison.Ordinal);
+            var safeTable = table.Replace("]", "]]");
             using var command = new SqlCommand(
                 $"SELECT TOP (500) * FROM dbo.[{safeTable}]",
                 connection);
@@ -150,8 +150,8 @@ public sealed class CatalogDataScreen : Form
             return _screenName;
 
         var normalized = _screenName
-            .Replace("Frm", "", StringComparison.OrdinalIgnoreCase)
-            .Replace(" ", "", StringComparison.Ordinal);
+            .Replace("Frm", "")
+            .Replace(" ", "");
 
         if (TableExists(connection, normalized))
             return normalized;
