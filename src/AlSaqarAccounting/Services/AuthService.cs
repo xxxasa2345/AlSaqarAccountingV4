@@ -1,5 +1,5 @@
 using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using AlSaqarAccounting.Core;
 
 namespace AlSaqarAccounting.Services;
@@ -26,13 +26,13 @@ public sealed class AuthService
             ORDER BY ID;
             """;
 
-        await using var cn = _factory.Create();
-        await using var cmd = new SqlCommand(sql, cn);
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(sql, cn);
         cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 150).Value = userName;
         cmd.Parameters.Add("@PassWord", SqlDbType.NVarChar, -1).Value = password;
 
         await cn.OpenAsync(cancellationToken);
-        await using var r = await cmd.ExecuteReaderAsync(cancellationToken);
+        using var r = await cmd.ExecuteReaderAsync(cancellationToken);
         if (!await r.ReadAsync(cancellationToken))
             return null;
 
