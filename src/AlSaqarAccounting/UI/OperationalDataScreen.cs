@@ -22,7 +22,7 @@ public sealed class OperationalDataScreen : Form
     private readonly int? _branchId;
     private readonly int? _userId;
 
-    private readonly TextBox _search = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes, PlaceholderText = "بحث داخل البيانات..." };
+    private readonly TextBox _search = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes,  };
     private readonly DataGridView _grid = new()
     {
         Dock = DockStyle.Fill,
@@ -181,7 +181,7 @@ public sealed class OperationalDataScreen : Form
         if (!allowed.Contains(tableName)) throw new InvalidOperationException("مصدر الشاشة غير موجود في قائمة المصادر المسموح بها.");
         using var connection = new SqlConnection(_connectionString);
         connection.Open();
-        var safe = tableName.Replace("]", "]]", StringComparison.Ordinal);
+        var safe = tableName.Replace("]", "]]");
         var sql = WritableMasterTables.Contains(tableName) ? $"SELECT ID, Name FROM dbo.[{safe}] ORDER BY ID" : $"SELECT TOP (2000) * FROM dbo.[{safe}]";
         using var command = new SqlCommand(sql, connection) { CommandTimeout = 90 };
         using var adapter = new SqlDataAdapter(command);
@@ -195,7 +195,7 @@ public sealed class OperationalDataScreen : Form
         if (_data is null) return;
         var value = text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(value)) { _data.DefaultView.RowFilter = string.Empty; return; }
-        var escaped = value.Replace("'", "''", StringComparison.Ordinal).Replace("[", "[[]", StringComparison.Ordinal).Replace("%", "[%]", StringComparison.Ordinal).Replace("*", "[*]", StringComparison.Ordinal);
+        var escaped = value.Replace("'", "''").Replace("[", "[[]").Replace("%", "[%]").Replace("*", "[*]");
         var filters = _data.Columns.Cast<DataColumn>().Where(c => c.DataType == typeof(string)).Select(c => $"CONVERT([{c.ColumnName}], 'System.String') LIKE '%{escaped}%'").ToArray();
         _data.DefaultView.RowFilter = filters.Length == 0 ? string.Empty : string.Join(" OR ", filters);
         _status.Text = BuildStatus();
@@ -266,7 +266,7 @@ public sealed class OperationalDataScreen : Form
     private void ExecuteInsert(string name)
     {
         using var cn = new SqlConnection(_connectionString); cn.Open();
-        var table = _definition.TableName!; var safe = table.Replace("]", "]]", StringComparison.Ordinal);
+        var table = _definition.TableName!; var safe = table.Replace("]", "]]");
         using var cmd = cn.CreateCommand();
         cmd.CommandText = $"INSERT INTO dbo.[{safe}] (Name, UserID_Add, UserBranch_Add, UserMacAddress_Add, UserDate_Add) VALUES (@Name, @UserID, @BranchID, @Mac, GETDATE());";
         cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 300).Value = name;
@@ -279,7 +279,7 @@ public sealed class OperationalDataScreen : Form
     private void ExecuteUpdate(int id, string name)
     {
         using var cn = new SqlConnection(_connectionString); cn.Open();
-        var table = _definition.TableName!; var safe = table.Replace("]", "]]", StringComparison.Ordinal);
+        var table = _definition.TableName!; var safe = table.Replace("]", "]]");
         using var cmd = cn.CreateCommand();
         cmd.CommandText = $"UPDATE dbo.[{safe}] SET Name=@Name, UserID_Update=@UserID, UserBranch_Update=@BranchID, UserMacAddress_Update=@Mac, UserDate_Update=GETDATE() WHERE ID=@ID;";
         cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 300).Value = name;
@@ -293,7 +293,7 @@ public sealed class OperationalDataScreen : Form
     private void ExecuteDelete(int id)
     {
         using var cn = new SqlConnection(_connectionString); cn.Open();
-        var table = _definition.TableName!; var safe = table.Replace("]", "]]", StringComparison.Ordinal);
+        var table = _definition.TableName!; var safe = table.Replace("]", "]]");
         using var cmd = cn.CreateCommand();
         cmd.CommandText = $"DELETE FROM dbo.[{safe}] WHERE ID=@ID;";
         cmd.Parameters.Add("@ID", SqlDbType.Int).Value = id;
