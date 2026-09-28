@@ -139,7 +139,10 @@ public sealed class ItemUnitForm : Form
     {
         if (_data is null) return;
         var value = _search.Text.Trim().Replace("'", "''");
-        _data.DefaultView.RowFilter = string.IsNullOrWhiteSpace(value) ? string.Empty : $"CONVERT([Name], 'System.String') LIKE '%{value.Replace("%", "[%]").Replace("*", "[*]")}%';";
+        var escaped = value.Replace("%", "[%]").Replace("*", "[*]");
+        _data.DefaultView.RowFilter = string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : $"CONVERT([Name], 'System.String') LIKE '%{escaped}%'";
         _status.Text = $"المعروض: {_data.DefaultView.Count:N0} من {_data.Rows.Count:N0}";
     }
 
