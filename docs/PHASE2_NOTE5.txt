@@ -1,0 +1,1 @@
+Routes FrmCompany, FrmClass and FrmGroups to real master form.
