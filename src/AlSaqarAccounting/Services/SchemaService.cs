@@ -1,5 +1,5 @@
 using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using AlSaqarAccounting.Core;
 
 namespace AlSaqarAccounting.Services;
@@ -22,10 +22,10 @@ public sealed class SchemaService
             GROUP BY s.name,t.name
             ORDER BY s.name,t.name;
             """;
-        await using var cn = _factory.Create();
-        await using var cmd = new SqlCommand(sql, cn);
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(sql, cn);
         await cn.OpenAsync(ct);
-        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        using var reader = await cmd.ExecuteReaderAsync(ct);
         var dt = new DataTable();
         dt.Load(reader);
         return dt;
