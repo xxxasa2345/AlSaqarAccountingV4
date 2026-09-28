@@ -12,6 +12,7 @@ public sealed class MainForm : Form
     private readonly StoredProcedureExecutor _sp;
     private readonly SecurityService _security;
     private readonly ScreenRouter _router;
+    private readonly string _connectionString;
 
     private readonly TreeView _navigation = new()
     {
@@ -26,7 +27,6 @@ public sealed class MainForm : Form
     {
         Dock = DockStyle.Top,
         Height = 34,
-        PlaceholderText = "بحث في الشاشات...",
         RightToLeft = RightToLeft.Yes
     };
 
@@ -69,13 +69,15 @@ public sealed class MainForm : Form
         AppSession session,
         SchemaService schema,
         StoredProcedureExecutor sp,
-        SecurityService security)
+        SecurityService security,
+        string connectionString)
     {
         _session = session;
         _schema = schema;
         _sp = sp;
         _security = security;
-        _router = new ScreenRouter(LoadConnectionString(), session);
+        _connectionString = connectionString;
+        _router = new ScreenRouter(_connectionString, session);
 
         Text = $"الصقر للمحاسبة — {session.UserName}";
         WindowState = FormWindowState.Maximized;
@@ -204,8 +206,8 @@ public sealed class MainForm : Form
             var text = filter?.Trim() ?? string.Empty;
             var groups = _screens
                 .Where(s => string.IsNullOrWhiteSpace(text) ||
-                            s.ScreenName.Contains(text, StringComparison.OrdinalIgnoreCase) ||
-                            s.ModuleDisplayName.Contains(text, StringComparison.OrdinalIgnoreCase))
+                            s.ScreenName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            s.ModuleDisplayName.IndexOf(text, StringComparison.OrdinalIgnoreCase) >= 0)
                 .GroupBy(s => s.ModuleDisplayName)
                 .OrderBy(g => g.Key, StringComparer.CurrentCultureIgnoreCase);
 
@@ -322,17 +324,4 @@ public sealed class MainForm : Form
         return card;
     }
 
-    private string LoadConnectionString()
-    {
-        var path = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
-        if (!File.Exists(path))
-            throw new FileNotFoundException("لم يتم العثور على appsettings.json", path);
-
-        using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
-        return document.RootElement
-            .GetProperty("ConnectionStrings")
-            .GetProperty("GtsDb2026")
-            .GetString()
-            ?? throw new InvalidOperationException("ConnectionStrings:GtsDb2026 غير موجود.");
-    }
 }
