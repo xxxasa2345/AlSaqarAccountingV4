@@ -1,5 +1,5 @@
 using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 
 namespace AlSaqarAccounting.Core;
 
@@ -13,8 +13,8 @@ public sealed class StoredProcedureExecutor
         IReadOnlyDictionary<string, object?>? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        await using var cn = _factory.Create();
-        await using var cmd = new SqlCommand(procedureName, cn)
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(procedureName, cn)
         {
             CommandType = CommandType.StoredProcedure,
             CommandTimeout = 120
@@ -27,7 +27,7 @@ public sealed class StoredProcedureExecutor
         }
 
         await cn.OpenAsync(cancellationToken);
-        await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+        using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
 
         var table = new DataTable();
         table.Load(reader);
@@ -39,8 +39,8 @@ public sealed class StoredProcedureExecutor
         IReadOnlyDictionary<string, object?>? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        await using var cn = _factory.Create();
-        await using var cmd = new SqlCommand(procedureName, cn)
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(procedureName, cn)
         {
             CommandType = CommandType.StoredProcedure,
             CommandTimeout = 120
