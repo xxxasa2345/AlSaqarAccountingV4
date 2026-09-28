@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Services;
 using AlSaqarAccounting.Forms;
@@ -12,25 +10,47 @@ internal static class Program
     [STAThread]
     public static void Main()
     {
-        ApplicationConfiguration.Initialize();
+        try
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
 
-        var builder = Host.CreateApplicationBuilder();
-        builder.Configuration.AddJsonFile(System.IO.Path.Combine(AppContext.BaseDirectory, "appsettings.json"), optional: false, reloadOnChange: true);
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(basePath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+                .Build();
 
-        builder.Services.AddSingleton<SqlConnectionFactory>();
-        builder.Services.AddSingleton<StoredProcedureExecutor>();
-        builder.Services.AddSingleton<AuthService>();
-        builder.Services.AddSingleton<SchemaService>();
-        builder.Services.AddSingleton<SecurityService>();
+            var connectionFactory = new SqlConnectionFactory(configuration);
+            var storedProcedures = new StoredProcedureExecutor(connectionFactory);
+            var auth = new AuthService(connectionFactory);
+            var schema = new SchemaService(connectionFactory);
+            var security = new SecurityService(connectionFactory);
 
-        using var host = builder.Build();
-        using var scope = host.Services.CreateScope();
+            Application.Run(new LoginForm(auth, schema, storedProcedures, security));
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                var logPath = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "startup-error.log");
 
-        Application.Run(new LoginForm(
-            scope.ServiceProvider.GetRequiredService<AuthService>(),
-            scope.ServiceProvider.GetRequiredService<SchemaService>(),
-            scope.ServiceProvider.GetRequiredService<StoredProcedureExecutor>(),
-            scope.ServiceProvider.GetRequiredService<SecurityService>()));
+                File.WriteAllText(
+                    logPath,
+                    $"Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\r\n\r\n{ex}");
+            }
+            catch
+            {
+                // Ignore logging failures.
+            }
+
+            MessageBox.Show(
+                ex.ToString(),
+                "خطأ عند تشغيل AlSaqarAccounting",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
     }
 }
-
