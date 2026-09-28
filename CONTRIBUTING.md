@@ -92,10 +92,10 @@ src/
 ### 1. اختبر التغييرات
 ```bash
 # بناء المشروع
-dotnet build AlSaqarAccounting.sln
+msbuild AlSaqarAccounting.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU"
 
 # تشغيل الاختبارات (إن وجدت)
-dotnet test AlSaqarAccounting.sln
+لا توجد اختبارات dotnet test حالياً؛ استخدم `Phase7_Verify.ps1` للتحقق من البناء.
 ```
 
 ### 2. التزم بالتغييرات
@@ -162,12 +162,12 @@ git push origin feature/add-new-feature
 
 1. **لا توجد أخطاء Build**
    ```bash
-   dotnet build --configuration Release
+   msbuild AlSaqarAccounting.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU"
    ```
 
 2. **المشروع ينطلق بدون أخطاء**
    ```bash
-   dotnet run
+   شغّل `src\AlSaqarAccounting\bin\Release\net48\AlSaqarAccounting.exe`
    ```
 
 3. **الالتزام برعاية معايير الكود**
