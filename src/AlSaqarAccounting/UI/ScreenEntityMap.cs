@@ -60,16 +60,16 @@ public static class ScreenEntityMap
             return table;
 
         var n = screenName.Trim();
-        if (n.Contains("أصناف", StringComparison.OrdinalIgnoreCase) || n.Contains("الصنف", StringComparison.OrdinalIgnoreCase)) return "Item_Items";
-        if (n.Contains("عميل", StringComparison.OrdinalIgnoreCase)) return "Account_DefualtCustomer";
-        if (n.Contains("مورد", StringComparison.OrdinalIgnoreCase)) return "Account_CustSup";
-        if (n.Contains("مخزن", StringComparison.OrdinalIgnoreCase)) return "Account_Stores";
-        if (n.Contains("حساب", StringComparison.OrdinalIgnoreCase)) return "Account_Accounts";
-        if (n.Contains("وحدة", StringComparison.OrdinalIgnoreCase)) return "Item_Unit";
-        if (n.Contains("موظف", StringComparison.OrdinalIgnoreCase)) return "Emp_Employee";
-        if (n.Contains("رواتب", StringComparison.OrdinalIgnoreCase)) return "Emp_Payroll";
-        if (n.Contains("عقد", StringComparison.OrdinalIgnoreCase)) return "Contract_Contract";
-        if (n.Contains("ضمان", StringComparison.OrdinalIgnoreCase)) return "Contract_Guarantee";
+        if (n.IndexOf("أصناف", StringComparison.OrdinalIgnoreCase) >= 0 || n.IndexOf("الصنف", StringComparison.OrdinalIgnoreCase) >= 0) return "Item_Items";
+        if (n.IndexOf("عميل", StringComparison.OrdinalIgnoreCase) >= 0) return "Account_DefualtCustomer";
+        if (n.IndexOf("مورد", StringComparison.OrdinalIgnoreCase) >= 0) return "Account_CustSup";
+        if (n.IndexOf("مخزن", StringComparison.OrdinalIgnoreCase) >= 0) return "Account_Stores";
+        if (n.IndexOf("حساب", StringComparison.OrdinalIgnoreCase) >= 0) return "Account_Accounts";
+        if (n.IndexOf("وحدة", StringComparison.OrdinalIgnoreCase) >= 0) return "Item_Unit";
+        if (n.IndexOf("موظف", StringComparison.OrdinalIgnoreCase) >= 0) return "Emp_Employee";
+        if (n.IndexOf("رواتب", StringComparison.OrdinalIgnoreCase) >= 0) return "Emp_Payroll";
+        if (n.IndexOf("عقد", StringComparison.OrdinalIgnoreCase) >= 0) return "Contract_Contract";
+        if (n.IndexOf("ضمان", StringComparison.OrdinalIgnoreCase) >= 0) return "Contract_Guarantee";
         return null;
     }
 }
