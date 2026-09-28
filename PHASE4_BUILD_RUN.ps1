@@ -4,11 +4,18 @@ param([switch]$Publish,[switch]$Run)
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$FixScript = Join-Path $Root 'FIX_PHASE4_AND_BUILD.ps1'
+$BuildScript = Join-Path $Root 'FixAndBuild-AlSaqarAccounting.ps1'
+$Output = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$PublishDir = Join-Path $Root 'publish'
 
-if (-not (Test-Path $FixScript)) {
-    throw "لم يتم العثور على سكربت الإصلاح: $FixScript"
-}
+if (-not (Test-Path $BuildScript)) { throw "لم يتم العثور على سكربت البناء: $BuildScript" }
 
-& $FixScript -Publish:$Publish -Run:$Run
+& $BuildScript -Run:$Run
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+if ($Publish) {
+    if (Test-Path $PublishDir) { Remove-Item $PublishDir -Recurse -Force }
+    New-Item -ItemType Directory -Force -Path $PublishDir | Out-Null
+    Copy-Item (Join-Path $Output '*') $PublishDir -Recurse -Force
+    Write-Host "نسخة NET48: $(Join-Path $PublishDir 'AlSaqarAccounting.exe')" -ForegroundColor Green
+}
