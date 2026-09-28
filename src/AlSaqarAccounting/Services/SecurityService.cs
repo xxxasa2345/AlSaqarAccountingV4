@@ -1,5 +1,5 @@
 using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.UI;
 
@@ -49,12 +49,12 @@ public sealed class SecurityService
                 s.ID;
             """;
 
-        await using var cn = _factory.Create();
-        await using var cmd = new SqlCommand(sql, cn);
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(sql, cn);
         cmd.Parameters.Add("@GroupID", SqlDbType.Int).Value = session.GroupId.Value;
         await cn.OpenAsync(cancellationToken);
 
-        await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+        using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var result = new List<ScreenAccess>();
 
         while (await reader.ReadAsync(cancellationToken))
@@ -93,8 +93,8 @@ public sealed class SecurityService
             WHERE ID = @GroupID;
             """;
 
-        await using var cn = _factory.Create();
-        await using var cmd = new SqlCommand(sql, cn);
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(sql, cn);
         cmd.Parameters.Add("@GroupID", SqlDbType.Int).Value = session.GroupId.Value;
         await cn.OpenAsync(cancellationToken);
         var value = await cmd.ExecuteScalarAsync(cancellationToken);
