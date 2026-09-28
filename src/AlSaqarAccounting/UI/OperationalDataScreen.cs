@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Net.NetworkInformation;
 using System.Text;
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 
 namespace AlSaqarAccounting.UI;
 
