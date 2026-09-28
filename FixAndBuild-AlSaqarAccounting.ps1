@@ -1,165 +1,46 @@
+#requires -Version 5.1
+[CmdletBinding()]
+param([switch]$Run)
+
 $ErrorActionPreference = 'Stop'
-
-# AlSaqarAccounting V4 - startup fix + build + publish + run
-# Run this script from anywhere. It discovers the project root from its own location.
-
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ProjectFile = Join-Path $ProjectRoot 'src\AlSaqarAccounting\AlSaqarAccounting.csproj'
 $SolutionFile = Join-Path $ProjectRoot 'AlSaqarAccounting.sln'
-$ProgramFile = Join-Path $ProjectRoot 'src\AlSaqarAccounting\Program.cs'
-$PublishDir = Join-Path $ProjectRoot 'publish'
-$BackupDir = Join-Path $ProjectRoot 'backup'
-$StartupLog = Join-Path $PublishDir 'startup-error.log'
+$ProjectFile = Join-Path $ProjectRoot 'src\AlSaqarAccounting\AlSaqarAccounting.csproj'
+$OutputDir = Join-Path $ProjectRoot 'src\AlSaqarAccounting\bin\Release\net48'
 
-Write-Host ''
-Write-Host '=== AlSaqarAccounting V4: Startup Fix / Build / Publish / Run ===' -ForegroundColor Cyan
-Write-Host "Project: $ProjectRoot"
-Write-Host ''
+function Find-MSBuild {
+    $cmd = Get-Command msbuild -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
 
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    throw 'dotnet SDK غير موجود في PATH. ثبّت .NET 8 SDK ثم أعد تشغيل PowerShell.'
-}
-
-if (-not (Test-Path $ProjectFile)) {
-    throw "لم يتم العثور على المشروع: $ProjectFile"
-}
-
-if (-not (Test-Path $SolutionFile)) {
-    throw "لم يتم العثور على الحل: $SolutionFile"
-}
-
-# Backup current Program.cs before changing it.
-New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
-$BackupProgram = Join-Path $BackupDir ("Program.cs.{0}.bak" -f (Get-Date -Format 'yyyyMMdd_HHmmss'))
-Copy-Item $ProgramFile $BackupProgram -Force
-Write-Host "Backup: $BackupProgram" -ForegroundColor DarkGray
-
-# Replace startup entry point with a resilient version that logs startup exceptions.
-$ProgramContent = @'
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using AlSaqarAccounting.Core;
-using AlSaqarAccounting.Services;
-using AlSaqarAccounting.Forms;
-
-namespace AlSaqarAccounting;
-
-internal static class Program
-{
-    [STAThread]
-    public static void Main()
-    {
-        try
-        {
-            ApplicationConfiguration.Initialize();
-
-            var basePath = AppContext.BaseDirectory;
-
-            var builder = Host.CreateApplicationBuilder(
-                new HostApplicationBuilderSettings
-                {
-                    ContentRootPath = basePath
-                });
-
-            builder.Configuration
-                .SetBasePath(basePath)
-                .AddJsonFile(
-                    "appsettings.json",
-                    optional: false,
-                    reloadOnChange: false);
-
-            builder.Services.AddSingleton<SqlConnectionFactory>();
-            builder.Services.AddSingleton<StoredProcedureExecutor>();
-            builder.Services.AddSingleton<AuthService>();
-            builder.Services.AddSingleton<SchemaService>();
-
-            using var host = builder.Build();
-            using var scope = host.Services.CreateScope();
-
-            var auth = scope.ServiceProvider.GetRequiredService<AuthService>();
-            var schema = scope.ServiceProvider.GetRequiredService<SchemaService>();
-            var sp = scope.ServiceProvider.GetRequiredService<StoredProcedureExecutor>();
-
-            Application.Run(new LoginForm(auth, schema, sp));
-        }
-        catch (Exception ex)
-        {
-            try
-            {
-                var logPath = Path.Combine(
-                    AppContext.BaseDirectory,
-                    "startup-error.log");
-
-                File.WriteAllText(
-                    logPath,
-                    $"Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\r\n\r\n{ex}");
-            }
-            catch
-            {
-                // Ignore logging errors.
-            }
-
-            MessageBox.Show(
-                ex.ToString(),
-                "خطأ عند تشغيل AlSaqarAccounting",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-        }
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    if (Test-Path -LiteralPath $vswhere) {
+        $found = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null |
+            Select-Object -First 1
+        if ($found) { return $found }
     }
-}
-'@
 
-Set-Content -Path $ProgramFile -Value $ProgramContent -Encoding UTF8
-Write-Host 'Program.cs تم تحديثه لإظهار وتسجيل أخطاء بدء التشغيل.' -ForegroundColor Green
-
-Write-Host ''
-Write-Host '1) dotnet restore' -ForegroundColor Yellow
-dotnet restore $SolutionFile
-if ($LASTEXITCODE -ne 0) { throw 'dotnet restore فشل.' }
-
-Write-Host ''
-Write-Host '2) dotnet build -c Release' -ForegroundColor Yellow
-dotnet build $SolutionFile -c Release
-if ($LASTEXITCODE -ne 0) { throw 'dotnet build فشل.' }
-
-Write-Host ''
-Write-Host '3) dotnet publish win-x64 self-contained' -ForegroundColor Yellow
-if (Test-Path $PublishDir) {
-    Remove-Item $PublishDir -Recurse -Force
+    throw 'MSBuild غير موجود. ثبّت Visual Studio 2022 مع workload Desktop development with .NET ثم شغّل Developer PowerShell.'
 }
 
-dotnet publish $ProjectFile -c Release -r win-x64 --self-contained true -o $PublishDir
-if ($LASTEXITCODE -ne 0) { throw 'dotnet publish فشل.' }
+$msbuild = Find-MSBuild
+if (-not (Test-Path -LiteralPath $SolutionFile)) { throw "الحل غير موجود: $SolutionFile" }
+if (-not (Test-Path -LiteralPath $ProjectFile)) { throw "المشروع غير موجود: $ProjectFile" }
 
-$ExePath = Join-Path $PublishDir 'AlSaqarAccounting.exe'
-if (-not (Test-Path $ExePath)) {
-    throw "ملف التشغيل لم يتم إنشاؤه: $ExePath"
+Push-Location $ProjectRoot
+try {
+    Write-Host '=== AlSaqarAccounting .NET Framework 4.8 Build ===' -ForegroundColor Cyan
+    & $msbuild $SolutionFile /t:Restore /p:Configuration=Release /p:Platform="Any CPU" /m
+    if ($LASTEXITCODE -ne 0) { throw 'MSBuild Restore فشل.' }
+
+    & $msbuild $SolutionFile /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:minimal
+    if ($LASTEXITCODE -ne 0) { throw 'MSBuild Build فشل.' }
+
+    $exe = Join-Path $OutputDir 'AlSaqarAccounting.exe'
+    $cfg = Join-Path $OutputDir 'appsettings.json'
+    if (-not (Test-Path -LiteralPath $exe)) { throw "EXE غير موجود: $exe" }
+    if (-not (Test-Path -LiteralPath $cfg)) { throw "appsettings.json غير موجود: $cfg" }
+
+    Write-Host "EXE: $exe" -ForegroundColor Green
+    if ($Run) { Start-Process -FilePath $exe -WorkingDirectory $OutputDir }
 }
-
-Write-Host ''
-Write-Host '4) تشغيل البرنامج' -ForegroundColor Yellow
-Write-Host "EXE: $ExePath" -ForegroundColor DarkGray
-Write-Host ''
-
-# Start and wait briefly for startup. This allows startup-error.log to be created if Main fails.
-$Process = Start-Process -FilePath $ExePath -WorkingDirectory $PublishDir -PassThru
-Start-Sleep -Seconds 3
-
-if ($Process.HasExited) {
-    Write-Host "البرنامج أغلق نفسه. ExitCode = $($Process.ExitCode)" -ForegroundColor Red
-    if (Test-Path $StartupLog) {
-        Write-Host ''
-        Write-Host '=== startup-error.log ===' -ForegroundColor Red
-        Get-Content $StartupLog -Raw
-    } else {
-        Write-Host 'لم يتم إنشاء startup-error.log.' -ForegroundColor Red
-    }
-} else {
-    Write-Host 'البرنامج يعمل الآن.' -ForegroundColor Green
-    Write-Host "مجلد التشغيل: $PublishDir"
-    Write-Host "ملف السجل عند حدوث خطأ: $StartupLog"
-}
-
-Write-Host ''
-Write-Host '=== انتهى التنفيذ ===' -ForegroundColor Cyan
+finally { Pop-Location }
