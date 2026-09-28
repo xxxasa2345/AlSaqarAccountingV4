@@ -43,6 +43,8 @@ jobs:
           $out = Join-Path $env:GITHUB_WORKSPACE 'release\AlSaqarAccounting-NET48'
           New-Item -ItemType Directory -Force -Path $out | Out-Null
           Copy-Item 'src\AlSaqarAccounting\bin\Release\net48\*' $out -Recurse -Force
+          $config = Join-Path $out 'appsettings.json'
+          if (Test-Path $config) { Remove-Item $config -Force }
           Compress-Archive -Path "$out\*" -DestinationPath "$env:GITHUB_WORKSPACE\AlSaqarAccounting-NET48.zip" -Force
 
       - name: Upload Release Artifact
