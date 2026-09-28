@@ -57,17 +57,17 @@ public sealed class ScreenAccess
             }
 
             var n = screenName ?? string.Empty;
-            if (n.Contains("Item", StringComparison.OrdinalIgnoreCase)) return "الأصناف والمخازن";
-            if (n.Contains("Account", StringComparison.OrdinalIgnoreCase)) return "الحسابات";
-            if (n.Contains("Contract", StringComparison.OrdinalIgnoreCase)) return "العقود";
-            if (n.Contains("Payroll", StringComparison.OrdinalIgnoreCase) || n.Contains("Employee", StringComparison.OrdinalIgnoreCase)) return "الموارد البشرية";
-            if (n.Contains("Manufacturing", StringComparison.OrdinalIgnoreCase)) return "التصنيع";
-            if (n.Contains("Rental", StringComparison.OrdinalIgnoreCase) || n.Contains("Rent", StringComparison.OrdinalIgnoreCase)) return "الإيجارات";
-            if (n.Contains("Repair", StringComparison.OrdinalIgnoreCase)) return "الصيانة";
-            if (n.Contains("Restaurant", StringComparison.OrdinalIgnoreCase)) return "المطاعم";
-            if (n.Contains("Invoice", StringComparison.OrdinalIgnoreCase) || n.Contains("Zatca", StringComparison.OrdinalIgnoreCase)) return "الفوترة الإلكترونية";
-            if (n.Contains("Order", StringComparison.OrdinalIgnoreCase) || n.Contains("Purchase", StringComparison.OrdinalIgnoreCase)) return "المبيعات والمشتريات";
-            if (n.Contains("Report", StringComparison.OrdinalIgnoreCase)) return "التقارير";
+            if (n.IndexOf("Item", StringComparison.OrdinalIgnoreCase) >= 0) return "الأصناف والمخازن";
+            if (n.IndexOf("Account", StringComparison.OrdinalIgnoreCase) >= 0) return "الحسابات";
+            if (n.IndexOf("Contract", StringComparison.OrdinalIgnoreCase) >= 0) return "العقود";
+            if (n.IndexOf("Payroll", StringComparison.OrdinalIgnoreCase) >= 0 || n.IndexOf("Employee", StringComparison.OrdinalIgnoreCase) >= 0) return "الموارد البشرية";
+            if (n.IndexOf("Manufacturing", StringComparison.OrdinalIgnoreCase) >= 0) return "التصنيع";
+            if (n.IndexOf("Rental", StringComparison.OrdinalIgnoreCase) >= 0 || n.IndexOf("Rent", StringComparison.OrdinalIgnoreCase) >= 0) return "الإيجارات";
+            if (n.IndexOf("Repair", StringComparison.OrdinalIgnoreCase) >= 0) return "الصيانة";
+            if (n.IndexOf("Restaurant", StringComparison.OrdinalIgnoreCase) >= 0) return "المطاعم";
+            if (n.IndexOf("Invoice", StringComparison.OrdinalIgnoreCase) >= 0 || n.IndexOf("Zatca", StringComparison.OrdinalIgnoreCase) >= 0) return "الفوترة الإلكترونية";
+            if (n.IndexOf("Order", StringComparison.OrdinalIgnoreCase) >= 0 || n.IndexOf("Purchase", StringComparison.OrdinalIgnoreCase) >= 0) return "المبيعات والمشتريات";
+            if (n.IndexOf("Report", StringComparison.OrdinalIgnoreCase) >= 0) return "التقارير";
             return "أخرى";
         }
     }
