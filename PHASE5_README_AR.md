@@ -9,10 +9,10 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 .\PHASE5_BUILD_RUN.ps1
 ```
 
-للنشر والتشغيل:
+للبناء وتشغيل نسخة Release:
 
 ```powershell
-.\PHASE5_BUILD_RUN.ps1 -Publish -Run
+.\PHASE5_BUILD_RUN.ps1 -Run
 ```
 
 هذه المرحلة لا تُغير قاعدة البيانات ولا تُنفذ عمليات كتابة.
