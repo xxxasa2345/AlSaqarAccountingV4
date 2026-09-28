@@ -32,7 +32,6 @@ public sealed class ScreenRouter
 
         var db = new DbExecutor(new SqlConnectionFactory(_connectionString));
 
-        // Concrete ERP master implementations are resolved before generic fallbacks.
         if (string.Equals(access.ScreenName, "FrmUnit", StringComparison.OrdinalIgnoreCase))
         {
             var service = new ItemUnitService(db);
@@ -46,6 +45,18 @@ public sealed class ScreenRouter
         {
             var service = new ItemMasterService(db);
             using var form = new ItemMasterForm(_session, access, service, tableName, displayName);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
+        }
+
+        // FrmItems now has a concrete ERP implementation backed by the original
+        // Get_All_Items / Insert_Items procedures. Generic screens are no longer
+        // used as the primary path for the inventory item master.
+        if (string.Equals(access.ScreenName, "FrmItems", StringComparison.OrdinalIgnoreCase))
+        {
+            var service = new ItemsService(db);
+            using var form = new ItemsForm(_session, access, service);
             form.StartPosition = FormStartPosition.CenterParent;
             form.ShowDialog(owner);
             return true;
