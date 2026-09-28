@@ -9,13 +9,14 @@ public sealed class LoginForm : Form
     private readonly SchemaService _schema;
     private readonly StoredProcedureExecutor _sp;
     private readonly SecurityService _security;
+    private readonly string _connectionString;
     private readonly TextBox _user = new();
     private readonly TextBox _pass = new();
     private readonly Button _login = new();
 
-    public LoginForm(AuthService auth, SchemaService schema, StoredProcedureExecutor sp, SecurityService security)
+    public LoginForm(AuthService auth, SchemaService schema, StoredProcedureExecutor sp, SecurityService security, string connectionString)
     {
-        _auth = auth; _schema = schema; _sp = sp; _security = security;
+        _auth = auth; _schema = schema; _sp = sp; _security = security; _connectionString = connectionString;
         Text = "الصقر للمحاسبة - تسجيل الدخول";
         RightToLeft = RightToLeft.Yes; RightToLeftLayout = true;
         Width = 420; Height = 230; StartPosition = FormStartPosition.CenterScreen;
@@ -52,7 +53,7 @@ public sealed class LoginForm : Form
             }
 
             Hide();
-            using var main = new MainForm(session, _schema, _sp, _security);
+            using var main = new MainForm(session, _schema, _sp, _security, _connectionString);
             main.ShowDialog(this);
             Show();
         }
