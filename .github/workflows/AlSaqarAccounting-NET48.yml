@@ -1,0 +1,52 @@
+name: AlSaqarAccounting .NET Framework 4.8
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/AlSaqarAccounting-NET48.yml'
+      - 'AlSaqarAccounting.sln'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore
+        run: msbuild AlSaqarAccounting.sln /t:Restore /p:Configuration=Release /p:Platform="Any CPU" /m
+
+      - name: Build .NET Framework 4.8
+        run: msbuild AlSaqarAccounting.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:minimal
+
+      - name: Verify output
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Release\net48\AlSaqarAccounting.exe'
+          $config = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Release\net48\appsettings.json'
+          if (-not (Test-Path $exe)) { throw "EXE not found: $exe" }
+          if (-not (Test-Path $config)) { throw "appsettings.json not found: $config" }
+          Write-Host "EXE: $exe"
+          Write-Host "Config: $config"
+
+      - name: Package Release
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:GITHUB_WORKSPACE 'release\AlSaqarAccounting-NET48'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item 'src\AlSaqarAccounting\bin\Release\net48\*' $out -Recurse -Force
+          Compress-Archive -Path "$out\*" -DestinationPath "$env:GITHUB_WORKSPACE\AlSaqarAccounting-NET48.zip" -Force
+
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AlSaqarAccounting-NET48
+          path: AlSaqarAccounting-NET48.zip
