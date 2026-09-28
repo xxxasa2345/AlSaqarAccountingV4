@@ -5,39 +5,15 @@ using AlSaqarAccounting.UI;
 
 namespace AlSaqarAccounting.Forms;
 
-/// <summary>
-/// First concrete ERP master screen: Item_Unit.
-/// All persistence is delegated to ItemUnitService.
-/// </summary>
 public sealed class ItemUnitForm : Form
 {
     private readonly AppSession _session;
     private readonly ScreenAccess _access;
     private readonly ItemUnitService _service;
-
     private readonly TextBox _name = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
     private readonly TextBox _search = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
-    private readonly DataGridView _grid = new()
-    {
-        Dock = DockStyle.Fill,
-        ReadOnly = true,
-        AllowUserToAddRows = false,
-        AllowUserToDeleteRows = false,
-        MultiSelect = false,
-        SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-        AutoGenerateColumns = true,
-        AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-        RightToLeft = RightToLeft.Yes
-    };
-    private readonly Label _status = new()
-    {
-        Dock = DockStyle.Bottom,
-        Height = 32,
-        TextAlign = ContentAlignment.MiddleRight,
-        Padding = new Padding(8),
-        BorderStyle = BorderStyle.FixedSingle
-    };
-
+    private readonly DataGridView _grid = new() { Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, MultiSelect = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, AutoGenerateColumns = true, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, RightToLeft = RightToLeft.Yes };
+    private readonly Label _status = new() { Dock = DockStyle.Bottom, Height = 32, TextAlign = ContentAlignment.MiddleRight, Padding = new Padding(8), BorderStyle = BorderStyle.FixedSingle };
     private DataTable? _data;
     private int? _editingId;
 
@@ -46,7 +22,6 @@ public sealed class ItemUnitForm : Form
         _session = session;
         _access = access;
         _service = service;
-
         Text = "الصقر للمحاسبة — الوحدات";
         Width = 1100;
         Height = 700;
@@ -54,7 +29,6 @@ public sealed class ItemUnitForm : Form
         StartPosition = FormStartPosition.CenterParent;
         RightToLeft = RightToLeft.Yes;
         RightToLeftLayout = true;
-
         BuildLayout();
         WireEvents();
     }
@@ -64,7 +38,6 @@ public sealed class ItemUnitForm : Form
         var header = new Panel { Dock = DockStyle.Top, Height = 120, Padding = new Padding(12), BackColor = Color.FromArgb(245, 247, 250) };
         var title = new Label { Text = "الوحدات", Dock = DockStyle.Top, Height = 38, Font = new Font("Tahoma", 18, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight };
         var info = new Label { Text = $"المستخدم: {_session.UserName} | الفرع: {_session.BranchId?.ToString() ?? "-"}", Dock = DockStyle.Top, Height = 25, ForeColor = Color.DimGray, TextAlign = ContentAlignment.MiddleRight };
-
         var searchRow = new TableLayoutPanel { Dock = DockStyle.Bottom, Height = 32, ColumnCount = 2 };
         searchRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         searchRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90));
@@ -72,7 +45,6 @@ public sealed class ItemUnitForm : Form
         refresh.Click += async (_, _) => await LoadAsync();
         searchRow.Controls.Add(_search, 0, 0);
         searchRow.Controls.Add(refresh, 1, 0);
-
         header.Controls.Add(searchRow);
         header.Controls.Add(info);
         header.Controls.Add(title);
@@ -88,15 +60,13 @@ public sealed class ItemUnitForm : Form
         cancel.Click += (_, _) => ClearEditor();
         editor.Controls.Add(save, 1, 0);
         editor.Controls.Add(cancel, 2, 0);
-
         var hint = new Label { Text = "اسم الوحدة", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleRight, Height = 26 };
         editor.Controls.Add(hint, 0, 1);
         editor.SetColumnSpan(hint, 3);
 
         var toolbar = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 44, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(6), WrapContents = false };
-        AddButton(toolbar, "تعديل", _access.AllowEdit, async () => await BeginEditAsync());
-        AddButton(toolbar, "حذف", _access.AllowDelete, async () => await DeleteAsync());
-
+        AddButton(toolbar, "تعديل", _access.AllowEdit, BeginEditAsync);
+        AddButton(toolbar, "حذف", _access.AllowDelete, DeleteAsync);
         Controls.Add(_grid);
         Controls.Add(_status);
         Controls.Add(toolbar);
@@ -139,7 +109,10 @@ public sealed class ItemUnitForm : Form
     {
         if (_data is null) return;
         var value = _search.Text.Trim().Replace("'", "''");
-        _data.DefaultView.RowFilter = string.IsNullOrWhiteSpace(value) ? string.Empty : $"CONVERT([Name], 'System.String') LIKE '%{value.Replace("%", "[%]").Replace("*", "[*]")}%'") ;
+        var escaped = value.Replace("%", "[%]").Replace("*", "[*]");
+        _data.DefaultView.RowFilter = string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : $"CONVERT([Name], 'System.String') LIKE '%{escaped}%'";
         _status.Text = $"المعروض: {_data.DefaultView.Count:N0} من {_data.Rows.Count:N0}";
     }
 
@@ -147,6 +120,11 @@ public sealed class ItemUnitForm : Form
     {
         if (!_access.AllowSave) return;
         var name = _name.Text.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            MessageBox.Show(this, "اسم الوحدة مطلوب.", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
         try
         {
             UseWaitCursor = true;
@@ -187,7 +165,6 @@ public sealed class ItemUnitForm : Form
         var id = Convert.ToInt32(row.Row["ID"]);
         var name = Convert.ToString(row.Row["Name"]) ?? string.Empty;
         if (MessageBox.Show(this, $"هل تريد حذف الوحدة؟\r\n{name}", "تأكيد الحذف", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
-
         try
         {
             UseWaitCursor = true;
