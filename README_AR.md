@@ -13,10 +13,9 @@
 - Views: `19`
 - Foreign Keys: `12`
 - PK/Unique records: `175`
-- EF Migrations: `20260921012338_InitialAccountingSchema`, ProductVersion `8.0.12`
 
 ## التصميم
-`WinForms (.NET 8) -> Application/SQL Services -> GTSdb2026`
+`WinForms (.NET Framework 4.8) -> Application/SQL Services -> GTSdb2026`
 
 لا يتم توليد منطق CRUD جديد بدل منطق SQL الأصلي عندما يكون الإجراء المخزن هو مصدر السلوك.
 
@@ -27,7 +26,7 @@
 - تعريفات أجسام Stored Procedures غير موجودة في ملفات CSV المرفوعة حتى الآن؛ يوجد في `database/Export_Procedure_Definitions_Chunks.sql` تصدير Read-Only لها على أجزاء 2000 حرف.
 
 ## تشغيل
-يفتح في Visual Studio 2022 على Windows مع .NET 8 SDK.
+يفتح في Visual Studio 2022 على Windows باستخدام .NET Framework 4.8 / MSBuild. .NET 8 SDK غير مطلوب لبناء هذا المشروع.
 عدل `src/AlSaqarAccounting/appsettings.json` حسب SQL Server لديك.
 
 ## ملاحظة أمنية
@@ -55,3 +54,10 @@
 - `Select_Scaffolds_ContractNotMinutesStarted` — 798 حرف
 - `Select_Order_TransferFromBranch` — 791 حرف
 - `Select_Order_TransferToBranch` — 785 حرف
+
+## ملاحظات التحويل إلى .NET Framework 4.8
+- تم تحويل المشروع من `net8.0-windows` إلى `net48`.
+- تم استبدال `Microsoft.Data.SqlClient` بـ `System.Data.SqlClient`.
+- تم إزالة الاعتماد على Generic Host من نقطة الدخول.
+- تم إضافة توافق `IsExternalInit` لدعم خصائص `init` و`record` في الكود الحالي.
+- بناء GitHub Actions يتم عبر MSBuild على Windows وينتج `AlSaqarAccounting-NET48.zip` بدون `appsettings.json`.
