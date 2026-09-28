@@ -1,12 +1,13 @@
 using System.Reflection;
 using AlSaqarAccounting.Core;
+using AlSaqarAccounting.Services;
+using AlSaqarAccounting.Forms;
 
 namespace AlSaqarAccounting.UI;
 
 /// <summary>
-/// Opens an extracted/original WinForms screen when its Form type exists.
-/// When the original Form implementation is not yet present in V4, it opens a
-/// read-only DB-backed screen using the same security record and entity hint.
+/// Routes a permitted screen to its concrete implementation. Generic catalog
+/// screens remain a compatibility fallback, not the primary ERP implementation.
 /// </summary>
 public sealed class ScreenRouter
 {
@@ -27,6 +28,18 @@ public sealed class ScreenRouter
         {
             message = "لا تملك صلاحية فتح هذه الشاشة.";
             return false;
+        }
+
+        // Concrete ERP implementations are resolved before generic fallbacks.
+        // FrmUnit is the first migrated master screen and persists to GTSdb2026.
+        if (string.Equals(access.ScreenName, "FrmUnit", StringComparison.OrdinalIgnoreCase))
+        {
+            var db = new DbExecutor(new SqlConnectionFactory(_connectionString));
+            var service = new ItemUnitService(db);
+            using var form = new ItemUnitForm(_session, access, service);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
         }
 
         if (OperationalScreenRegistry.TryResolve(access.ScreenName, out var operational))
@@ -71,7 +84,7 @@ public sealed class ScreenRouter
                 return true;
             }
 
-            message = formError ?? "تعذر إنشاء الشاشة الأصلية.";
+            message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
         }
 
         var entity = ScreenEntityMap.Resolve(access.ScreenName);
