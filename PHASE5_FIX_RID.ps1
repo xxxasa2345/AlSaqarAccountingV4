@@ -1,86 +1,43 @@
-﻿#requires -Version 5.1
+#requires -Version 5.1
 [CmdletBinding()]
-param(
-    [string]$Root = "",
-    [switch]$Run
-)
+param([string]$Root = "",[switch]$Run)
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
+if ([string]::IsNullOrWhiteSpace($Root)) { $Root = (Get-Location).Path }
+$Root = (Resolve-Path $Root).Path
+$Solution = Join-Path $Root 'AlSaqarAccounting.sln'
+$BuildDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$PublishDir = Join-Path $Root 'publish'
 
-if ([string]::IsNullOrWhiteSpace($Root)) {
-    $Root = (Get-Location).Path
+function Find-MSBuild {
+    $cmd = Get-Command msbuild -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    if (Test-Path -LiteralPath $vswhere) {
+        $found = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null |
+            Select-Object -First 1
+        if ($found) { return $found }
+    }
+
+    throw 'MSBuild غير موجود. ثبّت Visual Studio 2022 مع workload Desktop development with .NET ثم شغّل Developer PowerShell.'
 }
-
-$Root = [IO.Path]::GetFullPath($Root)
-$Project = Join-Path $Root "src\AlSaqarAccounting\AlSaqarAccounting.csproj"
-$Solution = Join-Path $Root "AlSaqarAccounting.sln"
-$PublishDir = Join-Path $Root "publish"
-$BackupDir = Join-Path $Root ".phase5-rid-backup"
-
-Write-Host "=== AlSaqarAccounting Phase 5 - RID Publish Fix ===" -ForegroundColor Cyan
-Write-Host "Root: $Root"
-
-if (-not (Test-Path -LiteralPath $Project)) {
-    throw "لم يتم العثور على المشروع: $Project"
-}
-
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    throw "dotnet غير موجود في PATH."
-}
-
-New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
-
-# Backup csproj before any optional change.
-$stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$backupProject = Join-Path $BackupDir "AlSaqarAccounting.csproj.$stamp.bak"
-Copy-Item -LiteralPath $Project -Destination $backupProject -Force
-Write-Host "Backup: $backupProject" -ForegroundColor DarkGray
+$msbuild = Find-MSBuild
 
 Push-Location $Root
 try {
-    Write-Host ""
-    Write-Host "1) Restore مع Runtime Identifier win-x64" -ForegroundColor Yellow
-    dotnet restore $Project -r win-x64
-    if ($LASTEXITCODE -ne 0) {
-        throw "dotnet restore -r win-x64 فشل."
-    }
+    & $msbuild $Solution /t:Restore /p:Configuration=Release /p:Platform="Any CPU" /m
+    if ($LASTEXITCODE -ne 0) { throw 'MSBuild Restore فشل.' }
+    & $msbuild $Solution /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:minimal
+    if ($LASTEXITCODE -ne 0) { throw 'MSBuild Build فشل.' }
 
-    Write-Host ""
-    Write-Host "2) Build Release" -ForegroundColor Yellow
-    dotnet build $Solution -c Release --no-restore
-    if ($LASTEXITCODE -ne 0) {
-        throw "dotnet build فشل."
-    }
+    if (Test-Path $PublishDir) { Remove-Item $PublishDir -Recurse -Force }
+    New-Item -ItemType Directory -Force -Path $PublishDir | Out-Null
+    Copy-Item (Join-Path $BuildDir '*') $PublishDir -Recurse -Force
 
-    if (Test-Path -LiteralPath $PublishDir) {
-        Remove-Item -LiteralPath $PublishDir -Recurse -Force
-    }
-
-    Write-Host ""
-    Write-Host "3) Publish win-x64 self-contained" -ForegroundColor Yellow
-    dotnet publish $Project -c Release -r win-x64 --self-contained true -o $PublishDir --no-restore
-    if ($LASTEXITCODE -ne 0) {
-        throw "dotnet publish فشل."
-    }
-
-    $Exe = Join-Path $PublishDir "AlSaqarAccounting.exe"
-    if (-not (Test-Path -LiteralPath $Exe)) {
-        throw "تمت عملية publish لكن ملف التشغيل غير موجود: $Exe"
-    }
-
-    Write-Host ""
-    Write-Host "تم النشر بنجاح." -ForegroundColor Green
-    Write-Host "EXE: $Exe" -ForegroundColor Green
-
-    if ($Run) {
-        Write-Host ""
-        Write-Host "4) تشغيل البرنامج" -ForegroundColor Yellow
-        & $Exe
-    }
+    $exe = Join-Path $PublishDir 'AlSaqarAccounting.exe'
+    if (-not (Test-Path $exe)) { throw "EXE غير موجود: $exe" }
+    Write-Host "NET48 release created: $exe" -ForegroundColor Green
+    if ($Run) { Start-Process -FilePath $exe -WorkingDirectory $PublishDir }
 }
-finally {
-    Pop-Location
-}
-
-Write-Host ""
-Write-Host "انتهى السكربت بنجاح." -ForegroundColor Green
+finally { Pop-Location }
