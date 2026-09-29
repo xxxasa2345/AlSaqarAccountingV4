@@ -102,6 +102,26 @@ public sealed class ScreenRouter
             return true;
         }
 
+        // Invoices screen: concrete ERP form with the original invoice services.
+        if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
+        {
+            var invoiceService = new InvoiceService(db);
+            var customerService = new CustomerService(db);
+            var supplierService = new SupplierService(db);
+            var itemsService = new ItemsService(db);
+            using var form = new InvoicesForm(
+                _session,
+                access,
+                invoiceService,
+                customerService,
+                supplierService,
+                itemsService);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
+        }
+
         if (OperationalScreenRegistry.TryResolve(access.ScreenName, out var operational))
         {
             var mappedType = operational.TargetFormName is null
