@@ -60,6 +60,48 @@ public sealed class ScreenRouter
             return true;
         }
 
+        // Customers screen
+        if (string.Equals(access.ScreenName, "FrmCustomer", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(access.ScreenName, "FrmCustomers", StringComparison.OrdinalIgnoreCase))
+        {
+            var service = new CustomerService(db);
+            using var form = new CustomersForm(_session, access, service);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
+        }
+
+        // Suppliers screen
+        if (string.Equals(access.ScreenName, "FrmSuppliers", StringComparison.OrdinalIgnoreCase))
+        {
+            var service = new SupplierService(db);
+            using var form = new SuppliersForm(_session, access, service);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
+        }
+
+        // Stores screen
+        if (string.Equals(access.ScreenName, "FrmStores", StringComparison.OrdinalIgnoreCase))
+        {
+            var service = new StoreService(db);
+            using var form = new StoresForm(_session, access, service);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
+        }
+
+        // Contracts screen
+        if (string.Equals(access.ScreenName, "FrmContract", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(access.ScreenName, "FrmContracts", StringComparison.OrdinalIgnoreCase))
+        {
+            var service = new ContractService(db);
+            using var form = new ContractsForm(_session, access, service);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
+        }
+
         if (OperationalScreenRegistry.TryResolve(access.ScreenName, out var operational))
         {
             var mappedType = operational.TargetFormName is null
