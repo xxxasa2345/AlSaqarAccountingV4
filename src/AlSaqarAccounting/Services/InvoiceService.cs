@@ -504,6 +504,17 @@ VALUES (
         }, cancellationToken);
     }
 
+    /// <summary>
+    /// Get purchase invoice details from the forensic Order_PurchasesDetails table.
+    /// </summary>
+    public Task<DataTable> GetPurchaseInvoiceDetailsAsync(int invoiceId, CancellationToken cancellationToken = default)
+    {
+        return _db.QueryAsync(
+            "SELECT * FROM dbo.Order_PurchasesDetails WHERE Purchese_ID = @InvoiceId ORDER BY SN",
+            p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId,
+            cancellationToken);
+    }
+
     #endregion
 
     #region Helper Methods
