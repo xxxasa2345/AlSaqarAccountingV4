@@ -13,6 +13,8 @@ public sealed class DbExecutor
 
     public DbExecutor(SqlConnectionFactory factory) => _factory = factory;
 
+    public string ConnectionString => _factory.ConnectionString;
+
     public async Task<DataTable> QueryAsync(
         string sql,
         Action<SqlParameterCollection>? parameters = null,
@@ -46,6 +48,44 @@ public sealed class DbExecutor
         parameters?.Invoke(cmd.Parameters);
         await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
         return await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<T?> QuerySingleAsync<T>(
+        string sql,
+        Action<SqlParameterCollection>? parameters = null,
+        CancellationToken cancellationToken = default) where T : class, new()
+    {
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(sql, cn)
+        {
+            CommandType = CommandType.Text,
+            CommandTimeout = 120
+        };
+        parameters?.Invoke(cmd.Parameters);
+        await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
+        using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+
+        if (!reader.HasRows)
+            return null;
+
+        await reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+        var obj = new T();
+        var props = typeof(T).GetProperties();
+
+        for (var i = 0; i < reader.FieldCount; i++)
+        {
+            var fieldName = reader.GetName(i);
+            var prop = props.FirstOrDefault(p =>
+                string.Equals(p.Name, fieldName, StringComparison.OrdinalIgnoreCase));
+
+            if (prop is not null && !reader.IsDBNull(i))
+            {
+                try { prop.SetValue(obj, reader.GetValue(i)); }
+                catch { }
+            }
+        }
+
+        return obj;
     }
 
     public async Task<DataTable> ExecuteStoredProcedureAsync(
