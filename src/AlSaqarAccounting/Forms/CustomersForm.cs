@@ -309,13 +309,12 @@ public sealed class CustomersForm : Form
         _note.Clear();
     }
 
-    private void ExportCsv()
+    private Task ExportCsv()
     {
-        if (!_access.AllowExport || _data is null) return;
-        using var dialog = new SaveFileDialog { Filter = "CSV UTF-8 (*.csv)|*.csv", FileName = "Customers.csv", AddExtension = true };
-        if (dialog.ShowDialog(this) != DialogResult.OK) return;
-        
-        var sb = new System.Text.StringBuilder();
+        if (!_access.AllowExport || _data is null) return Task.CompletedTask;
+using var dialog = new SaveFileDialog { Filter = "CSV UTF-8 (*.csv)|*.csv", FileName = "Customers.csv", AddExtension = true };
+        if (dialog.ShowDialog(this) != DialogResult.OK) return Task.CompletedTask;
+var sb = new System.Text.StringBuilder();
         // Header
         var headers = new[] { "", "", "", "", "", "" }; // "م", "اسم العميل", "الهاتف", "الرقم الضريبي", "العنوان", "حد الائتمان"
         sb.AppendLine(string.Join(",", headers));
@@ -337,6 +336,8 @@ public sealed class CustomersForm : Form
         
         File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
         _status.Text = ": " + dialog.FileName; // "تم التصدير إلى: ..."
+    
+        return Task.CompletedTask;
     }
 
     private static string EscapeCsv(string value)
