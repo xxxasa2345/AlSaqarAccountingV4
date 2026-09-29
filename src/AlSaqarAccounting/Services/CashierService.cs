@@ -35,7 +35,7 @@ public sealed class CashierService
             throw new ArgumentException("Customer name is required");
 
         // Start transaction
-        using var cn = new SqlConnection(_db._factory.ConnectionString);
+        using var cn = new SqlConnection(_db.ConnectionString);
         await cn.OpenAsync(cancellationToken);
         
         using var transaction = cn.BeginTransaction();
