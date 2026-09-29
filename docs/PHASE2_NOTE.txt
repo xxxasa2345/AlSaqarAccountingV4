@@ -1,0 +1,1 @@
+Phase 2 migrates FrmCompany, FrmClass and FrmGroups to concrete ItemMasterForm and ItemMasterService implementations backed by dbo.Item_Company, dbo.Item_Class and dbo.Item_Groups.

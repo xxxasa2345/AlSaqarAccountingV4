@@ -30,13 +30,31 @@ public sealed class ScreenRouter
             return false;
         }
 
-        // Concrete ERP implementations are resolved before generic fallbacks.
-        // FrmUnit is the first migrated master screen and persists to GTSdb2026.
+        var db = new DbExecutor(new SqlConnectionFactory(_connectionString));
+
         if (string.Equals(access.ScreenName, "FrmUnit", StringComparison.OrdinalIgnoreCase))
         {
-            var db = new DbExecutor(new SqlConnectionFactory(_connectionString));
             var service = new ItemUnitService(db);
             using var form = new ItemUnitForm(_session, access, service);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
+        }
+
+        if (TryResolveItemMaster(access.ScreenName, out var tableName, out var displayName))
+        {
+            var service = new ItemMasterService(db);
+            using var form = new ItemMasterForm(_session, access, service, tableName, displayName);
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(owner);
+            return true;
+        }
+
+        // Concrete inventory item screen: original Get_All_Items / Insert_Items.
+        if (string.Equals(access.ScreenName, "FrmItems", StringComparison.OrdinalIgnoreCase))
+        {
+            var service = new ItemsService(db);
+            using var form = new ItemsForm(_session, access, service);
             form.StartPosition = FormStartPosition.CenterParent;
             form.ShowDialog(owner);
             return true;
@@ -49,7 +67,7 @@ public sealed class ScreenRouter
                 : FindFormType(operational.TargetFormName);
 
             if (mappedType is not null &&
-                TryCreateForm(mappedType, access, out var mappedForm, out var mappedError) &&
+                TryCreateForm(mappedType, access, out var mappedForm, out _) &&
                 mappedForm is not null)
             {
                 using (mappedForm)
@@ -57,7 +75,6 @@ public sealed class ScreenRouter
                     mappedForm.StartPosition = FormStartPosition.CenterParent;
                     mappedForm.ShowDialog(owner);
                 }
-
                 return true;
             }
 
@@ -80,18 +97,39 @@ public sealed class ScreenRouter
                     form.StartPosition = FormStartPosition.CenterParent;
                     form.ShowDialog(owner);
                 }
-
                 return true;
             }
-
             message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
         }
 
         var entity = ScreenEntityMap.Resolve(access.ScreenName);
         using var fallback = new CatalogDataScreen(_connectionString, access.ScreenName, entity, access);
         fallback.ShowDialog(owner);
-
         return true;
+    }
+
+    private static bool TryResolveItemMaster(string screenName, out string tableName, out string displayName)
+    {
+        tableName = string.Empty;
+        displayName = string.Empty;
+
+        switch (screenName.Trim())
+        {
+            case "FrmCompany":
+                tableName = "Item_Company";
+                displayName = "الشركات";
+                return true;
+            case "FrmClass":
+                tableName = "Item_Class";
+                displayName = "الفئات";
+                return true;
+            case "FrmGroups":
+                tableName = "Item_Groups";
+                displayName = "المجموعات";
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static Type? FindFormType(string screenName)
@@ -120,7 +158,6 @@ public sealed class ScreenRouter
             if (match is not null)
                 return match;
         }
-
         return null;
     }
 
@@ -132,37 +169,30 @@ public sealed class ScreenRouter
     {
         form = null;
         error = null;
-
         try
         {
             foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
                          .OrderBy(c => c.GetParameters().Length))
             {
                 var parameters = ctor.GetParameters();
-
                 if (parameters.Length == 0)
                 {
                     form = (Form?)ctor.Invoke(null);
                     if (form is not null) return true;
                 }
-
-                if (parameters.Length == 1 &&
-                    parameters[0].ParameterType == typeof(AppSession))
+                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(AppSession))
                 {
                     form = (Form?)ctor.Invoke(new object?[] { _session });
                     if (form is not null) return true;
                 }
-
                 if (parameters.Length == 1 &&
-                    (parameters[0].ParameterType == typeof(int) ||
-                     parameters[0].ParameterType == typeof(int?)) &&
+                    (parameters[0].ParameterType == typeof(int) || parameters[0].ParameterType == typeof(int?)) &&
                     access.ScreenNum.HasValue)
                 {
                     form = (Form?)ctor.Invoke(new object?[] { access.ScreenNum.Value });
                     if (form is not null) return true;
                 }
             }
-
             error = $"الشاشة {type.Name} موجودة لكن لا يوجد Constructor مدعوم حاليًا.";
             return false;
         }
