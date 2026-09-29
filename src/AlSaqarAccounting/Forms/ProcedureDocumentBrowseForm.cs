@@ -56,8 +56,7 @@ public abstract class ProcedureDocumentBrowseForm : BrowseScreenBase
         catch (Exception ex)
         {
             MessageBox.Show(this,
-                "تعذر تحميل تفاصيل المستند:
-" + ex.GetBaseException().Message,
+                "تعذر تحميل تفاصيل المستند:\r\n" + ex.GetBaseException().Message,
                 "تفاصيل المستند",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
