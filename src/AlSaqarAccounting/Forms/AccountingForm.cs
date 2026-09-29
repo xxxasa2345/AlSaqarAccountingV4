@@ -98,7 +98,6 @@ public sealed class AccountingForm : Form
         var searchLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "بحث:"
         _searchText.Dock = DockStyle.Fill;
         _searchText.RightToLeft = RightToLeft.Yes;
-        _searchText.PlaceholderText = "\u0001"; // "ابحث..."
         
         var refreshBtn = new Button { Text = "\u0001", Width = 80, Height = 30 }; // "تحديث"
         refreshBtn.Click += (_, _) => LoadData();
