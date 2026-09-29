@@ -91,7 +91,6 @@ public sealed class CashierForm : Form
         var customerTitle = new Label { Text = "\u0001", Width = 100, TextAlign = ContentAlignment.MiddleRight }; // "العميل:"
         _customerSearch.Dock = DockStyle.Fill;
         _customerSearch.RightToLeft = RightToLeft.Yes;
-        _customerSearch.PlaceholderText = "\u0001"; // "ابحث عن العميل..."
         _customerLabel.Width = 300;
         _customerLabel.TextAlign = ContentAlignment.MiddleLeft;
         
