@@ -83,7 +83,7 @@ INNER JOIN sys.types AS tp
 WHERE SCHEMA_NAME(tt.schema_id) = 'dbo'
       AND tt.name = @TypeName
 ORDER BY c.column_id;",
-            p => p.Add("@TypeName", System.Data.SqlClient.SqlDbType.NVarChar, 128).Value = typeName,
+            p => p.Add("@TypeName", System.Data.SqlDbType.NVarChar, 128).Value = typeName,
             cancellationToken).ConfigureAwait(false);
 
         if (table.Rows.Count == 0)
