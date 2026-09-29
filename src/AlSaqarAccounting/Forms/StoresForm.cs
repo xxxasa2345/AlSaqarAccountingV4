@@ -294,11 +294,11 @@ public sealed class StoresForm : Form
         _address.Clear();
     }
 
-    private void ExportCsv()
+    private Task ExportCsv()
     {
-        if (!_access.AllowExport || _data is null) return;
+        if (!_access.AllowExport || _data is null) return Task.CompletedTask;
         using var dialog = new SaveFileDialog { Filter = "CSV UTF-8 (*.csv)|*.csv", FileName = "Stores.csv", AddExtension = true };
-        if (dialog.ShowDialog(this) != DialogResult.OK) return;
+        if (dialog.ShowDialog(this) != DialogResult.OK) return Task.CompletedTask;
         
         var sb = new System.Text.StringBuilder();
         // Header
@@ -320,6 +320,7 @@ public sealed class StoresForm : Form
         
         File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
         _status.Text = ": " + dialog.FileName; // "تم التصدير إلى: ..."
+        return Task.CompletedTask;
     }
 
     private static string EscapeCsv(string value)
