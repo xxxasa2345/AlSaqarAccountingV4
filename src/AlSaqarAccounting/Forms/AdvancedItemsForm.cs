@@ -101,7 +101,6 @@ public sealed class AdvancedItemsForm : Form
         var searchLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "بحث:"
         _searchText.Dock = DockStyle.Fill;
         _searchText.RightToLeft = RightToLeft.Yes;
-        _searchText.PlaceholderText = "\u0001"; // "ابحث..."
         
         var barcodeLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "باركود:"
         _barcodeText.Dock = DockStyle.Fill;
