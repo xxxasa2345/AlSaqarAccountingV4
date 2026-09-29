@@ -109,7 +109,7 @@ public sealed class AdvancedItemsForm : Form
         _barcodeText.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) SearchByBarcode(); };
         
         var refreshBtn = new Button { Text = "\u0001", Width = 80, Height = 30 }; // "تحديث"
-        refreshBtn.Click += (_, _) => LoadItems();
+        refreshBtn.Click += async (_, _) => await LoadItems();
         
         filterLayout.Controls.Add(searchLabel, 0, 0);
         filterLayout.Controls.Add(_searchText, 1, 0);
@@ -159,7 +159,7 @@ public sealed class AdvancedItemsForm : Form
         AddField(detailsLayout, "\u0001", _sellPriceText, 3, 1); // "سعر البيع"
         AddField(detailsLayout, "\u0001", _minStockText, 0, 2); // "الحد الأدنى للمخزون"
         AddField(detailsLayout, "\u0001", _currentStockText, 1, 2); // "المخزون الحالي"
-        AddField(detailsLayout, _taxCheck, 2, 2); // "خاضع للضريبة"
+        AddField(detailsLayout, "", _taxCheck, 2, 2); // "خاضع للضريبة"
         AddField(detailsLayout, "\u0001", _taxValueText, 3, 2); // "قيمة الضريبة %"
         AddField(detailsLayout, "\u0001", _notesText, 0, 3, true); // "ملاحظات"
         detailsLayout.SetColumnSpan(_notesText, 3);
@@ -279,7 +279,7 @@ public sealed class AdvancedItemsForm : Form
         combo.DropDownStyle = ComboBoxStyle.DropDownList;
     }
 
-    private void LoadItems()
+    private async Task LoadItems()
     {
         try
         {
