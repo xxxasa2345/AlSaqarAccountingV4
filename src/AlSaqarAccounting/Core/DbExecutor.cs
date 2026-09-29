@@ -13,9 +13,6 @@ public sealed class DbExecutor
 
     public DbExecutor(SqlConnectionFactory factory) => _factory = factory;
 
-    /// <summary>Connection string used for transactional operations that must share the factory configuration.</summary>
-    public string ConnectionString => _factory.ConnectionString;
-
     public async Task<DataTable> QueryAsync(
         string sql,
         Action<SqlParameterCollection>? parameters = null,
@@ -86,44 +83,32 @@ public sealed class DbExecutor
         return await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<T?> QuerySingleAsync<T>(
-        string sql,
-        Action<SqlParameterCollection>? parameters = null,
-        CancellationToken cancellationToken = default) where T : class, new()
+    /// <summary>
+    /// Runs a stored procedure and returns the value of one OUTPUT parameter
+    /// after execution (used by dbo.Insert_Tran_Tran which returns the new
+    /// voucher serial through @Transn OUTPUT).
+    /// </summary>
+    public async Task<object?> ExecuteStoredProcedureOutputAsync(
+        string procedureName,
+        Action<SqlParameterCollection> parameters,
+        string outputParameterName,
+        CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(outputParameterName))
+            throw new ArgumentException("اسم بارامتر الإخراج مطلوب.", nameof(outputParameterName));
+
         using var cn = _factory.Create();
-        using var cmd = new SqlCommand(sql, cn)
+        using var cmd = new SqlCommand(procedureName, cn)
         {
-            CommandType = CommandType.Text,
+            CommandType = CommandType.StoredProcedure,
             CommandTimeout = 120
         };
-        parameters?.Invoke(cmd.Parameters);
+        parameters.Invoke(cmd.Parameters);
         await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
-        using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-        
-        if (!reader.HasRows)
-            return null;
-        
-        await reader.ReadAsync(cancellationToken).ConfigureAwait(false);
-        var obj = new T();
-        var props = typeof(T).GetProperties();
-        
-        for (int i = 0; i < reader.FieldCount; i++)
-        {
-            var fieldName = reader.GetName(i);
-            var prop = props.FirstOrDefault(p => 
-                string.Equals(p.Name, fieldName, StringComparison.OrdinalIgnoreCase));
-            
-            if (prop != null && !reader.IsDBNull(i))
-            {
-                try
-                {
-                    prop.SetValue(obj, reader.GetValue(i));
-                }
-                catch { /* Ignore conversion errors */ }
-            }
-        }
-        
-        return obj;
+        await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+
+        var parameter = cmd.Parameters.Cast<SqlParameter>().FirstOrDefault(p =>
+            string.Equals(p.ParameterName, outputParameterName.Trim(), StringComparison.OrdinalIgnoreCase));
+        return parameter?.Value;
     }
 }
