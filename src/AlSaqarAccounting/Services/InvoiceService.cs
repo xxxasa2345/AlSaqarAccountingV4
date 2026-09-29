@@ -35,7 +35,7 @@ public sealed class InvoiceService
             throw new ArgumentException("Customer name is required");
 
         // Start transaction
-        using var cn = new SqlConnection(_db._factory.ConnectionString);
+        using var cn = new SqlConnection(_db.ConnectionString);
         await cn.OpenAsync(cancellationToken);
         
         using var transaction = cn.BeginTransaction();
@@ -353,7 +353,7 @@ WHERE ID = @ID;";
             throw new ArgumentException("Supplier name is required");
 
         // Start transaction
-        using var cn = new SqlConnection(_db._factory.ConnectionString);
+        using var cn = new SqlConnection(_db.ConnectionString);
         await cn.OpenAsync(cancellationToken);
         
         using var transaction = cn.BeginTransaction();
@@ -430,29 +430,24 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
 
                 const string detailSql = @"
 INSERT INTO dbo.Order_PurchasesDetails (
-    Purchese_ID, SN, ItemID, ItemIDADD, BranchID, StoreID, ItemUnitID,
-    Quantity, LastCost, SmallUnitPrice, UnitPrice, TotalPrice, VAT,
-    NetUnitPrice, NetTotalPrice, VAT_Discount, ItemUnitType, IsPrint,
-    ItemNote, IsPrintCook, UnitNumber, Weight, Height, DetailsData
+    Purchese_ID, SN, ItemID, BranchID, StoreID, ItemUnitID, Quantity,
+    UnitPrice, TotalPrice, VAT, NetUnitPrice, NetTotalPrice, VAT_Discount,
+    ItemUnitType, Bounce, NoteItem, UnitNumber, SellPrice, DiscNum, DiscPercent
 )
 VALUES (
-    @Purchese_ID, @SN, @ItemID, @ItemIDADD, @BranchID, @StoreID, @ItemUnitID,
-    @Quantity, @LastCost, @SmallUnitPrice, @UnitPrice, @TotalPrice, @VAT,
-    @NetUnitPrice, @NetTotalPrice, @VAT_Discount, @ItemUnitType, @IsPrint,
-    @ItemNote, @IsPrintCook, @UnitNumber, @Weight, @Height, @DetailsData
+    @Purchese_ID, @SN, @ItemID, @BranchID, @StoreID, @ItemUnitID, @Quantity,
+    @UnitPrice, @TotalPrice, @VAT, @NetUnitPrice, @NetTotalPrice, @VAT_Discount,
+    @ItemUnitType, @Bounce, @NoteItem, @UnitNumber, @SellPrice, @DiscNum, @DiscPercent
 );";
 
                 using var detailCmd = new SqlCommand(detailSql, cn, transaction);
                 detailCmd.Parameters.Add("@Purchese_ID", SqlDbType.Int).Value = detail.Purchese_ID;
-                detailCmd.Parameters.Add("@SN", SqlDbType.Int).Value = (object)detail.SN ?? DBNull.Value;
+                detailCmd.Parameters.Add("@SN", SqlDbType.Int).Value = detail.SN;
                 detailCmd.Parameters.Add("@ItemID", SqlDbType.Int).Value = (object)detail.ItemID ?? DBNull.Value;
-                detailCmd.Parameters.Add("@ItemIDADD", SqlDbType.Int).Value = (object)detail.ItemIDADD ?? DBNull.Value;
                 detailCmd.Parameters.Add("@BranchID", SqlDbType.Int).Value = (object)detail.BranchID ?? DBNull.Value;
                 detailCmd.Parameters.Add("@StoreID", SqlDbType.Int).Value = (object)detail.StoreID ?? DBNull.Value;
                 detailCmd.Parameters.Add("@ItemUnitID", SqlDbType.Int).Value = (object)detail.ItemUnitID ?? DBNull.Value;
                 detailCmd.Parameters.Add("@Quantity", SqlDbType.Decimal).Value = (object)detail.Quantity ?? DBNull.Value;
-                detailCmd.Parameters.Add("@LastCost", SqlDbType.Decimal).Value = (object)detail.LastCost ?? DBNull.Value;
-                detailCmd.Parameters.Add("@SmallUnitPrice", SqlDbType.Decimal).Value = (object)detail.SmallUnitPrice ?? DBNull.Value;
                 detailCmd.Parameters.Add("@UnitPrice", SqlDbType.Decimal).Value = (object)detail.UnitPrice ?? DBNull.Value;
                 detailCmd.Parameters.Add("@TotalPrice", SqlDbType.Decimal).Value = (object)detail.TotalPrice ?? DBNull.Value;
                 detailCmd.Parameters.Add("@VAT", SqlDbType.Decimal).Value = (object)detail.VAT ?? DBNull.Value;
@@ -460,13 +455,12 @@ VALUES (
                 detailCmd.Parameters.Add("@NetTotalPrice", SqlDbType.Decimal).Value = (object)detail.NetTotalPrice ?? DBNull.Value;
                 detailCmd.Parameters.Add("@VAT_Discount", SqlDbType.Decimal).Value = (object)detail.VAT_Discount ?? DBNull.Value;
                 detailCmd.Parameters.Add("@ItemUnitType", SqlDbType.NVarChar, 100).Value = (object)detail.ItemUnitType ?? DBNull.Value;
-                detailCmd.Parameters.Add("@IsPrint", SqlDbType.Bit).Value = (object)detail.IsPrint ?? DBNull.Value;
-                detailCmd.Parameters.Add("@ItemNote", SqlDbType.NVarChar, 500).Value = (object)detail.ItemNote ?? DBNull.Value;
-                detailCmd.Parameters.Add("@IsPrintCook", SqlDbType.Bit).Value = (object)detail.IsPrintCook ?? DBNull.Value;
+                detailCmd.Parameters.Add("@Bounce", SqlDbType.Decimal).Value = (object)detail.Bounce ?? DBNull.Value;
+                detailCmd.Parameters.Add("@NoteItem", SqlDbType.NVarChar, 500).Value = (object)detail.NoteItem ?? DBNull.Value;
                 detailCmd.Parameters.Add("@UnitNumber", SqlDbType.Decimal).Value = (object)detail.UnitNumber ?? DBNull.Value;
-                detailCmd.Parameters.Add("@Weight", SqlDbType.Decimal).Value = (object)detail.Weight ?? DBNull.Value;
-                detailCmd.Parameters.Add("@Height", SqlDbType.Decimal).Value = (object)detail.Height ?? DBNull.Value;
-                detailCmd.Parameters.Add("@DetailsData", SqlDbType.NVarChar).Value = (object)detail.DetailsData ?? DBNull.Value;
+                detailCmd.Parameters.Add("@SellPrice", SqlDbType.Decimal).Value = (object)detail.SellPrice ?? DBNull.Value;
+                detailCmd.Parameters.Add("@DiscNum", SqlDbType.Decimal).Value = (object)detail.DiscNum ?? DBNull.Value;
+                detailCmd.Parameters.Add("@DiscPercent", SqlDbType.Decimal).Value = (object)detail.DiscPercent ?? DBNull.Value;
 
                 await detailCmd.ExecuteNonQueryAsync(cancellationToken);
             }
