@@ -13,6 +13,9 @@ public sealed class DbExecutor
 
     public DbExecutor(SqlConnectionFactory factory) => _factory = factory;
 
+    /// <summary>Connection string used for transactional operations that must share the factory configuration.</summary>
+    public string ConnectionString => _factory.ConnectionString;
+
     public async Task<DataTable> QueryAsync(
         string sql,
         Action<SqlParameterCollection>? parameters = null,
