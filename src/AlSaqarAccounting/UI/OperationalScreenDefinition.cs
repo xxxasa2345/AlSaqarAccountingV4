@@ -29,6 +29,7 @@ public static class OperationalScreenRegistry
             new OperationalScreenDefinition("المخازن", "المخازن", "FrmStores", "Account_Stores", null, false, "العملاء والموردون", "ID"),
             new OperationalScreenDefinition("الفروع", "الفروع", "FrmBranches", "Account_Branch", null, false, "العملاء والموردون", "ID"),
             new OperationalScreenDefinition("العقود", "العقود", "FrmContract", "Contract_Contract", null, false, "العقود", "ID"),
+            new OperationalScreenDefinition("الفواتير", "الفواتير", "InvoicesForm", null, null, true, "المبيعات والمشتريات", "ID"),
 
             // Operational screens whose concrete Forms are not all migrated yet.
             new OperationalScreenDefinition("المبيعات", "المبيعات", "FrmOrders", null, "Select_Order_Orders", true, "المبيعات والمشتريات", "ID"),
@@ -46,7 +47,7 @@ public static class OperationalScreenRegistry
 
         var value = screenName.Trim();
 
-        // Exact names first. This is important for screens such as "بونص العقود":
+        // Exact names first. This is important for child screens such as "بونص العقود":
         // a child screen must not accidentally inherit the parent "العقود" route.
         var exact = Definitions.FirstOrDefault(d =>
             string.Equals(value, d.MatchName, StringComparison.OrdinalIgnoreCase));
