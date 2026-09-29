@@ -82,7 +82,7 @@ public sealed class ScreenRouter
 
         // Migrated real screens (accounts tree, customers, suppliers, branches,
         // stores, salesmen, cost centers, projects, orders, purchases, receipts).
-        if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, out var realScreen) &&
+        if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) &&
             realScreen is not null)
         {
             using (realScreen)
