@@ -92,6 +92,50 @@ public static class RealScreenCatalog
                 new StoresService(CreateDb(cs)),
                 new CustSupService(CreateDb(cs))),
 
+            // التحويلات والجرد والمرتجعات وعروض الأسعار والضمانات — شاشات حقيقية مرتبطة بإجراءات GTSdb2026
+            ["FrmTransferToBranch"] = (cs, s, a) => new TransferToBranchForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["تحويل إلى فرع"] = (cs, s, a) => new TransferToBranchForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmTransferFromBranch"] = (cs, s, a) => new TransferFromBranchForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["تحويل من فرع"] = (cs, s, a) => new TransferFromBranchForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmStoreTransfer"] = (cs, s, a) => new StoreTransfersForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmStoreTransfers"] = (cs, s, a) => new StoreTransfersForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["تحويلات المخازن"] = (cs, s, a) => new StoreTransfersForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmOrderReturn"] = (cs, s, a) => new SalesReturnsForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["مرتجعات المبيعات"] = (cs, s, a) => new SalesReturnsForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmPurchasesReturn"] = (cs, s, a) => new PurchaseReturnsForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["مرتجعات المشتريات"] = (cs, s, a) => new PurchaseReturnsForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmPriceOffer"] = (cs, s, a) => new PriceOffersForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["عروض الأسعار"] = (cs, s, a) => new PriceOffersForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmGuarantee"] = (cs, s, a) => new GuaranteesForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["ضمانات العقود"] = (cs, s, a) => new GuaranteesForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmGard"] = (cs, s, a) => new InventoryCountForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["الجرد"] = (cs, s, a) => new InventoryCountForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["كميات المخزون"] = (cs, s, a) => new InventoryStockForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmInventoryStock"] = (cs, s, a) => new InventoryStockForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["بونص العقود"] = (cs, s, a) => new ContractBounceForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["FrmContractBounce"] = (cs, s, a) => new ContractBounceForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+
             // السندات — سند جديد/حذف تشغيلية عبر Insert_Tran_Tran
             ["FrmReceipts"] = (cs, s, a) => new ReceiptsForm(
                 s, a, new VouchersService(CreateDb(cs))),
