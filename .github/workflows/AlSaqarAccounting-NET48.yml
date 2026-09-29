@@ -44,8 +44,26 @@ jobs:
           New-Item -ItemType Directory -Force -Path $out | Out-Null
           Copy-Item 'src\AlSaqarAccounting\bin\Release\net48\*' $out -Recurse -Force
           $config = Join-Path $out 'appsettings.json'
-          if (Test-Path $config) { Remove-Item $config -Force }
+          if (-not (Test-Path $config)) { throw "Package config missing: $config" }
           Compress-Archive -Path "$out\*" -DestinationPath "$env:GITHUB_WORKSPACE\AlSaqarAccounting-NET48.zip" -Force
+
+      - name: Verify package contents
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:GITHUB_WORKSPACE 'AlSaqarAccounting-NET48.zip'
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($zip)
+          try {
+            $required = @('AlSaqarAccounting.exe', 'appsettings.json')
+            foreach ($file in $required) {
+              if (-not ($archive.Entries | Where-Object { $_.FullName -eq $file })) {
+                throw "Required file missing from package: $file"
+              }
+            }
+          }
+          finally {
+            $archive.Dispose()
+          }
 
       - name: Upload Release Artifact
         uses: actions/upload-artifact@v4
