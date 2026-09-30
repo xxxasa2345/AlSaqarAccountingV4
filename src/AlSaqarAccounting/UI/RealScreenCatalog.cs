@@ -86,7 +86,15 @@ public static class RealScreenCatalog
             ["بونص العقود"] = (cs, s, a) => new ContractBounceForm(s, a, new InventoryOperationsService(CreateDb(cs))),
             ["FrmContractBounce"] = (cs, s, a) => new ContractBounceForm(s, a, new InventoryOperationsService(CreateDb(cs))),
             ["FrmReceipts"] = (cs, s, a) => new ReceiptsForm(s, a, new VouchersService(CreateDb(cs))),
-            ["السندات"] = (cs, s, a) => new ReceiptsForm(s, a, new VouchersService(CreateDb(cs)))
+            ["السندات"] = (cs, s, a) => new ReceiptsForm(s, a, new VouchersService(CreateDb(cs))),
+            ["الطابعات"] = (cs, s, a) => new PrinterSettingsForm(s, a, new PrinterSettingsService(CreateDb(cs))),
+            ["الطابعة"] = (cs, s, a) => new PrinterSettingsForm(s, a, new PrinterSettingsService(CreateDb(cs))),
+            ["إعدادات الطابعات"] = (cs, s, a) => new PrinterSettingsForm(s, a, new PrinterSettingsService(CreateDb(cs))),
+            ["إعدادات طابعة الكاشير"] = (cs, s, a) => new PrinterSettingsForm(s, a, new PrinterSettingsService(CreateDb(cs))),
+            ["طابعات الكاشير"] = (cs, s, a) => new PrinterSettingsForm(s, a, new PrinterSettingsService(CreateDb(cs))),
+            ["طابعات المطبخ"] = (cs, s, a) => new PrinterSettingsForm(s, a, new PrinterSettingsService(CreateDb(cs))),
+            ["طبعات المطبخ"] = (cs, s, a) => new PrinterSettingsForm(s, a, new PrinterSettingsService(CreateDb(cs))),
+            ["إعدادات طابعات المطبخ"] = (cs, s, a) => new PrinterSettingsForm(s, a, new PrinterSettingsService(CreateDb(cs)))
         };
 
     public static bool TryCreate(string? screenName, string connectionString, AppSession session, ScreenAccess access, out Form? form)
