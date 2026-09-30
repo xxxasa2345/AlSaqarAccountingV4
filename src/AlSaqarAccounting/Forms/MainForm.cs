@@ -154,7 +154,7 @@ public sealed class MainForm : Form
         Shown += async (_, _) => await LoadSecurityAsync();
         _search.TextChanged += (_, _) => RebuildModuleMenu(_search.Text);
         _clock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-        var timer = new Timer { Interval = 1000 };
+        var timer = new System.Windows.Forms.Timer { Interval = 1000 };
         timer.Tick += (_, _) => _clock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         timer.Start();
         FormClosed += (_, _) => timer.Dispose();
