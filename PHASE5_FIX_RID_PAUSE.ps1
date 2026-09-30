@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 if ([string]::IsNullOrWhiteSpace($Root)) { $Root = (Get-Location).Path }
 $Root = (Resolve-Path $Root).Path
 $Solution = Join-Path $Root 'AlSaqarAccounting.sln'
-$BuildDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$BuildDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
 $PublishDir = Join-Path $Root 'publish'
 $LogFile = Join-Path $Root 'PHASE5_FIX_RID.log'
 
