@@ -58,7 +58,7 @@ public sealed class RealSalesInvoiceForm : Form
     private readonly List<Order_OrdersDetails> _lines = new();
     private DataTable? _customers;
     private DataTable? _items;
-    private DataTable? _stores;
+    private DataTable? _storesData;
     private string? _customerId;
     private string? _customerName;
     private string? _customerPhone;
@@ -238,7 +238,7 @@ public sealed class RealSalesInvoiceForm : Form
             _vatRate = settings.VatRate;
             _customers = customerTask.Result;
             _items = itemTask.Result;
-            _stores = storeTask.Result;
+            _storesData = storeTask.Result;
 
             _customerId = FindColumn(_customers, "ID", "SN", "AccountID");
             _customerName = FindColumn(_customers, "Name", "CustSuppName", "Account_Name", "CustomerName");
@@ -256,7 +256,7 @@ public sealed class RealSalesInvoiceForm : Form
 
             Bind(_customer, _customers, _customerId, _customerName, true);
             Bind(_item, _items, _itemId, _itemName, true);
-            Bind(_store, _stores, _storeId, _storeName, false);
+            Bind(_store, _storesData!, _storeId, _storeName, false);
 
             SelectStore(settings.DefaultStoreId);
             _date.Value = DateTime.Today;
@@ -511,7 +511,7 @@ public sealed class RealSalesInvoiceForm : Form
     }
 
     private string ItemText(int? id) => Value(FindRow(_items, _itemId, id ?? -1), _itemName) ?? string.Empty;
-    private string StoreText(int? id) => Value(FindRow(_stores, _storeId, id ?? -1), _storeName) ?? string.Empty;
+    private string StoreText(int? id) => Value(FindRow(_storesData, _storeId, id ?? -1), _storeName) ?? string.Empty;
 
     private static DataRow? FindRow(DataTable? table, string? idColumn, int id)
     {
