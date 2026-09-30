@@ -8,7 +8,7 @@ $Root = (Resolve-Path -LiteralPath $Root -ErrorAction Stop).Path
 
 $csproj = Join-Path $Root 'src\AlSaqarAccounting\AlSaqarAccounting.csproj'
 $sln = Join-Path $Root 'AlSaqarAccounting.sln'
-$output = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$output = Join-Path $Root 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
 if (-not (Test-Path $csproj)) { throw "Missing project: $csproj" }
 if (-not (Test-Path $sln)) { throw "Missing solution: $sln" }
 
