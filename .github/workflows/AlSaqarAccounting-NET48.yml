@@ -33,8 +33,9 @@ jobs:
       - name: Verify output
         shell: pwsh
         run: |
-          $exe = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Release\net48\AlSaqarAccounting.exe'
-          $config = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Release\net48\appsettings.json'
+          $output = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
+          $exe = Join-Path $output 'AlSaqarAccounting.exe'
+          $config = Join-Path $output 'appsettings.json'
           if (-not (Test-Path $exe)) { throw "EXE not found: $exe" }
           if (-not (Test-Path $config)) { throw "appsettings.json not found: $config" }
           Write-Host "EXE: $exe"
@@ -43,9 +44,10 @@ jobs:
       - name: Package Release
         shell: pwsh
         run: |
+          $output = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
           $out = Join-Path $env:GITHUB_WORKSPACE 'release\AlSaqarAccounting-NET48'
           New-Item -ItemType Directory -Force -Path $out | Out-Null
-          Copy-Item 'src\AlSaqarAccounting\bin\Release\net48\*' $out -Recurse -Force
+          Copy-Item "$output\*" $out -Recurse -Force
           $config = Join-Path $out 'appsettings.json'
           if (-not (Test-Path $config)) { throw "Package config missing: $config" }
           Compress-Archive -Path "$out\*" -DestinationPath "$env:GITHUB_WORKSPACE\AlSaqarAccounting-NET48.zip" -Force
@@ -80,5 +82,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload 'محاسبة' 'AlSaqarAccounting-NET48.zip' --repo '${{ github.repository }}' --clobber
+          gh release view 'محاسبة' --repo '${{ github.repository }}' 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create 'محاسبة' 'AlSaqarAccounting-NET48.zip' --repo '${{ github.repository }}' --target '${{ github.sha }}' --title 'محاسبة' --notes 'AlSaqarAccounting .NET Framework 4.8 release package.'
+          } else {
+            gh release upload 'محاسبة' 'AlSaqarAccounting-NET48.zip' --repo '${{ github.repository }}' --clobber
+          }
           Write-Host 'Release asset uploaded successfully.'
