@@ -167,7 +167,7 @@ git push origin feature/add-new-feature
 
 2. **المشروع ينطلق بدون أخطاء**
    ```bash
-   شغّل `src\AlSaqarAccounting\bin\Release\net48\AlSaqarAccounting.exe`
+   شغّل `src\AlSaqarAccounting\bin\Any CPU\Release\net48\AlSaqarAccounting.exe`
    ```
 
 3. **الالتزام برعاية معايير الكود**
