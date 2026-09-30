@@ -6,8 +6,10 @@ using AlSaqarAccounting.Forms;
 namespace AlSaqarAccounting.UI;
 
 /// <summary>
-/// Routes a permitted screen to its concrete implementation. Generic catalog
-/// screens remain a compatibility fallback, not the primary ERP implementation.
+/// Routes a permitted screen to its concrete implementation. Specialized ERP
+/// Forms are always preferred. If a migrated Form is not registered yet, the
+/// router first tries a matching real Form type and only then uses the SQL-backed
+/// schema/procedure screen as the compatibility last mile.
 /// </summary>
 public sealed class ScreenRouter
 {
@@ -50,7 +52,6 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // Concrete inventory item screen: original Get_All_Items / Insert_Items.
         if (string.Equals(access.ScreenName, "FrmItems", StringComparison.OrdinalIgnoreCase))
         {
             var service = new ItemsService(db);
@@ -60,7 +61,6 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // Legacy invoice screen remains available for the Arabic "الفواتير" entry.
         if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
         {
@@ -80,8 +80,7 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // Migrated real screens (accounts tree, customers, suppliers, branches,
-        // stores, salesmen, cost centers, projects, orders, purchases, receipts).
+        // First: explicit migrated screen catalog.
         if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) &&
             realScreen is not null)
         {
@@ -93,9 +92,26 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // أي شاشة لم ترحل بعد إلى Form متخصص تمر الآن إلى Form حقيقي
-        // schema-driven مبني على مصدرها الفعلي في SQL Server، وليس إلى
-        // OperationalDataScreen/CatalogDataScreen القديمة.
+        // Second: a concrete Form whose class name matches the original screen name.
+        // This is deliberately attempted before the generic DB-backed form so a newly
+        // migrated screen cannot accidentally be swallowed by the fallback.
+        var type = FindFormType(access.ScreenName);
+        if (type is not null && type != typeof(DynamicErpScreenForm))
+        {
+            if (TryCreateForm(type, access, out var form, out var formError) && form is not null)
+            {
+                using (form)
+                {
+                    form.StartPosition = FormStartPosition.CenterParent;
+                    form.ShowDialog(owner);
+                }
+                return true;
+            }
+            message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
+        }
+
+        // Third: real SQL-backed compatibility screen. ScreenEntityMap contains
+        // the original Arabic labels and known Order_* / Account_* / Item_* entities.
         var dynamicService = new DynamicErpScreenService(db);
         try
         {
@@ -113,26 +129,10 @@ public sealed class ScreenRouter
             message = ex.GetBaseException().Message;
         }
 
-        var type = FindFormType(access.ScreenName);
-        if (type is not null)
-        {
-            if (TryCreateForm(type, access, out var form, out var formError) && form is not null)
-            {
-                using (form)
-                {
-                    form.StartPosition = FormStartPosition.CenterParent;
-                    form.ShowDialog(owner);
-                }
-                return true;
-            }
-            message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
-        }
-
         message = string.IsNullOrWhiteSpace(message)
             ? "تعذر إنشاء الشاشة من قاعدة البيانات."
             : message;
         return false;
-
     }
 
     private static bool TryResolveItemMaster(string screenName, out string tableName, out string displayName)
