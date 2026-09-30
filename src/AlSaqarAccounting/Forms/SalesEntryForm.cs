@@ -300,9 +300,21 @@ public sealed class SalesEntryForm : Form
             if (!string.IsNullOrWhiteSpace(name))
                 names.Add(name);
         }
-        combo.AutoCompleteSource = AutoCompleteSource.CustomSource;
-        combo.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-        combo.AutoCompleteCustomSource = names;
+        // AutoComplete is only valid for editable DropDown/DropDownList
+        // when the source/mode combination is supported by WinForms.
+        // Store is a DropDownList and must remain selection-only.
+        if (combo.DropDownStyle != ComboBoxStyle.DropDownList)
+        {
+            combo.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            combo.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            combo.AutoCompleteCustomSource = names;
+        }
+        else
+        {
+            combo.AutoCompleteMode = AutoCompleteMode.None;
+            combo.AutoCompleteSource = AutoCompleteSource.None;
+            combo.AutoCompleteCustomSource = null;
+        }
     }
 
     private static string? FindColumn(DataTable table, params string[] names)

@@ -6,8 +6,10 @@ using AlSaqarAccounting.Forms;
 namespace AlSaqarAccounting.UI;
 
 /// <summary>
-/// Routes a permitted screen to its concrete implementation. Generic catalog
-/// screens remain a compatibility fallback, not the primary ERP implementation.
+/// Routes a permitted screen to its concrete implementation. Specialized ERP
+/// Forms are always preferred. If a migrated Form is not registered yet, the
+/// router first tries a matching real Form type and only then uses the SQL-backed
+/// schema/procedure screen as the compatibility last mile.
 /// </summary>
 public sealed class ScreenRouter
 {
@@ -50,7 +52,6 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // Concrete inventory item screen: original Get_All_Items / Insert_Items.
         if (string.Equals(access.ScreenName, "FrmItems", StringComparison.OrdinalIgnoreCase))
         {
             var service = new ItemsService(db);
@@ -60,7 +61,6 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // Legacy invoice screen remains available for the Arabic "الفواتير" entry.
         if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
         {
@@ -80,8 +80,7 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // Migrated real screens (accounts tree, customers, suppliers, branches,
-        // stores, salesmen, cost centers, projects, orders, purchases, receipts).
+        // First: explicit migrated screen catalog.
         if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) &&
             realScreen is not null)
         {
@@ -93,35 +92,11 @@ public sealed class ScreenRouter
             return true;
         }
 
-        if (OperationalScreenRegistry.TryResolve(access.ScreenName, out var operational))
-        {
-            var mappedType = operational.TargetFormName is null
-                ? null
-                : FindFormType(operational.TargetFormName);
-
-            if (mappedType is not null &&
-                TryCreateForm(mappedType, access, out var mappedForm, out _) &&
-                mappedForm is not null)
-            {
-                using (mappedForm)
-                {
-                    mappedForm.StartPosition = FormStartPosition.CenterParent;
-                    mappedForm.ShowDialog(owner);
-                }
-                return true;
-            }
-
-            using var operationalScreen = new OperationalDataScreen(
-                _connectionString,
-                operational,
-                access,
-                _session.BranchId);
-            operationalScreen.ShowDialog(owner);
-            return true;
-        }
-
+        // Second: a concrete Form whose class name matches the original screen name.
+        // This is deliberately attempted before the generic DB-backed form so a newly
+        // migrated screen cannot accidentally be swallowed by the fallback.
         var type = FindFormType(access.ScreenName);
-        if (type is not null)
+        if (type is not null && type != typeof(DynamicErpScreenForm))
         {
             if (TryCreateForm(type, access, out var form, out var formError) && form is not null)
             {
@@ -135,10 +110,29 @@ public sealed class ScreenRouter
             message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
         }
 
-        var entity = ScreenEntityMap.Resolve(access.ScreenName);
-        using var fallback = new CatalogDataScreen(_connectionString, access.ScreenName, entity, access);
-        fallback.ShowDialog(owner);
-        return true;
+        // Third: real SQL-backed compatibility screen. ScreenEntityMap contains
+        // the original Arabic labels and known Order_* / Account_* / Item_* entities.
+        var dynamicService = new DynamicErpScreenService(db);
+        try
+        {
+            using var dynamicScreen = new DynamicErpScreenForm(
+                _session,
+                access,
+                dynamicService,
+                access.ScreenName);
+            dynamicScreen.StartPosition = FormStartPosition.CenterParent;
+            dynamicScreen.ShowDialog(owner);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            message = ex.GetBaseException().Message;
+        }
+
+        message = string.IsNullOrWhiteSpace(message)
+            ? "تعذر إنشاء الشاشة من قاعدة البيانات."
+            : message;
+        return false;
     }
 
     private static bool TryResolveItemMaster(string screenName, out string tableName, out string displayName)

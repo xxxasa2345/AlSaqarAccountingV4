@@ -10,6 +10,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -70,3 +73,12 @@ jobs:
         with:
           name: AlSaqarAccounting-NET48
           path: AlSaqarAccounting-NET48.zip
+
+      - name: Attach package to محاسبة release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload 'محاسبة' 'AlSaqarAccounting-NET48.zip' --repo '${{ github.repository }}' --clobber
+          Write-Host 'Release asset uploaded successfully.'
