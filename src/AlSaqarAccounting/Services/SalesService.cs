@@ -26,6 +26,45 @@ public sealed class SalesService
     public Task<DataTable> ListCustomersAsync(int? branchId, CancellationToken cancellationToken = default)
         => ExecuteBranchProcedureAsync("dbo.Select_AccountCustomer", branchId, cancellationToken);
 
+    public async Task<SalesEntrySettings> GetEntrySettingsAsync(
+        int branchId,
+        CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            SELECT TOP (1)
+                IsVat,
+                PerVat,
+                StoreID
+            FROM dbo.TblSetting
+            WHERE ID = @BranchID;
+            """;
+
+        using var cn = new SqlConnection(_db.ConnectionString);
+        using var cmd = new SqlCommand(sql, cn)
+        {
+            CommandTimeout = 60
+        };
+        cmd.Parameters.Add("@BranchID", SqlDbType.Int).Value = branchId;
+
+        await cn.OpenAsync(cancellationToken);
+        using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+
+        if (!await reader.ReadAsync(cancellationToken))
+            return new SalesEntrySettings();
+
+        var enabled = !reader.IsDBNull(0) && reader.GetBoolean(0);
+        decimal rate = reader.IsDBNull(1) ? 0m : reader.GetDecimal(1);
+        if (rate > 1m)
+            rate /= 100m;
+
+        return new SalesEntrySettings
+        {
+            VatEnabled = enabled,
+            VatRate = enabled ? (rate > 0m ? rate : 0.15m) : 0m,
+            DefaultStoreId = reader.IsDBNull(2) ? null : reader.GetInt32(2)
+        };
+    }
+
     /// <summary>Inserts a full sales invoice (header + lines) through the
     /// original 61-parameter procedure of GTSdb2026.</summary>
     public async Task CreateAsync(
