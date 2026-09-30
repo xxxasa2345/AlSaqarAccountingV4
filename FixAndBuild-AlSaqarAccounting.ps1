@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $SolutionFile = Join-Path $ProjectRoot 'AlSaqarAccounting.sln'
 $ProjectFile = Join-Path $ProjectRoot 'src\AlSaqarAccounting\AlSaqarAccounting.csproj'
-$OutputDir = Join-Path $ProjectRoot 'src\AlSaqarAccounting\bin\Release\net48'
+$OutputDir = Join-Path $ProjectRoot 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
 
 function Find-MSBuild {
     $cmd = Get-Command msbuild -ErrorAction SilentlyContinue
