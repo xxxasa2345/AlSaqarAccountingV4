@@ -3,12 +3,6 @@ using System.Text;
 
 namespace AlSaqarAccounting.UI;
 
-/// <summary>
-/// Maps the original screen identifiers and Arabic labels to the real SQL entities
-/// already present in GTSdb2026. This is a compatibility map for screens whose
-/// original Form implementation has not yet been migrated; it never creates a
-/// database object or changes the schema.
-/// </summary>
 public static class ScreenEntityMap
 {
     private static readonly Dictionary<string, string> Exact =
@@ -59,7 +53,6 @@ public static class ScreenEntityMap
             ["FrmTable"] = "Restaurant_Table",
             ["FrmZatcaIntgration"] = "ResultElectronicInvoiceXmls",
 
-            // Arabic labels used by the original User_Screens table.
             ["الأصناف"] = "Item_Items",
             ["الصنف"] = "Item_Items",
             ["الوحدات"] = "Item_Unit",
@@ -102,20 +95,30 @@ public static class ScreenEntityMap
             ["الجرد"] = "Order_Gard",
             ["كميات المخزون"] = "ItemQuantity",
             ["الكميات الافتتاحية"] = "Order_OpenQuantity",
-            ["بونص العقود"] = "Contract_Bounce"
+            ["بونص العقود"] = "Contract_Bounce",
+
+            ["الطابعات"] = "Printers",
+            ["الطابعة"] = "Printers",
+            ["إعدادات الطابعات"] = "Printers",
+            ["إعدادات طابعة الكاشير"] = "PrintersCook",
+            ["طابعات الكاشير"] = "PrintersCook",
+            ["طابعات المطبخ"] = "PrintersCook",
+            ["طبعات المطبخ"] = "PrintersCook",
+            ["إعدادات طابعات المطبخ"] = "PrintersCook"
         };
 
     public static string? Resolve(string screenName)
     {
-        if (string.IsNullOrWhiteSpace(screenName))
-            return null;
-
+        if (string.IsNullOrWhiteSpace(screenName)) return null;
         var raw = screenName.Trim();
-        if (Exact.TryGetValue(raw, out var table))
-            return table;
-
+        if (Exact.TryGetValue(raw, out var table)) return table;
         var n = Normalize(raw);
 
+        if (n.Contains("اعداداتطابعةالكاشير", StringComparison.OrdinalIgnoreCase) ||
+            n.Contains("طابعاتالكاشير", StringComparison.OrdinalIgnoreCase) ||
+            n.Contains("طابعاتالمطبخ", StringComparison.OrdinalIgnoreCase) ||
+            n.Contains("طبعاتالمطبخ", StringComparison.OrdinalIgnoreCase)) return "PrintersCook";
+        if (n.Contains("طابعات", StringComparison.OrdinalIgnoreCase) || n.Contains("طابعة", StringComparison.OrdinalIgnoreCase)) return "Printers";
         if (n.Contains("اصناف", StringComparison.OrdinalIgnoreCase) || n.Contains("الصنف", StringComparison.OrdinalIgnoreCase)) return "Item_Items";
         if (n.Contains("وحدات", StringComparison.OrdinalIgnoreCase) || n.Contains("الوحدات", StringComparison.OrdinalIgnoreCase)) return "Item_Unit";
         if (n.Contains("شركة", StringComparison.OrdinalIgnoreCase) || n.Contains("شركات", StringComparison.OrdinalIgnoreCase)) return "Item_Company";
@@ -142,7 +145,6 @@ public static class ScreenEntityMap
         if (n.Contains("مبيعات")) return "Order_Orders";
         if (n.Contains("جرد")) return "Order_Gard";
         if (n.Contains("افتتاح") && n.Contains("كم")) return "Order_OpenQuantity";
-
         return null;
     }
 
@@ -153,12 +155,7 @@ public static class ScreenEntityMap
         foreach (var ch in form)
         {
             var category = CharUnicodeInfo.GetUnicodeCategory(ch);
-            if (category == UnicodeCategory.Format ||
-                category == UnicodeCategory.NonSpacingMark ||
-                category == UnicodeCategory.SpacingCombiningMark ||
-                char.IsWhiteSpace(ch))
-                continue;
-
+            if (category == UnicodeCategory.Format || category == UnicodeCategory.NonSpacingMark || category == UnicodeCategory.SpacingCombiningMark || char.IsWhiteSpace(ch)) continue;
             builder.Append(ch switch
             {
                 'أ' or 'إ' or 'آ' or 'ٱ' => 'ا',
