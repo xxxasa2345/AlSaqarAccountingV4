@@ -136,6 +136,19 @@ public static class RealScreenCatalog
             ["FrmContractBounce"] = (cs, s, a) => new ContractBounceForm(
                 s, a, new InventoryOperationsService(CreateDb(cs))),
 
+            // الكميات الافتتاحية — CRUD فعلي عبر Insert/Update/Delete_OpenQuantity + Items_OpenQuantity
+            ["FrmOpenQuantity"] = (cs, s, a) => new OpenQuantitiesForm(
+                s, a, new OpenQuantityService(CreateDb(cs))),
+            ["الكميات الافتتاحية"] = (cs, s, a) => new OpenQuantitiesForm(
+                s, a, new OpenQuantityService(CreateDb(cs))),
+            ["كميات افتتاحية"] = (cs, s, a) => new OpenQuantitiesForm(
+                s, a, new OpenQuantityService(CreateDb(cs))),
+
+            // تسوية الجرد بالنقص — قراءة وطباعة بعقد موثق
+            ["FrmInventorySettlementMinus"] = (cs, s, a) => new InventorySettlementMinusForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["تسوية جرد بالنقص"] = (cs, s, a) => new InventorySettlementMinusForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
             // السندات — سند جديد/حذف تشغيلية عبر Insert_Tran_Tran
             ["FrmReceipts"] = (cs, s, a) => new ReceiptsForm(
                 s, a, new VouchersService(CreateDb(cs))),
