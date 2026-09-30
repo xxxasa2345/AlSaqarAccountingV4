@@ -176,23 +176,6 @@ ORDER BY SN;",
             cancellationToken);
     }
 
-    public Task<DataTable> ListInventorySettlementMinusAsync(int? branchId, CancellationToken cancellationToken = default)
-        => ExecuteBranchProcedureAsync(
-            "dbo.Select_Order_InventorySettlementMinus",
-            branchId,
-            null,
-            cancellationToken);
-
-    public Task<DataTable> PrintInventorySettlementMinusAsync(
-        int id,
-        int? branchId,
-        CancellationToken cancellationToken = default)
-        => DocumentPrintAsync(
-            "dbo.Print_Order_InventorySettlementMinus",
-            id,
-            branchId,
-            cancellationToken);
-
     public Task<DataTable> GetInventoryCountDetailsAsync(int id, CancellationToken cancellationToken = default)
         => _db.ExecuteStoredProcedureAsync(
             "dbo.Select_OrderGard",
