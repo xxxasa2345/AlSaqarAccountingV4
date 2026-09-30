@@ -18,7 +18,7 @@ $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Solution = Join-Path $Root 'AlSaqarAccounting.sln'
 $Project = Join-Path $Root 'src\AlSaqarAccounting\AlSaqarAccounting.csproj'
 $Config = Join-Path $Root 'src\AlSaqarAccounting\appsettings.json'
-$BuildDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$BuildDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
 $PublishDir = Join-Path $Root 'publish'
 $BackupDir = Join-Path $Root 'backup\installer'
 
