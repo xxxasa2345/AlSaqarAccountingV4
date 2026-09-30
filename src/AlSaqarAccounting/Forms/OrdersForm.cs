@@ -35,7 +35,7 @@ public sealed class OrdersForm : BrowseScreenBase
     {
         AddButton(toolbar, "فاتورة جديدة", Access.AllowSave, async () =>
         {
-            using var form = new RealSalesInvoiceForm(Session, Access, _sales, _stores);
+            using var form = new RealSalesInvoiceFormFixed(Session, Access, _sales, _stores);
             form.ShowDialog(this);
             if (form.Saved)
                 await ReloadAsync();
