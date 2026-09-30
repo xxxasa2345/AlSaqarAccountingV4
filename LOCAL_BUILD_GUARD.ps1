@@ -75,7 +75,7 @@ try {
         Tee-Object -FilePath $Log -Append
     if ($LASTEXITCODE -ne 0) { throw "Build فشل. راجع $Log" }
 
-    $exe = Join-Path $Root "src\AlSaqarAccounting\bin\Release\net48\AlSaqarAccounting.exe"
+    $exe = Join-Path $Root "src\AlSaqarAccounting\bin\Any CPU\Release\net48\AlSaqarAccounting.exe"
     if (-not (Test-Path -LiteralPath $exe)) { throw "تم البناء لكن EXE غير موجود: $exe" }
 
     Write-Host ""
