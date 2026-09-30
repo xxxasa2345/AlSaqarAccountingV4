@@ -20,6 +20,18 @@ public static class RealScreenCatalog
     private static readonly Dictionary<string, ScreenFactory> Factories =
         new(StringComparer.OrdinalIgnoreCase)
         {
+            // أسماء القائمة العربية التي يجب أن تصل مباشرة إلى Forms الحقيقية.
+            // هذه الإدخالات تمنع سقوط الشاشة إلى OperationalDataScreen.
+            ["الأصناف"] = (cs, s, a) => new ItemsForm(
+                s, a, new ItemsService(CreateDb(cs))),
+            ["الوحدات"] = (cs, s, a) => new ItemUnitForm(
+                s, a, new ItemUnitService(CreateDb(cs))),
+            ["الشركات"] = (cs, s, a) => new ItemMasterForm(
+                s, a, new ItemMasterService(CreateDb(cs)), "Item_Company", "الشركات"),
+            ["الفئات"] = (cs, s, a) => new ItemMasterForm(
+                s, a, new ItemMasterService(CreateDb(cs)), "Item_Class", "الفئات"),
+            ["المجموعات"] = (cs, s, a) => new ItemMasterForm(
+                s, a, new ItemMasterService(CreateDb(cs)), "Item_Groups", "المجموعات"),
             // شجرة الحسابات — إضافة/تعديل/حذف تشغيلية
             ["FrmAccountTree"] = (cs, s, a) => new AccountsTreeForm(
                 s, a, new AccountsTreeService(CreateDb(cs))),
@@ -64,6 +76,27 @@ public static class RealScreenCatalog
             ["مراكز التكلفة"] = (cs, s, a) => new CostCentersForm(
                 s, a, new DocumentsService(CreateDb(cs))),
 
+            // العقود — إدارة حقيقية عبر ContractService
+            ["FrmContract"] = (cs, s, a) => new ContractsForm(
+                s, a, new ContractService(CreateDb(cs))),
+            ["العقود"] = (cs, s, a) => new ContractsForm(
+                s, a, new ContractService(CreateDb(cs))),
+
+            // المندوبون/المستودعات — أسماء بديلة مستخدمة في القائمة
+            ["المندوبين"] = (cs, s, a) => new SalesMenForm(
+                s, a, new SalesManService(CreateDb(cs))),
+            ["المندوبون"] = (cs, s, a) => new SalesMenForm(
+                s, a, new SalesManService(CreateDb(cs))),
+            ["المستودعات"] = (cs, s, a) => new StoresForm(
+                s, a, new StoresService(CreateDb(cs))),
+
+            // الكاشير — شاشة نقطة بيع فعلية
+            ["الكاشير"] = (cs, s, a) => new CashierForm(
+                s, a,
+                new CashierService(CreateDb(cs)),
+                new ItemsService(CreateDb(cs)),
+                new CustomerService(CreateDb(cs))),
+
             // المشاريع
             ["FrmProjects"] = (cs, s, a) => new ProjectsForm(
                 s, a, new DocumentsService(CreateDb(cs))),
@@ -92,6 +125,27 @@ public static class RealScreenCatalog
                 new StoresService(CreateDb(cs)),
                 new CustSupService(CreateDb(cs))),
 
+            // مرادفات القائمة للعمليات المستندية
+            ["طلب التحويل إلى فرع"] = (cs, s, a) => new TransferToBranchForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["طلب الاستقبال من فرع"] = (cs, s, a) => new TransferFromBranchForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["طلبات التحويل للفروع"] = (cs, s, a) => new StoreTransfersForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["عروض أسعار"] = (cs, s, a) => new PriceOffersForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["مرتجعات المبيعات بفاتورة"] = (cs, s, a) => new SalesReturnsForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["مرتجعات المبيعات بدون فاتورة"] = (cs, s, a) => new SalesReturnsForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["مرتجعات المشتريات بفاتورة"] = (cs, s, a) => new PurchaseReturnsForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["مرتجعات المشتريات بدون فاتورة"] = (cs, s, a) => new PurchaseReturnsForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["تسوية الجرد بالنقص"] = (cs, s, a) => new InventorySettlementMinusForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+            ["الكميات الافتتاحية"] = (cs, s, a) => new OpenQuantitiesForm(
+                s, a, new OpenQuantityService(CreateDb(cs))),
             // التحويلات والجرد والمرتجعات وعروض الأسعار والضمانات — شاشات حقيقية مرتبطة بإجراءات GTSdb2026
             ["FrmTransferToBranch"] = (cs, s, a) => new TransferToBranchForm(
                 s, a, new InventoryOperationsService(CreateDb(cs))),
