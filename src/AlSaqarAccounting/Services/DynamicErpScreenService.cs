@@ -28,6 +28,10 @@ public sealed class DynamicErpScreenService
         if (!string.IsNullOrWhiteSpace(table) && await TableExistsAsync(table, cancellationToken))
             return await BuildTableDefinitionAsync(screenName.Trim(), table, cancellationToken);
 
+        var inferredTable = await FindTableByScreenNameAsync(screenName.Trim(), cancellationToken);
+        if (!string.IsNullOrWhiteSpace(inferredTable))
+            return await BuildTableDefinitionAsync(screenName.Trim(), inferredTable!, cancellationToken);
+
         var procedure = await FindSelectProcedureAsync(screenName.Trim(), cancellationToken);
         if (!string.IsNullOrWhiteSpace(procedure.Name))
             return new DynamicErpDefinition(
