@@ -83,8 +83,7 @@ public sealed class OpenQuantitiesForm : ProcedureDocumentBrowseForm
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر حذف المستند:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر حذف المستند:\r\n" + ex.GetBaseException().Message,
                 "الكميات الافتتاحية", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
