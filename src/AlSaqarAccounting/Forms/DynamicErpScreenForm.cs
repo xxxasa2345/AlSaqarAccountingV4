@@ -350,8 +350,7 @@ public sealed class DynamicErpScreenForm : Form
         catch (Exception ex)
         {
             MessageBox.Show(this,
-                "تعذر الحفظ:
-" + ex.GetBaseException().Message,
+                "تعذر الحفظ:\r\n" + ex.GetBaseException().Message,
                 "حفظ",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -390,8 +389,7 @@ public sealed class DynamicErpScreenForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر الحذف:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر الحذف:\r\n" + ex.GetBaseException().Message,
                 "حذف", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
