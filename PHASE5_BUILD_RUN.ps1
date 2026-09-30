@@ -5,7 +5,7 @@ param([switch]$Run)
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Solution = Join-Path $Root 'AlSaqarAccounting.sln'
-$OutputDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$OutputDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
 $PublishDir = Join-Path $Root 'publish'
 
 function Find-MSBuild {
