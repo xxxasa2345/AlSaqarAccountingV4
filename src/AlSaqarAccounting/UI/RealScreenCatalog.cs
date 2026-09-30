@@ -27,7 +27,6 @@ public static class RealScreenCatalog
             ["الشركات"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Company", "الشركات"),
             ["الفئات"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Class", "الفئات"),
             ["المجموعات"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Groups", "المجموعات"),
-
             ["FrmAccountTree"] = (cs, s, a) => new AccountsTreeForm(s, a, new AccountsTreeService(CreateDb(cs))),
             ["شجرة الحسابات"] = (cs, s, a) => new AccountsTreeForm(s, a, new AccountsTreeService(CreateDb(cs))),
             ["الحسابات"] = (cs, s, a) => new AccountsTreeForm(s, a, new AccountsTreeService(CreateDb(cs))),
@@ -90,28 +89,24 @@ public static class RealScreenCatalog
             ["السندات"] = (cs, s, a) => new ReceiptsForm(s, a, new VouchersService(CreateDb(cs)))
         };
 
-    public static bool TryCreate(
-        string? screenName,
-        string connectionString,
-        AppSession session,
-        ScreenAccess access,
-        out Form? form)
+    public static bool TryCreate(string? screenName, string connectionString, AppSession session, ScreenAccess access, out Form? form)
     {
         form = null;
-        var normalized = NormalizeScreenName(screenName);
-        if (string.IsNullOrWhiteSpace(normalized))
+        var raw = screenName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(raw))
             return false;
 
-        if (Factories.TryGetValue(normalized, out var factory))
+        // First honor the exact database label. This keeps all existing Arabic mappings intact.
+        if (Factories.TryGetValue(raw, out var factory))
         {
             form = factory(connectionString, session, access);
             return form is not null;
         }
 
-        // The original database sometimes contains Arabic labels with hidden
-        // Unicode formatting characters or minor spelling variants. Resolve the
-        // canonical migrated forms from the normalized semantic name instead of
-        // falling through to the generic dynamic screen.
+        var normalized = NormalizeScreenName(raw);
+
+        // The original database can contain hidden Unicode formatting characters or minor
+        // spelling variants. Resolve migrated screens semantically instead of falling back.
         if (IsItemScreen(normalized))
         {
             form = new ItemsForm(session, access, new ItemsService(CreateDb(connectionString)));
@@ -141,11 +136,8 @@ public static class RealScreenCatalog
            normalized.Contains("وحدات", StringComparison.OrdinalIgnoreCase) ||
            normalized.Equals("frmunit", StringComparison.OrdinalIgnoreCase);
 
-    private static string NormalizeScreenName(string? value)
+    private static string NormalizeScreenName(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return string.Empty;
-
         var form = value.Normalize(NormalizationForm.FormKC);
         var builder = new StringBuilder(form.Length);
         foreach (var ch in form)
@@ -161,7 +153,6 @@ public static class RealScreenCatalog
             {
                 'أ' or 'إ' or 'آ' or 'ٱ' => 'ا',
                 'ى' => 'ي',
-                'ة' => 'ه',
                 _ => ch
             });
         }
