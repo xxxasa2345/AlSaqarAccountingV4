@@ -6,19 +6,24 @@ using AlSaqarAccounting.UI;
 namespace AlSaqarAccounting.Forms;
 
 /// <summary>
-/// Concrete suppliers screen (الموردون). Fully maintained through
-/// CustSupService against Account_CustSup where IsSuppliers = 1.
+/// Concrete sales-representatives screen (مندوبو المبيعات). Fully maintained
+/// through SalesManService against Account_SalesMan.
 /// </summary>
-public sealed class SuppliersForm : Form
+public sealed class SalesMenForm : Form
 {
     private readonly AppSession _session;
     private readonly ScreenAccess _access;
-    private readonly CustSupService _service;
+    private readonly SalesManService _service;
 
     private readonly TextBox _name = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
-    private readonly TextBox _vat = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
     private readonly TextBox _phone = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
-    private readonly TextBox _address = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
+    private readonly NumericUpDown _profit = new()
+    {
+        Dock = DockStyle.Fill,
+        DecimalPlaces = 2,
+        Minimum = 0,
+        Maximum = 1000000
+    };
     private readonly TextBox _search = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
 
     private readonly DataGridView _grid = new()
@@ -44,18 +49,18 @@ public sealed class SuppliersForm : Form
     };
 
     private DataTable? _data;
-    private int? _editingId;
+    private int? _editingSn;
 
-    public SuppliersForm(AppSession session, ScreenAccess access, CustSupService service)
+    public SalesMenForm(AppSession session, ScreenAccess access, SalesManService service)
     {
         _session = session;
         _access = access;
         _service = service;
 
-        Text = "الصقر للمحاسبة — الموردون";
-        Width = 1180;
-        Height = 740;
-        MinimumSize = new Size(960, 600);
+        Text = "الصقر للمحاسبة — مندوبو المبيعات";
+        Width = 1100;
+        Height = 700;
+        MinimumSize = new Size(900, 560);
         StartPosition = FormStartPosition.CenterParent;
         RightToLeft = RightToLeft.Yes;
         RightToLeftLayout = true;
@@ -75,7 +80,7 @@ public sealed class SuppliersForm : Form
         };
         var title = new Label
         {
-            Text = "الموردون",
+            Text = "مندوبو المبيعات",
             Dock = DockStyle.Top,
             Height = 38,
             Font = new Font("Tahoma", 18, FontStyle.Bold),
@@ -104,25 +109,22 @@ public sealed class SuppliersForm : Form
         {
             Dock = DockStyle.Top,
             Height = 140,
-            ColumnCount = 4,
+            ColumnCount = 3,
             RowCount = 3,
             Padding = new Padding(8)
         };
-        for (var i = 0; i < 4; i++)
-            editor.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
-        AddField(editor, "اسم المورد", _name, 0, 0);
-        AddField(editor, "الرقم الضريبي", _vat, 1, 0);
-        AddField(editor, "الهاتف", _phone, 2, 0);
-        AddField(editor, "العنوان", _address, 3, 0);
+        for (var i = 0; i < 3; i++)
+            editor.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33f));
+        AddField(editor, "اسم المندوب", _name, 0, 0);
+        AddField(editor, "الهاتف", _phone, 1, 0);
+        AddField(editor, "نسبة العمولة %", _profit, 2, 0);
 
         var save = new Button { Text = "حفظ", Dock = DockStyle.Fill, Enabled = _access.AllowSave };
         var cancel = new Button { Text = "إلغاء", Dock = DockStyle.Fill };
         save.Click += async (_, _) => await SaveAsync();
         cancel.Click += (_, _) => ClearEditor();
         editor.Controls.Add(save, 0, 2);
-        editor.Controls.Add(cancel, 2, 2);
-        editor.SetColumnSpan(save, 2);
-        editor.SetColumnSpan(cancel, 2);
+        editor.Controls.Add(cancel, 1, 2);
 
         var toolbar = new FlowLayoutPanel
         {
@@ -134,7 +136,7 @@ public sealed class SuppliersForm : Form
         };
         AddButton(toolbar, "تعديل", _access.AllowEdit, BeginEdit);
         AddButton(toolbar, "حذف", _access.AllowDelete, DeleteAsync);
-        AddButton(toolbar, "تفاصيل", true, () => ScreenToolbox.ShowRecordDetails(this, "الموردون", _grid));
+        AddButton(toolbar, "تفاصيل", true, () => ScreenToolbox.ShowRecordDetails(this, "مندوبو المبيعات", _grid));
         AddButton(toolbar, "تصدير CSV", _access.AllowExport, Export);
         AddButton(toolbar, "طباعة", _access.AllowPrint, Print);
 
@@ -184,15 +186,15 @@ public sealed class SuppliersForm : Form
         try
         {
             UseWaitCursor = true;
-            _data = await _service.ListSuppliersAsync();
+            _data = await _service.ListAsync();
             ScreenToolbox.TranslateCommonColumns(_data);
             _grid.DataSource = _data;
             ApplySearch();
-            _status.Text = $"عدد الموردين: {_data.Rows.Count:N0}";
+            _status.Text = $"عدد المندوبين: {_data.Rows.Count:N0}";
         }
         catch (Exception ex)
         {
-            _status.Text = "خطأ في تحميل الموردين: " + ex.GetBaseException().Message;
+            _status.Text = "خطأ في تحميل المندوبين: " + ex.GetBaseException().Message;
         }
         finally
         {
@@ -207,7 +209,7 @@ public sealed class SuppliersForm : Form
         var escaped = value.Replace("%", "[%]").Replace("*", "[*]").Replace("[", "[[]");
         _data.DefaultView.RowFilter = string.IsNullOrWhiteSpace(escaped)
             ? string.Empty
-            : $"CONVERT([CustSuppName], 'System.String') LIKE '%{escaped}%'";
+            : $"CONVERT([Name], 'System.String') LIKE '%{escaped}%'";
         _status.Text = $"المعروض: {_data.DefaultView.Count:N0} من {_data.Rows.Count:N0}";
     }
 
@@ -217,33 +219,33 @@ public sealed class SuppliersForm : Form
         var name = _name.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
-            MessageBox.Show(this, "اسم المورد مطلوب.", "تنبيه",
+            MessageBox.Show(this, "اسم المندوب مطلوب.", "تنبيه",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
+        decimal? profit = _profit.Value > 0 ? _profit.Value : null;
+
         try
         {
             UseWaitCursor = true;
-            if (_editingId.HasValue)
+            if (_editingSn.HasValue)
             {
                 if (!_access.AllowEdit) return;
-                await _service.UpdateSupplierAsync(
-                    _editingId.Value, name, _vat.Text, _phone.Text, _address.Text, _session);
-                _status.Text = "تم تعديل المورد بنجاح.";
+                await _service.UpdateAsync(_editingSn.Value, name, _phone.Text, profit, _session);
+                _status.Text = "تم تعديل المندوب بنجاح.";
             }
             else
             {
-                var id = await _service.CreateSupplierAsync(
-                    name, _vat.Text, _phone.Text, _address.Text, _session);
-                _status.Text = $"تم حفظ المورد برقم {id}.";
+                var sn = await _service.CreateAsync(name, _phone.Text, profit, _session);
+                _status.Text = $"تم حفظ المندوب برقم {sn}.";
             }
             ClearEditor();
             await LoadAsync();
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "حفظ المورد",
+            MessageBox.Show(this, ex.GetBaseException().Message, "حفظ المندوب",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
@@ -257,40 +259,47 @@ public sealed class SuppliersForm : Form
         if (!_access.AllowEdit || _grid.CurrentRow?.DataBoundItem is not DataRowView row)
             return Task.CompletedTask;
 
-        _editingId = Convert.ToInt32(row.Row["ID"]);
-        _name.Text = Convert.ToString(row.Row["CustSuppName"]) ?? string.Empty;
-        _vat.Text = row.Row.Table.Columns.Contains("VatNum") && row.Row["VatNum"] != DBNull.Value
-            ? Convert.ToString(row.Row["VatNum"]) ?? string.Empty
-            : string.Empty;
-        _phone.Text = row.Row.Table.Columns.Contains("Phone") && row.Row["Phone"] != DBNull.Value
-            ? Convert.ToString(row.Row["Phone"]) ?? string.Empty
-            : string.Empty;
-        _address.Text = row.Row.Table.Columns.Contains("Address") && row.Row["Address"] != DBNull.Value
-            ? Convert.ToString(row.Row["Address"]) ?? string.Empty
-            : string.Empty;
+        _editingSn = Convert.ToInt32(row.Row["SN"]);
+        _name.Text = Convert.ToString(row.Row["Name"]) ?? string.Empty;
+        _phone.Text = GetValue(row, "Phone");
+        _profit.Value = row.Row.Table.Columns.Contains("profit") &&
+                        row.Row["profit"] != DBNull.Value
+            ? ClampProfit(Convert.ToDecimal(row.Row["profit"]))
+            : 0;
         _name.Focus();
         _name.SelectAll();
         return Task.CompletedTask;
     }
 
+    private static string GetValue(DataRowView row, string column)
+        => row.Row.Table.Columns.Contains(column) && row.Row[column] != DBNull.Value
+            ? Convert.ToString(row.Row[column]) ?? string.Empty
+            : string.Empty;
+
+    private static decimal ClampProfit(decimal value)
+    {
+        if (value < 0) return 0;
+        return value > 1000000 ? 1000000 : value;
+    }
+
     private async Task DeleteAsync()
     {
         if (!_access.AllowDelete || _grid.CurrentRow?.DataBoundItem is not DataRowView row) return;
-        var id = Convert.ToInt32(row.Row["ID"]);
-        var name = Convert.ToString(row.Row["CustSuppName"]) ?? string.Empty;
-        if (MessageBox.Show(this, $"هل تريد حذف المورد؟\r\n{name}", "تأكيد الحذف",
+        var sn = Convert.ToInt32(row.Row["SN"]);
+        var name = Convert.ToString(row.Row["Name"]) ?? string.Empty;
+        if (MessageBox.Show(this, $"هل تريد حذف المندوب؟\r\n{name}", "تأكيد الحذف",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
 
         try
         {
             UseWaitCursor = true;
-            await _service.DeleteSupplierAsync(id);
+            await _service.DeleteAsync(sn);
             await LoadAsync();
-            _status.Text = "تم حذف المورد.";
+            _status.Text = "تم حذف المندوب.";
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "حذف المورد",
+            MessageBox.Show(this, ex.GetBaseException().Message, "حذف المندوب",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
@@ -299,16 +308,15 @@ public sealed class SuppliersForm : Form
         }
     }
 
-    private void Export() => ScreenToolbox.ExportCsv(this, _data, "الموردون");
+    private void Export() => ScreenToolbox.ExportCsv(this, _data, "مندوبو المبيعات");
 
-    private void Print() => ScreenToolbox.ShowPrintPreview(this, "الموردون", _data);
+    private void Print() => ScreenToolbox.ShowPrintPreview(this, "مندوبو المبيعات", _data);
 
     private void ClearEditor()
     {
-        _editingId = null;
+        _editingSn = null;
         _name.Clear();
-        _vat.Clear();
         _phone.Clear();
-        _address.Clear();
+        _profit.Value = 0;
     }
 }

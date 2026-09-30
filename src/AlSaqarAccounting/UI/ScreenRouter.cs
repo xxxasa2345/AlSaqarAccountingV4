@@ -60,45 +60,36 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // Customers screen
-        if (string.Equals(access.ScreenName, "FrmCustomer", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(access.ScreenName, "FrmCustomers", StringComparison.OrdinalIgnoreCase))
+        // Legacy invoice screen remains available for the Arabic "الفواتير" entry.
+        if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
         {
-            var service = new CustomerService(db);
-            using var form = new CustomersForm(_session, access, service);
+            var invoiceService = new InvoiceService(db);
+            var customerService = new CustomerService(db);
+            var supplierService = new SupplierService(db);
+            var itemsService = new ItemsService(db);
+            using var form = new InvoicesForm(
+                _session,
+                access,
+                invoiceService,
+                customerService,
+                supplierService,
+                itemsService);
             form.StartPosition = FormStartPosition.CenterParent;
             form.ShowDialog(owner);
             return true;
         }
 
-        // Suppliers screen
-        if (string.Equals(access.ScreenName, "FrmSuppliers", StringComparison.OrdinalIgnoreCase))
+        // Migrated real screens (accounts tree, customers, suppliers, branches,
+        // stores, salesmen, cost centers, projects, orders, purchases, receipts).
+        if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) &&
+            realScreen is not null)
         {
-            var service = new SupplierService(db);
-            using var form = new SuppliersForm(_session, access, service);
-            form.StartPosition = FormStartPosition.CenterParent;
-            form.ShowDialog(owner);
-            return true;
-        }
-
-        // Stores screen
-        if (string.Equals(access.ScreenName, "FrmStores", StringComparison.OrdinalIgnoreCase))
-        {
-            var service = new StoreService(db);
-            using var form = new StoresForm(_session, access, service);
-            form.StartPosition = FormStartPosition.CenterParent;
-            form.ShowDialog(owner);
-            return true;
-        }
-
-        // Contracts screen
-        if (string.Equals(access.ScreenName, "FrmContract", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(access.ScreenName, "FrmContracts", StringComparison.OrdinalIgnoreCase))
-        {
-            var service = new ContractService(db);
-            using var form = new ContractsForm(_session, access, service);
-            form.StartPosition = FormStartPosition.CenterParent;
-            form.ShowDialog(owner);
+            using (realScreen)
+            {
+                realScreen.StartPosition = FormStartPosition.CenterParent;
+                realScreen.ShowDialog(owner);
+            }
             return true;
         }
 
