@@ -1,4 +1,7 @@
+ phase11-open-quantity
+=======
 using System.ComponentModel;
+ main
 using System.Data;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Models;
@@ -133,7 +136,12 @@ public sealed class OpenQuantityEntryForm : Form
             }
             catch (Exception ex)
             {
+ phase11-open-quantity
+                MessageBox.Show(this, "تعذر تحميل الكمية الافتتاحية:
+" + ex.GetBaseException().Message,
+
                 MessageBox.Show(this, "تعذر تحميل الكمية الافتتاحية:\r\n" + ex.GetBaseException().Message,
+main
                     "الكميات الافتتاحية", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
             }
@@ -281,6 +289,20 @@ public sealed class OpenQuantityEntryForm : Form
         {
             _lines.Add(new Order_OpenQuantityDetails
             {
+phase11-open-quantity
+                SN = r.Field<int>("SN"),
+                Purchese_ID = r.Field<int?>("Purchese_ID"),
+                ItemID = r.Field<int?>("ItemID"),
+                BranchID = r.Field<int?>("BranchID"),
+                StoreID = r.Field<int?>("StoreID"),
+                ItemUnitID = r.Field<int?>("ItemUnitID"),
+                Quantity = r.Field<decimal?>("Quantity"),
+                UnitPrice = r.Field<decimal?>("UnitPrice"),
+                TotalPrice = r.Field<decimal?>("TotalPrice"),
+                ItemUnitType = r.Field<string>("ItemUnitType"),
+                UnitNumber = r.Field<decimal?>("UnitNumber"),
+                SellPrice = r.Field<decimal?>("SellPrice")
+
                 SN = Convert.ToInt32(r["SN"]),
                 Purchese_ID = NullableInt(r["Purchese_ID"]),
                 ItemID = NullableInt(r["ItemID"]),
@@ -293,11 +315,14 @@ public sealed class OpenQuantityEntryForm : Form
                 ItemUnitType = r["ItemUnitType"] == DBNull.Value ? null : Convert.ToString(r["ItemUnitType"]),
                 UnitNumber = NullableDecimal(r["UnitNumber"]),
                 SellPrice = NullableDecimal(r["SellPrice"])
+ main
             });
         }
 
         Recalculate();
     }
+
+ phase11-open-quantity
 
     private static int? NullableInt(object value)
         => value == DBNull.Value || value is null ? null : Convert.ToInt32(value);
@@ -305,6 +330,7 @@ public sealed class OpenQuantityEntryForm : Form
     private static decimal? NullableDecimal(object value)
         => value == DBNull.Value || value is null ? null : Convert.ToDecimal(value);
 
+ main
     private async Task SaveAsync()
     {
         try
@@ -334,7 +360,12 @@ public sealed class OpenQuantityEntryForm : Form
         }
         catch (Exception ex)
         {
+phase11-open-quantity
+            MessageBox.Show(this, "تعذر حفظ الكمية الافتتاحية:
+" + ex.GetBaseException().Message,
+
             MessageBox.Show(this, "تعذر حفظ الكمية الافتتاحية:\r\n" + ex.GetBaseException().Message,
+main
                 "الكميات الافتتاحية", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally

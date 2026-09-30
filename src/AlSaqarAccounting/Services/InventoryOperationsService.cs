@@ -70,6 +70,12 @@ ORDER BY ID DESC;",
             cancellationToken);
     }
 
+    public Task<DataTable> ListInventorySettlementMinusAsync(int? branchId, CancellationToken cancellationToken = default)
+        => BranchListAsync("dbo.Select_Order_InventorySettlementMinus", branchId, cancellationToken);
+
+    public Task<DataTable> PrintInventorySettlementMinusAsync(int id, int? branchId, CancellationToken cancellationToken = default)
+        => DocumentPrintAsync("dbo.Print_Order_InventorySettlementMinus", id, branchId, cancellationToken);
+
     public Task<DataTable> ListContractBouncesAsync(int? branchId, CancellationToken cancellationToken = default)
     {
         if (!branchId.HasValue)
