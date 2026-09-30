@@ -132,8 +132,8 @@ public sealed class SalesService
             .Set("@HasmPer", 0m)
             .Set("@HasmAmount", 0m)
             .Set("@Net", net)
-            .Set("@CashMoney", invoice.PaymentType == 1 ? net : 0m)
-            .Set("@CashBank", invoice.PaymentType == 2 ? net : 0m)
+            .Set("@CashMoney", invoice.PaymentType == 1 ? amountPaid : 0m)
+            .Set("@CashBank", invoice.PaymentType == 2 ? amountPaid : 0m)
             .Set("@AmountPaid", amountPaid)
             .Set("@Rest", net - amountPaid)
             .Set("@AllDiscount", discount)
@@ -185,6 +185,14 @@ public sealed class SalesService
 
     private static string? NullIfEmpty(string? value)
         => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+}
+
+/// <summary>Branch-level settings used by the sales entry screen.</summary>
+public sealed class SalesEntrySettings
+{
+    public bool VatEnabled { get; init; }
+    public decimal VatRate { get; init; } = 0.15m;
+    public int? DefaultStoreId { get; init; }
 }
 
 /// <summary>In-memory sales invoice submitted by the entry screen.</summary>
