@@ -21,6 +21,7 @@ public static class RealScreenCatalog
 
     private static readonly Dictionary<string, ScreenFactory> Factories =
         new(StringComparer.OrdinalIgnoreCase)
+        {
             ["FrmAccountTree"] = (cs, s, a) => new AccountsTreeForm(
                 s, a, new AccountsTreeService(CreateDb(cs))),
 
