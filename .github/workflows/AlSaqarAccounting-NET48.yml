@@ -33,7 +33,7 @@ jobs:
       - name: Verify output
         shell: pwsh
         run: |
-          $output = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
+          $output = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Release\net48'
           $exe = Join-Path $output 'AlSaqarAccounting.exe'
           $config = Join-Path $output 'appsettings.json'
           if (-not (Test-Path $exe)) { throw "EXE not found: $exe" }
