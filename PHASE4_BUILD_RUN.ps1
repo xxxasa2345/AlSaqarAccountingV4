@@ -5,7 +5,7 @@ param([switch]$Publish,[switch]$Run)
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $BuildScript = Join-Path $Root 'FixAndBuild-AlSaqarAccounting.ps1'
-$Output = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$Output = Join-Path $Root 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
 $PublishDir = Join-Path $Root 'publish'
 
 if (-not (Test-Path $BuildScript)) { throw "لم يتم العثور على سكربت البناء: $BuildScript" }
