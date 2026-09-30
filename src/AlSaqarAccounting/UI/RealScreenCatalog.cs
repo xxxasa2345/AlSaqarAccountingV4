@@ -119,6 +119,127 @@ public static class RealScreenCatalog
             return true;
         }
 
+        // Resolve common legacy screen-name variants to the concrete ERP Forms
+        // already implemented in this repository. This prevents ordinary Arabic
+        // labels, Frm* aliases and plural/suffix variants from reaching the
+        // generic DynamicErpScreenForm.
+        var db = CreateDb(connectionString);
+
+        if (normalized.Contains("عميل", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("عملاء", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("customer", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("cust", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new CustomersForm(session, access, new CustSupService(db), new AccountsTreeService(db));
+            return true;
+        }
+
+        if (normalized.Contains("مورد", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("موردون", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("supplier", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("supp", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new SuppliersForm(session, access, new CustSupService(db));
+            return true;
+        }
+
+        if (normalized.Contains("فرع", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("branch", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new BranchesForm(session, access, new BranchService(db));
+            return true;
+        }
+
+        if (normalized.Contains("مخزن", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("مستودع", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("store", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("warehouse", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new StoresForm(session, access, new StoresService(db));
+            return true;
+        }
+
+        if (normalized.Contains("مندوب", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("salesman", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("salesman", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new SalesMenForm(session, access, new SalesManService(db));
+            return true;
+        }
+
+        if (normalized.Contains("مركزالتكلفة", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("مراكزالتكلفة", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("costcenter", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new CostCentersForm(session, access, new DocumentsService(db));
+            return true;
+        }
+
+        if (normalized.Contains("مشروع", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("project", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new ProjectsForm(session, access, new DocumentsService(db));
+            return true;
+        }
+
+        if (normalized.Contains("عقد", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("عقود", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("contract", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new ContractsForm(session, access, new ContractService(db));
+            return true;
+        }
+
+        if (normalized.Contains("شراء", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("مشتريات", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("purchase", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new PurchasesForm(session, access, new PurchasesService(db), new StoresService(db), new CustSupService(db));
+            return true;
+        }
+
+        if (normalized.Contains("بيع", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("مبيعات", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("order", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("sales", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new OrdersForm(session, access, new SalesService(db), new StoresService(db));
+            return true;
+        }
+
+        if (normalized.Contains("فاتورة", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("فواتير", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("invoice", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new InvoicesForm(
+                session,
+                access,
+                new InvoiceService(db),
+                new CustomerService(db),
+                new SupplierService(db),
+                new ItemsService(db));
+            return true;
+        }
+
+        if (normalized.Contains("سند", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("قبض", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("صرف", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("voucher", StringComparison.OrdinalIgnoreCase) ||
+            normalized.Contains("receipt", StringComparison.OrdinalIgnoreCase))
+        {
+            form = new ReceiptsForm(session, access, new VouchersService(db));
+            return true;
+        }
+
+        if ((normalized.Contains("حساب", StringComparison.OrdinalIgnoreCase) ||
+             normalized.Contains("account", StringComparison.OrdinalIgnoreCase)) &&
+            (normalized.Contains("شجر", StringComparison.OrdinalIgnoreCase) ||
+             normalized.Contains("tree", StringComparison.OrdinalIgnoreCase)))
+        {
+            form = new AccountsTreeForm(session, access, new AccountsTreeService(db));
+            return true;
+        }
+
         return false;
     }
 
