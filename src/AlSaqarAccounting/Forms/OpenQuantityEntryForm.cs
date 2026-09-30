@@ -132,8 +132,7 @@ public sealed class OpenQuantityEntryForm : Form
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "تعذر تحميل الكمية الافتتاحية:
-" + ex.GetBaseException().Message,
+                MessageBox.Show(this, "تعذر تحميل الكمية الافتتاحية:\r\n" + ex.GetBaseException().Message,
                     "الكميات الافتتاحية", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
             }
@@ -328,8 +327,7 @@ public sealed class OpenQuantityEntryForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر حفظ الكمية الافتتاحية:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر حفظ الكمية الافتتاحية:\r\n" + ex.GetBaseException().Message,
                 "الكميات الافتتاحية", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
