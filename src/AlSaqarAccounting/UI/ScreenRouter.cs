@@ -93,31 +93,24 @@ public sealed class ScreenRouter
             return true;
         }
 
-        if (OperationalScreenRegistry.TryResolve(access.ScreenName, out var operational))
+        // أي شاشة لم ترحل بعد إلى Form متخصص تمر الآن إلى Form حقيقي
+        // schema-driven مبني على مصدرها الفعلي في SQL Server، وليس إلى
+        // OperationalDataScreen/CatalogDataScreen القديمة.
+        var dynamicService = new DynamicErpScreenService(db);
+        try
         {
-            var mappedType = operational.TargetFormName is null
-                ? null
-                : FindFormType(operational.TargetFormName);
-
-            if (mappedType is not null &&
-                TryCreateForm(mappedType, access, out var mappedForm, out _) &&
-                mappedForm is not null)
-            {
-                using (mappedForm)
-                {
-                    mappedForm.StartPosition = FormStartPosition.CenterParent;
-                    mappedForm.ShowDialog(owner);
-                }
-                return true;
-            }
-
-            using var operationalScreen = new OperationalDataScreen(
-                _connectionString,
-                operational,
+            using var dynamicScreen = new DynamicErpScreenForm(
+                _session,
                 access,
-                _session.BranchId);
-            operationalScreen.ShowDialog(owner);
+                dynamicService,
+                access.ScreenName);
+            dynamicScreen.StartPosition = FormStartPosition.CenterParent;
+            dynamicScreen.ShowDialog(owner);
             return true;
+        }
+        catch (Exception ex)
+        {
+            message = ex.GetBaseException().Message;
         }
 
         var type = FindFormType(access.ScreenName);
@@ -135,10 +128,11 @@ public sealed class ScreenRouter
             message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
         }
 
-        var entity = ScreenEntityMap.Resolve(access.ScreenName);
-        using var fallback = new CatalogDataScreen(_connectionString, access.ScreenName, entity, access);
-        fallback.ShowDialog(owner);
-        return true;
+        message = string.IsNullOrWhiteSpace(message)
+            ? "تعذر إنشاء الشاشة من قاعدة البيانات."
+            : message;
+        return false;
+
     }
 
     private static bool TryResolveItemMaster(string screenName, out string tableName, out string displayName)
