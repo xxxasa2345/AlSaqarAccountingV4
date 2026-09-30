@@ -232,7 +232,7 @@ ORDER BY c.column_id;",
         {
             var shortName = n.Substring(3);
             names.Add(shortName);
-            names.Add(shortName.Replace("Form", "", StringComparison.OrdinalIgnoreCase));
+            names.Add(shortName.Replace("Form", ""));
         }
 
         foreach (var candidate in names.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase))
