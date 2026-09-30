@@ -44,7 +44,7 @@ jobs:
       - name: Package Release
         shell: pwsh
         run: |
-          $output = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
+          $output = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Release\net48'
           $out = Join-Path $env:GITHUB_WORKSPACE 'release\AlSaqarAccounting-NET48'
           New-Item -ItemType Directory -Force -Path $out | Out-Null
           Copy-Item "$output\*" $out -Recurse -Force
