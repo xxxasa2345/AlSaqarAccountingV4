@@ -11,7 +11,7 @@ $Root = (Resolve-Path -LiteralPath $Root -ErrorAction Stop).Path
 
 $Solution = Join-Path $Root 'AlSaqarAccounting.sln'
 $Project = Join-Path $Root 'src\AlSaqarAccounting\AlSaqarAccounting.csproj'
-$BuildDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Release\net48'
+$BuildDir = Join-Path $Root 'src\AlSaqarAccounting\bin\Any CPU\Release\net48'
 $Workflow = Join-Path $Root '.github\workflows\AlSaqarAccounting-NET48.yml'
 $LogFile = Join-Path $Root 'phase7-install.log'
 
