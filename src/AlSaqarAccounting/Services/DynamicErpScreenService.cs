@@ -274,6 +274,57 @@ ORDER BY CASE
         return (null, false);
     }
 
+    private async Task<string?> FindTableByScreenNameAsync(
+        string screenName,
+        CancellationToken cancellationToken)
+    {
+        var value = screenName.Trim();
+        if (value.StartsWith("Frm", StringComparison.OrdinalIgnoreCase))
+            value = value.Substring(3);
+        if (value.EndsWith("Form", StringComparison.OrdinalIgnoreCase))
+            value = value.Substring(0, value.Length - 4);
+
+        var candidates = new[]
+        {
+            value,
+            "Item_" + value,
+            "Account_" + value,
+            "Contract_" + value,
+            "Order_" + value,
+            "Orders_" + value,
+            "Emp_" + value,
+            "Repairs_" + value,
+            "Restaurant_" + value,
+            "Scaffold_" + value,
+            "Virg_" + value
+        };
+
+        foreach (var candidate in candidates.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            var exact = await _db.QueryAsync(
+                "SELECT TOP (1) name FROM sys.tables WHERE SCHEMA_NAME(schema_id)='dbo' AND name=@Name;",
+                p => p.Add("@Name", SqlDbType.NVarChar, 256).Value = candidate,
+                cancellationToken).ConfigureAwait(false);
+
+            if (exact.Rows.Count == 1)
+                return Convert.ToString(exact.Rows[0]["name"]);
+
+            var contains = await _db.QueryAsync(
+                @"SELECT TOP (2) name
+                  FROM sys.tables
+                  WHERE SCHEMA_NAME(schema_id)='dbo'
+                    AND name LIKE @Pattern
+                  ORDER BY name;",
+                p => p.Add("@Pattern", SqlDbType.NVarChar, 300).Value = "%" + candidate + "%",
+                cancellationToken).ConfigureAwait(false);
+
+            if (contains.Rows.Count == 1)
+                return Convert.ToString(contains.Rows[0]["name"]);
+        }
+
+        return null;
+    }
+
     private async Task<bool> TableExistsAsync(string tableName, CancellationToken cancellationToken)
     {
         var data = await _db.QueryAsync(
