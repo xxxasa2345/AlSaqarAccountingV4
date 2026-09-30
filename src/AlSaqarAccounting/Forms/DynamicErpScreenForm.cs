@@ -188,8 +188,7 @@ public sealed class DynamicErpScreenForm : Form
         catch (Exception ex)
         {
             MessageBox.Show(this,
-                "تعذر تحميل الشاشة:
-" + ex.GetBaseException().Message,
+                "تعذر تحميل الشاشة:\r\n" + ex.GetBaseException().Message,
                 "الشاشة",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
