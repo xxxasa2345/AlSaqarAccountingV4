@@ -30,13 +30,15 @@ public sealed class SalesService
         int branchId,
         CancellationToken cancellationToken = default)
     {
+        // TblSetting is a settings table, not a branch-keyed lookup table.
+        // Read the active/latest settings row instead of treating BranchID as TblSetting.ID.
         const string sql = """
             SELECT TOP (1)
                 IsVat,
                 PerVat,
                 StoreID
             FROM dbo.TblSetting
-            WHERE ID = @BranchID;
+            ORDER BY ID DESC;
             """;
 
         using var cn = new SqlConnection(_db.ConnectionString);
@@ -44,7 +46,6 @@ public sealed class SalesService
         {
             CommandTimeout = 60
         };
-        cmd.Parameters.Add("@BranchID", SqlDbType.Int).Value = branchId;
 
         await cn.OpenAsync(cancellationToken);
         using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
@@ -60,7 +61,7 @@ public sealed class SalesService
         return new SalesEntrySettings
         {
             VatEnabled = enabled,
-            VatRate = enabled ? (rate > 0m ? rate : 0.15m) : 0m,
+            VatRate = enabled ? Math.Max(0m, rate) : 0m,
             DefaultStoreId = reader.IsDBNull(2) ? null : reader.GetInt32(2)
         };
     }

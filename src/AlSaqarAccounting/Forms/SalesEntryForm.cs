@@ -13,12 +13,14 @@ namespace AlSaqarAccounting.Forms;
 /// </summary>
 public sealed class SalesEntryForm : Form
 {
-    private const decimal VatRate = 0.15m;
 
     private readonly AppSession _session;
     private readonly ScreenAccess _access;
     private readonly SalesService _sales;
     private readonly StoresService _stores;
+    private decimal _vatRate;
+    private bool _vatEnabled;
+    private int? _defaultStoreId;
 
     private readonly ComboBox _customerCombo = new() { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown, RightToLeft = RightToLeft.Yes };
     private readonly ComboBox _storeCombo = new() { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList, RightToLeft = RightToLeft.Yes };
@@ -27,10 +29,10 @@ public sealed class SalesEntryForm : Form
     private readonly DateTimePicker _date = new() { Dock = DockStyle.Fill, Format = DateTimePickerFormat.Short };
     private readonly TextBox _noteNum = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
     private readonly TextBox _note = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
-    private readonly NumericUpDown _quantity = new() { Dock = DockStyle.Fill, Minimum = 0, DecimalPlaces = 2, Value = 1 };
-    private readonly NumericUpDown _price = new() { Dock = DockStyle.Fill, Minimum = 0, DecimalPlaces = 2 };
-    private readonly NumericUpDown _discount = new() { Dock = DockStyle.Fill, Minimum = 0, DecimalPlaces = 2 };
-    private readonly NumericUpDown _paid = new() { Dock = DockStyle.Fill, Minimum = 0, DecimalPlaces = 2 };
+    private readonly NumericUpDown _quantity = new() { Dock = DockStyle.Fill, Minimum = 0, Maximum = 1000000000, DecimalPlaces = 2, Value = 1 };
+    private readonly NumericUpDown _price = new() { Dock = DockStyle.Fill, Minimum = 0, Maximum = 100000000000m, DecimalPlaces = 2 };
+    private readonly NumericUpDown _discount = new() { Dock = DockStyle.Fill, Minimum = 0, Maximum = 100000000000m, DecimalPlaces = 2 };
+    private readonly NumericUpDown _paid = new() { Dock = DockStyle.Fill, Minimum = 0, Maximum = 100000000000m, DecimalPlaces = 2 };
 
     private readonly DataGridView _grid = new()
     {
@@ -102,7 +104,7 @@ public sealed class SalesEntryForm : Form
         _lines.Columns.Add("الكمية", typeof(decimal));
         _lines.Columns.Add("سعر الوحدة", typeof(decimal));
         _lines.Columns.Add("الإجمالي", typeof(decimal));
-        _lines.Columns.Add("الضريبة 15%", typeof(decimal));
+        _lines.Columns.Add("الضريبة", typeof(decimal));
         _lines.Columns.Add("الإجمالي بعد الضريبة", typeof(decimal));
         _grid.DataSource = _lines;
     }
@@ -245,6 +247,18 @@ public sealed class SalesEntryForm : Form
 
             _paymentCombo.SelectedIndex = 0;
 
+            if (_session.BranchId.HasValue)
+            {
+                var settings = await _sales.GetEntrySettingsAsync(_session.BranchId.Value);
+                _vatEnabled = settings.VatEnabled;
+                _vatRate = settings.VatRate;
+                _defaultStoreId = settings.DefaultStoreId;
+            }
+            else
+            {
+                throw new InvalidOperationException("حفظ فاتورة المبيعات يتطلب فرعاً فعالاً.");
+            }
+
             var itemsTask = _sales.ListItemsAsync();
             var customersTask = _sales.ListCustomersAsync(_session.BranchId);
             var storesTask = _stores.ListAsync();
@@ -271,9 +285,20 @@ public sealed class SalesEntryForm : Form
             var storeId = FindColumn(stores, "ID", "SN", "StoreID");
             var storeName = FindColumn(stores, "Store_Name", "Name", "StoreName");
             if (storeId is not null && storeName is not null)
+            {
                 BindCombo(_storeCombo, stores, storeId, storeName);
+                if (_defaultStoreId.HasValue)
+                {
+                    try { _storeCombo.SelectedValue = _defaultStoreId.Value; }
+                    catch { /* default store may not be available to this branch/user */ }
+                }
+            }
             else
+            {
                 _storeCombo.Items.Add("غير محدد");
+            }
+
+            OnPaymentChanged();
         }
         catch (Exception ex)
         {
@@ -364,7 +389,7 @@ public sealed class SalesEntryForm : Form
 
         var name = _itemCombo.Text.Trim();
         var total = decimal.Round(quantity * price, 2);
-        var vat = decimal.Round(total * VatRate, 2);
+        var vat = _vatEnabled ? decimal.Round(total * _vatRate, 2) : 0m;
         _lines.Rows.Add(itemId, name, quantity, price, total, vat, total + vat);
         UpdateTotals();
         _quantity.Value = 1;
@@ -384,7 +409,7 @@ public sealed class SalesEntryForm : Form
     private void UpdateTotals()
     {
         var subtotal = Subtotal();
-        var vat = decimal.Round(subtotal * VatRate, 2);
+        var vat = _vatEnabled ? decimal.Round(subtotal * _vatRate, 2) : 0m;
         var discount = _discount.Value;
         var net = subtotal - discount + vat;
         var paid = _paid.Value;
@@ -399,9 +424,15 @@ public sealed class SalesEntryForm : Form
     {
         // آجل → المدفوع صفر افتراضياً؛ نقدي/بنك → المدفوع كامل افتراضياً.
         if (_paymentCombo.SelectedIndex == 2)
+        {
             _paid.Value = 0;
+        }
         else
-            _paid.Value = decimal.Round(Subtotal() - _discount.Value + decimal.Round(Subtotal() * VatRate, 2), 2);
+        {
+            var subtotal = Subtotal();
+            var vat = _vatEnabled ? decimal.Round(subtotal * _vatRate, 2) : 0m;
+            _paid.Value = decimal.Round(subtotal - _discount.Value + vat, 2);
+        }
     }
 
     private async Task SaveAsync()
@@ -440,7 +471,7 @@ public sealed class SalesEntryForm : Form
                     Quantity = Convert.ToDecimal(line["الكمية"]),
                     UnitPrice = Convert.ToDecimal(line["سعر الوحدة"]),
                     TotalPrice = Convert.ToDecimal(line["الإجمالي"]),
-                    VAT = Convert.ToDecimal(line["الضريبة 15%"]),
+                    VAT = Convert.ToDecimal(line["الضريبة"]),
                     NetUnitPrice = Convert.ToDecimal(line["سعر الوحدة"]),
                     NetTotalPrice = Convert.ToDecimal(line["الإجمالي"]),
                     VAT_Discount = 0,
@@ -451,6 +482,7 @@ public sealed class SalesEntryForm : Form
 
             await _sales.CreateAsync(invoice, _session);
             Saved = true;
+            DialogResult = DialogResult.OK;
             MessageBox.Show(this, "تم حفظ فاتورة المبيعات بنجاح.", "حفظ الفاتورة",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             Close();
