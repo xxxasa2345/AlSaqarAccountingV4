@@ -107,8 +107,7 @@ public sealed class UserScreensForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر تحميل شاشات النظام:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر تحميل شاشات النظام:\r\n" + ex.GetBaseException().Message,
                 "شاشات النظام", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally { UseWaitCursor = false; }
@@ -145,8 +144,7 @@ public sealed class UserScreensForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر حفظ الشاشة:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر حفظ الشاشة:\r\n" + ex.GetBaseException().Message,
                 "شاشات النظام", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -169,8 +167,7 @@ public sealed class UserScreensForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر حذف الشاشة:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر حذف الشاشة:\r\n" + ex.GetBaseException().Message,
                 "شاشات النظام", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
