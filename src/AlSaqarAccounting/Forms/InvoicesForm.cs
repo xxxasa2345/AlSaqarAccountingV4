@@ -15,6 +15,8 @@ public sealed class InvoicesForm : Form
     private readonly AppSession _session;
     private readonly ScreenAccess _access;
     private readonly InvoiceService _invoiceService;
+    private readonly SalesService _salesService;
+    private readonly StoresService _storesService;
     private readonly CustomerService _customerService;
     private readonly SupplierService _supplierService;
     private readonly ItemsService _itemsService;
@@ -38,6 +40,8 @@ public sealed class InvoicesForm : Form
         AppSession session,
         ScreenAccess access,
         InvoiceService invoiceService,
+        SalesService salesService,
+        StoresService storesService,
         CustomerService customerService,
         SupplierService supplierService,
         ItemsService itemsService)
@@ -45,6 +49,8 @@ public sealed class InvoicesForm : Form
         _session = session;
         _access = access;
         _invoiceService = invoiceService;
+        _salesService = salesService;
+        _storesService = storesService;
         _customerService = customerService;
         _supplierService = supplierService;
         _itemsService = itemsService;
@@ -54,7 +60,7 @@ public sealed class InvoicesForm : Form
 
     private void InitializeUi()
     {
-        Text = "\u0001\u0001 - \u0001"; // "النظام المحاسبي - إدارة الفواتير"
+        Text = "الصقر للمحاسبة - إدارة الفواتير";
         Width = 1400;
         Height = 900;
         MinimumSize = new Size(1200, 800);
@@ -66,7 +72,7 @@ public sealed class InvoicesForm : Form
         var header = new Panel { Dock = DockStyle.Top, Height = 120, Padding = new Padding(12), BackColor = Color.FromArgb(245, 247, 250) };
         var title = new Label
         {
-            Text = "\u0001", // "إدارة الفواتير"
+            Text = "إدارة الفواتير",
             Dock = DockStyle.Top,
             Height = 38,
             Font = new Font("Tahoma", 18, FontStyle.Bold),
@@ -74,7 +80,7 @@ public sealed class InvoicesForm : Form
         };
         var info = new Label
         {
-            Text = $"\u0001: {_session.UserName} | \u0001: {_session.BranchId?.ToString() ?? "-"}", // "المستخدم: ... | الفرع: ..."
+            Text = $"المستخدم: {_session.UserName} | الفرع: {_session.BranchId?.ToString() ?? "-"}",
             Dock = DockStyle.Top,
             Height = 25,
             ForeColor = Color.DimGray,
@@ -96,35 +102,35 @@ public sealed class InvoicesForm : Form
         filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
         filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
         
-        var searchLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "بحث:"
+        var searchLabel = new Label { Text = "بحث:", TextAlign = ContentAlignment.MiddleRight };
         _searchText.Dock = DockStyle.Fill;
         _searchText.RightToLeft = RightToLeft.Yes;
         
-        var typeLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "نوع الفاتورة:"
+        var typeLabel = new Label { Text = "نوع الفاتورة:", TextAlign = ContentAlignment.MiddleRight };
         _invoiceTypeCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-        _invoiceTypeCombo.Items.AddRange(new object[] { "\u0001", "\u0001" }); // "مبيعات", "مشتريات"
+        _invoiceTypeCombo.Items.AddRange(new object[] { "مبيعات", "مشتريات" });
         _invoiceTypeCombo.SelectedIndex = 0;
         _invoiceTypeCombo.SelectedIndexChanged += (_, _) => { _salesMode = _invoiceTypeCombo.SelectedIndex == 0; LoadInvoices(); };
         
-        var customerLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "العميل/المورد:"
+        var customerLabel = new Label { Text = "العميل/المورد:", TextAlign = ContentAlignment.MiddleRight };
         _customerSupplierText.Dock = DockStyle.Fill;
         _customerSupplierText.RightToLeft = RightToLeft.Yes;
         
-        var numberLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "رقم الفاتورة:"
+        var numberLabel = new Label { Text = "رقم الفاتورة:", TextAlign = ContentAlignment.MiddleRight };
         _invoiceNumberText.Dock = DockStyle.Fill;
         _invoiceNumberText.RightToLeft = RightToLeft.Yes;
         
-        var fromLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "من:"
+        var fromLabel = new Label { Text = "من:", TextAlign = ContentAlignment.MiddleRight };
         _dateFrom.Format = DateTimePickerFormat.Short;
         _dateFrom.Value = DateTime.Today.AddDays(-30);
         _dateFrom.RightToLeft = RightToLeft.Yes;
         
-        var toLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "إلى:"
+        var toLabel = new Label { Text = "إلى:", TextAlign = ContentAlignment.MiddleRight };
         _dateTo.Format = DateTimePickerFormat.Short;
         _dateTo.Value = DateTime.Today;
         _dateTo.RightToLeft = RightToLeft.Yes;
         
-        var refreshBtn = new Button { Text = "\u0001", Width = 80, Height = 30 }; // "تحديث"
+        var refreshBtn = new Button { Text = "تحديث", Width = 80, Height = 30 };
         refreshBtn.Click += (_, _) => LoadInvoices();
         
         filterLayout.Controls.Add(searchLabel, 0, 0);
@@ -153,7 +159,7 @@ public sealed class InvoicesForm : Form
         
         // Top Panel - Invoices List
         var invoicesPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(8) };
-        var invoicesTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "قائمة الفواتير"
+        var invoicesTitle = new Label { Text = "قائمة الفواتير", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight };
         
         _invoicesGrid.Dock = DockStyle.Fill;
         _invoicesGrid.ReadOnly = true;
@@ -172,7 +178,7 @@ public sealed class InvoicesForm : Form
 
         // Bottom Panel - Invoice Details
         var detailsPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(8) };
-        var detailsTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "تفاصيل الفاتورة"
+        var detailsTitle = new Label { Text = "تفاصيل الفاتورة", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight };
         
         _detailsGrid.Dock = DockStyle.Fill;
         _detailsGrid.ReadOnly = true;
@@ -190,11 +196,11 @@ public sealed class InvoicesForm : Form
         // Toolbar Panel
         var toolbar = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 50, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(6), WrapContents = false, BackColor = Color.FromArgb(240, 248, 255) };
         
-        AddToolbarButton(toolbar, "\u0001", _access.AllowSave, CreateNewInvoice); // "جديد"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowEdit, EditInvoice); // "تعديل"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowDelete, DeleteInvoice); // "حذف"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowPrint, PrintInvoice); // "طباعة"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowExport, ExportInvoices); // "تصدير"
+        AddToolbarButton(toolbar, "جديد", _access.AllowSave, CreateNewInvoice);
+        AddToolbarButton(toolbar, "تعديل", _access.AllowEdit && !_salesMode, EditInvoice);
+        AddToolbarButton(toolbar, "حذف", _access.AllowDelete, DeleteInvoice);
+        AddToolbarButton(toolbar, "طباعة", _access.AllowPrint, PrintInvoice);
+        AddToolbarButton(toolbar, "تصدير", _access.AllowExport, ExportInvoices);
 
         // Status Bar
         _status.Dock = DockStyle.Bottom;
@@ -232,11 +238,11 @@ public sealed class InvoicesForm : Form
         {
             UseWaitCursor = true;
             await LoadInvoices();
-            _status.Text = "\u0001"; // "النظام جاهز"
+            _status.Text = "النظام جاهز";
         }
         catch (Exception ex)
         {
-            _status.Text = "\u0001: " + ex.GetBaseException().Message; // "خطأ: "
+            _status.Text = "خطأ: " + ex.GetBaseException().Message;
         }
         finally { UseWaitCursor = false; }
     }
@@ -266,11 +272,11 @@ public sealed class InvoicesForm : Form
             ApplyFilters();
             _invoicesGrid.DataSource = _invoicesData;
             FormatInvoicesGrid();
-            _status.Text = $"\u0001: {_invoicesData.Rows.Count:N0}"; // "عدد الفواتير: ..."
+            _status.Text = $"عدد الفواتير: {_invoicesData.Rows.Count:N0}";
         }
         catch (Exception ex)
         {
-            _status.Text = "\u0001: " + ex.GetBaseException().Message; // "خطأ في تحميل الفواتير: "
+            _status.Text = "خطأ في تحميل الفواتير: " + ex.GetBaseException().Message;
         }
         finally { UseWaitCursor = false; }
     }
@@ -280,8 +286,8 @@ public sealed class InvoicesForm : Form
         if (_invoicesData == null) return;
         
         var filter = string.Empty;
-        var searchTerm = _searchText.Text.Trim();
-        var customerTerm = _customerSupplierText.Text.Trim();
+        var searchTerm = EscapeRowFilterValue(_searchText.Text.Trim());
+        var customerTerm = EscapeRowFilterValue(_customerSupplierText.Text.Trim());
         
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -295,7 +301,24 @@ public sealed class InvoicesForm : Form
             filter += $"Convert([SupplierName], 'System.String') LIKE '%{customerTerm}%' ";
         }
         
-        _invoicesData.DefaultView.RowFilter = filter;
+        try
+        {
+            _invoicesData.DefaultView.RowFilter = filter;
+        }
+        catch
+        {
+            // Never allow a malformed user search expression to break the screen.
+            _invoicesData.DefaultView.RowFilter = string.Empty;
+        }
+    }
+
+    private static string EscapeRowFilterValue(string value)
+    {
+        return value
+            .Replace("'", "''")
+            .Replace("[", "[[]")
+            .Replace("*", "[*]")
+            .Replace("%", "[%]");
     }
 
     private void FormatInvoicesGrid()
@@ -319,12 +342,12 @@ public sealed class InvoicesForm : Form
         }
         
         // Rename columns
-        if (_invoicesGrid.Columns.Contains("NoteNum")) _invoicesGrid.Columns["NoteNum"].HeaderText = "\u0001"; // "رقم الفاتورة"
-        if (_invoicesGrid.Columns.Contains("SupplierName")) _invoicesGrid.Columns["SupplierName"].HeaderText = _salesMode ? "\u0001" : "\u0001"; // "العميل" or "المورد"
-        if (_invoicesGrid.Columns.Contains("Purchases_Date")) _invoicesGrid.Columns["Purchases_Date"].HeaderText = "\u0001"; // "التاريخ"
-        if (_invoicesGrid.Columns.Contains("TotalPrices")) _invoicesGrid.Columns["TotalPrices"].HeaderText = "\u0001"; // "الإجمالي"
-        if (_invoicesGrid.Columns.Contains("Tax")) _invoicesGrid.Columns["Tax"].HeaderText = "\u0001"; // "الضريبة"
-        if (_invoicesGrid.Columns.Contains("Net")) _invoicesGrid.Columns["Net"].HeaderText = "\u0001"; // "الصافي"
+        if (_invoicesGrid.Columns.Contains("NoteNum")) _invoicesGrid.Columns["NoteNum"].HeaderText = "رقم الفاتورة";
+        if (_invoicesGrid.Columns.Contains("SupplierName")) _invoicesGrid.Columns["SupplierName"].HeaderText = _salesMode ? "العميل" : "المورد";
+        if (_invoicesGrid.Columns.Contains("Purchases_Date")) _invoicesGrid.Columns["Purchases_Date"].HeaderText = "التاريخ";
+        if (_invoicesGrid.Columns.Contains("TotalPrices")) _invoicesGrid.Columns["TotalPrices"].HeaderText = "الإجمالي";
+        if (_invoicesGrid.Columns.Contains("Tax")) _invoicesGrid.Columns["Tax"].HeaderText = "الضريبة";
+        if (_invoicesGrid.Columns.Contains("Net")) _invoicesGrid.Columns["Net"].HeaderText = "الصافي";
     }
 
     private async Task ShowInvoiceDetailsAsync()
@@ -351,7 +374,7 @@ public sealed class InvoicesForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -374,37 +397,45 @@ public sealed class InvoicesForm : Form
         }
         
         // Rename columns
-        if (_detailsGrid.Columns.Contains("ItemID")) _detailsGrid.Columns["ItemID"].HeaderText = "\u0001"; // "كود المنتج"
-        if (_detailsGrid.Columns.Contains("Quantity")) _detailsGrid.Columns["Quantity"].HeaderText = "\u0001"; // "الكمية"
-        if (_detailsGrid.Columns.Contains("UnitPrice")) _detailsGrid.Columns["UnitPrice"].HeaderText = "\u0001"; // "سعر الوحدة"
-        if (_detailsGrid.Columns.Contains("TotalPrice")) _detailsGrid.Columns["TotalPrice"].HeaderText = "\u0001"; // "الإجمالي"
-        if (_detailsGrid.Columns.Contains("VAT")) _detailsGrid.Columns["VAT"].HeaderText = "\u0001"; // "الضريبة"
+        if (_detailsGrid.Columns.Contains("ItemID")) _detailsGrid.Columns["ItemID"].HeaderText = "كود المنتج";
+        if (_detailsGrid.Columns.Contains("Quantity")) _detailsGrid.Columns["Quantity"].HeaderText = "الكمية";
+        if (_detailsGrid.Columns.Contains("UnitPrice")) _detailsGrid.Columns["UnitPrice"].HeaderText = "سعر الوحدة";
+        if (_detailsGrid.Columns.Contains("TotalPrice")) _detailsGrid.Columns["TotalPrice"].HeaderText = "الإجمالي";
+        if (_detailsGrid.Columns.Contains("VAT")) _detailsGrid.Columns["VAT"].HeaderText = "الضريبة";
     }
 
-    private void CreateNewInvoice()
+    private async void CreateNewInvoice()
     {
-        if (!_access.AllowSave) return;
-        
-        using var form = new InvoiceEditForm(
+        if (!_access.AllowSave)
+            return;
+
+        if (_salesMode)
+        {
+            using var salesForm = new SalesEntryForm(_session, _access, _salesService, _storesService);
+            salesForm.ShowDialog(this);
+            if (salesForm.Saved)
+                await LoadInvoices();
+            return;
+        }
+
+        using var purchaseForm = new InvoiceEditForm(
             _session,
             _access,
             _invoiceService,
             _customerService,
             _supplierService,
             _itemsService,
-            _salesMode);
-        
-        if (form.ShowDialog(this) == DialogResult.OK)
-        {
-            LoadInvoices();
-        }
+            false);
+
+        if (purchaseForm.ShowDialog(this) == DialogResult.OK)
+            await LoadInvoices();
     }
 
     private void EditInvoice()
     {
         if (!_access.AllowEdit || !_selectedInvoiceId.HasValue)
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "يرجى اختيار فاتورة"
+            MessageBox.Show(this, "يرجى اختيار فاتورة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
         
@@ -432,15 +463,18 @@ public sealed class InvoicesForm : Form
             return;
         }
         
-        if (MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) // "هل تريد حذف الفاتورة؟"
+        if (MessageBox.Show(this, "هل تريد حذف الفاتورة؟", "تأكيد الحذف", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) // "هل تريد حذف الفاتورة؟"
             return;
         
         try
         {
             UseWaitCursor = true;
-            await _invoiceService.DeleteInvoiceAsync(_selectedInvoiceId.Value);
+            if (_salesMode)
+                await _salesService.DeleteAsync(_selectedInvoiceId.Value, _session.BranchId);
+            else
+                await _invoiceService.DeleteInvoiceAsync(_selectedInvoiceId.Value);
             await LoadInvoices();
-            _status.Text = "\u0001"; // "تم حذف الفاتورة"
+            _status.Text = "تم حذف الفاتورة";
         }
         catch (Exception ex)
         {
@@ -457,7 +491,7 @@ public sealed class InvoicesForm : Form
             return;
         }
         
-        MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "طباعة الفواتير قيد التطوير"
+        MessageBox.Show(this, "طباعة الفواتير قيد التطوير في شاشة الطباعة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private void ExportInvoices()
@@ -470,7 +504,7 @@ public sealed class InvoicesForm : Form
         var sb = new System.Text.StringBuilder();
         
         // Header
-        var headers = new[] { "\u0001", "\u0001", "\u0001", "\u0001", "\u0001", "\u0001" }; // "رقم", "التاريخ", "العميل/المورد", "الإجمالي", "الضريبة", "الصافي"
+        var headers = new[] { "رقم", "التاريخ", "العميل/المورد", "الإجمالي", "الضريبة", "الصافي" };
         sb.AppendLine(string.Join(",", headers));
         
         // Data
@@ -489,7 +523,7 @@ public sealed class InvoicesForm : Form
         }
         
         File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
-        _status.Text = "\u0001: " + dialog.FileName; // "تم التصدير إلى: ..."
+        _status.Text = "تم التصدير إلى: " + dialog.FileName;
     }
 
     private static string EscapeCsv(string value)
@@ -554,7 +588,7 @@ internal sealed class InvoiceEditForm : Form
 
     private void InitializeUi()
     {
-        Text = _invoiceId.HasValue ? "\u0001" : "\u0001"; // "تعديل الفاتورة" or "فاتورة جديدة"
+        Text = _invoiceId.HasValue ? "تعديل الفاتورة" : "فاتورة جديدة";
         Width = 1000;
         Height = 700;
         StartPosition = FormStartPosition.CenterParent;
@@ -565,7 +599,7 @@ internal sealed class InvoiceEditForm : Form
         var header = new Panel { Dock = DockStyle.Top, Height = 80, Padding = new Padding(12), BackColor = Color.FromArgb(245, 247, 250) };
         var title = new Label
         {
-            Text = _invoiceId.HasValue ? "\u0001" : "\u0001", // "تعديل الفاتورة" or "فاتورة جديدة"
+            Text = _invoiceId.HasValue ? "تعديل الفاتورة" : "فاتورة جديدة",
             Dock = DockStyle.Top,
             Height = 38,
             Font = new Font("Tahoma", 16, FontStyle.Bold),
@@ -580,12 +614,12 @@ internal sealed class InvoiceEditForm : Form
         formPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
         formPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
 
-        AddField(formPanel, "\u0001", _invoiceNumberText, 0, 0); // "رقم الفاتورة"
-        AddField(formPanel, "\u0001", _datePicker, 1, 0); // "التاريخ"
+        AddField(formPanel, "رقم الفاتورة", _invoiceNumberText, 0, 0);
+        AddField(formPanel, "التاريخ", _datePicker, 1, 0);
         formPanel.SetColumnSpan(_datePicker, 2);
-        AddField(formPanel, _salesMode ? "\u0001" : "\u0001", _customerSupplierText, 0, 1); // "العميل" or "المورد"
+        AddField(formPanel, _salesMode ? "العميل" : "المورد", _customerSupplierText, 0, 1);
         formPanel.SetColumnSpan(_customerSupplierText, 3);
-        AddField(formPanel, "\u0001", _notesText, 0, 2, true); // "ملاحظات"
+        AddField(formPanel, "ملاحظات", _notesText, 0, 2, true);
         formPanel.SetColumnSpan(_notesText, 3);
 
         // Items Grid
@@ -608,22 +642,22 @@ internal sealed class InvoiceEditForm : Form
         totalsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
         totalsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
         
-        AddField(totalsLayout, "\u0001", _totalText, 0, 0); // "الإجمالي"
-        AddField(totalsLayout, "\u0001", _taxText, 1, 0); // "الضريبة"
-        AddField(totalsLayout, "\u0001", _netText, 2, 0); // "الصافي"
+        AddField(totalsLayout, "الإجمالي", _totalText, 0, 0);
+        AddField(totalsLayout, "الضريبة", _taxText, 1, 0);
+        AddField(totalsLayout, "الصافي", _netText, 2, 0);
         
         totalsPanel.Controls.Add(totalsLayout);
 
         // Buttons Panel
         var buttonsPanel = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 50, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(8), WrapContents = false };
         
-        _saveBtn.Text = "\u0001"; // "حفظ"
+        _saveBtn.Text = "حفظ";
         _saveBtn.Width = 100;
         _saveBtn.Height = 36;
         _saveBtn.DialogResult = DialogResult.OK;
         _saveBtn.Click += async (_, _) => await SaveInvoiceAsync();
         
-        _cancelBtn.Text = "\u0001"; // "إلغاء"
+        _cancelBtn.Text = "إلغاء";
         _cancelBtn.Width = 100;
         _cancelBtn.Height = 36;
         _cancelBtn.DialogResult = DialogResult.Cancel;
@@ -750,7 +784,7 @@ internal sealed class InvoiceEditForm : Form
                 };
                 
                 await _invoiceService.UpdateInvoiceAsync(invoice, _session);
-                MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "تم تحديث الفاتورة"
+                MessageBox.Show(this, "تم تحديث الفاتورة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
@@ -771,7 +805,7 @@ internal sealed class InvoiceEditForm : Form
                 var details = new List<Order_OrdersDetails>();
                 
                 var invoiceId = await _invoiceService.CreateSalesInvoiceAsync(invoice, details, _session);
-                MessageBox.Show(this, $"\u0001 {invoiceId}", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "تم إنشاء الفاتورة رقم: ..."
+                MessageBox.Show(this, $"تم إنشاء الفاتورة رقم: {invoiceId}", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             
             DialogResult = DialogResult.OK;
