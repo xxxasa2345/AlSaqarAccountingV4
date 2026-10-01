@@ -32,7 +32,7 @@ public static class ScreenEntityMap
             ["FrmDoctor"] = "Item_Doctor",
             ["FrmGuarantee"] = "Contract_Guarantee",
             ["FrmGroups"] = "User_Groups",
-            ["FrmSecurityGroup"] = "User_Groups",
+            ["FrmSecurityGroup"] = "User_Permission",
             ["FrmUsers"] = "User_Login",
             ["FrmEditUser"] = "User_Login",
             ["FrmPassword"] = "User_Login",
