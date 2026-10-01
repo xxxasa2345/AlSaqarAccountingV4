@@ -240,7 +240,14 @@ public sealed class ContractsForm : Form
 
     private async Task SaveAsync()
     {
-        if (!_access.AllowSave) return;
+        if (_editingId.HasValue)
+        {
+            if (!_access.AllowEdit) return;
+        }
+        else if (!_access.AllowSave)
+        {
+            return;
+        }
         
         var contract = new Contract_Contract
         {
@@ -261,7 +268,6 @@ public sealed class ContractsForm : Form
             UseWaitCursor = true;
             if (_editingId.HasValue)
             {
-                if (!_access.AllowEdit) return;
                 contract.ID = _editingId.Value;
                 await _service.UpdateAsync(contract, _session);
                 _status.Text = "  "; // "تم تعديل العقد بنجاح"
