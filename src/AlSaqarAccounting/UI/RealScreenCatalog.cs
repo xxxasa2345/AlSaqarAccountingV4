@@ -31,6 +31,43 @@ public static class RealScreenCatalog
             ["الحسابات"] = (cs, s, a) => new AccountsTreeForm(
                 s, a, new AccountsTreeService(CreateDb(cs))),
 
+            // الأمن والصلاحيات — شاشات إدارية حقيقية مرتبطة بجداول User_* الأصلية.
+            ["FrmPassword"] = (cs, s, a) => new ChangePasswordForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["كلمة المرور"] = (cs, s, a) => new ChangePasswordForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["تغيير كلمة المرور"] = (cs, s, a) => new ChangePasswordForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["FrmScreens"] = (cs, s, a) => new UserScreensForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["الشاشات"] = (cs, s, a) => new UserScreensForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["شاشات النظام"] = (cs, s, a) => new UserScreensForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["UserScreensForm"] = (cs, s, a) => new UserScreensForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["FrmPermission"] = (cs, s, a) => new UserPermissionsForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["FrmPermissions"] = (cs, s, a) => new UserPermissionsForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["الصلاحيات"] = (cs, s, a) => new UserPermissionsForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["صلاحيات الشاشات"] = (cs, s, a) => new UserPermissionsForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
+            ["UserPermissionsForm"] = (cs, s, a) => new UserPermissionsForm(
+                s, new SecurityAdministrationService(CreateDb(cs))),
+
             // العملاء — إضافة/حذف تشغيلية (حساب فرعي تحت الحساب الافتراضي),
 
             ["FrmCustomer"] = (cs, s, a) => new CustomersForm(
