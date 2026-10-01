@@ -45,28 +45,28 @@ public static class RealScreenCatalog
                 s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             ["الشاشات"] = (cs, s, a) => new UserScreensForm(
-                s, new SecurityAdministrationService(CreateDb(cs))),
+                s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             ["شاشات النظام"] = (cs, s, a) => new UserScreensForm(
-                s, new SecurityAdministrationService(CreateDb(cs))),
+                s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             ["UserScreensForm"] = (cs, s, a) => new UserScreensForm(
-                s, new SecurityAdministrationService(CreateDb(cs))),
+                s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             ["FrmPermission"] = (cs, s, a) => new UserPermissionsForm(
                 s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             ["FrmPermissions"] = (cs, s, a) => new UserPermissionsForm(
-                s, new SecurityAdministrationService(CreateDb(cs))),
+                s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             ["الصلاحيات"] = (cs, s, a) => new UserPermissionsForm(
-                s, new SecurityAdministrationService(CreateDb(cs))),
+                s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             ["صلاحيات الشاشات"] = (cs, s, a) => new UserPermissionsForm(
-                s, new SecurityAdministrationService(CreateDb(cs))),
+                s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             ["UserPermissionsForm"] = (cs, s, a) => new UserPermissionsForm(
-                s, new SecurityAdministrationService(CreateDb(cs))),
+                s, a, new SecurityAdministrationService(CreateDb(cs))),
 
             // العملاء — إضافة/حذف تشغيلية (حساب فرعي تحت الحساب الافتراضي),
 
