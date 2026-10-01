@@ -424,11 +424,15 @@ public sealed class SalesEntryForm : Form
     {
         // آجل → المدفوع صفر افتراضياً؛ نقدي/بنك → المدفوع كامل افتراضياً.
         if (_paymentCombo.SelectedIndex == 2)
+        {
             _paid.Value = 0;
+        }
         else
+        {
             var subtotal = Subtotal();
             var vat = _vatEnabled ? decimal.Round(subtotal * _vatRate, 2) : 0m;
             _paid.Value = decimal.Round(subtotal - _discount.Value + vat, 2);
+        }
     }
 
     private async Task SaveAsync()
