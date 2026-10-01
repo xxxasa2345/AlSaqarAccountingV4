@@ -33,6 +33,7 @@ public sealed class ScreenAccess
                 ["FrmRestaurant"] = "المطاعم",
                 ["FrmsHome"] = "الرئيسية",
                 ["FrmsMain"] = "النظام والإعدادات",
+                ["Security"] = "الأمن والصلاحيات",
                 ["Items"] = "الأصناف والمخازن",
                 ["OrderDalala"] = "الدلالة والإرسال",
                 ["OrderManufacturing"] = "التصنيع",

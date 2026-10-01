@@ -27,11 +27,19 @@ public sealed class ScreenRouter
             form.ShowDialog(owner); return true;
         }
 
-        // المستخدمون ومستخدم جديد يجب أن يفتحا شاشة CRUD الحقيقية على dbo.User_Login.
+        // Original GTSErpSystem places user-management screens in the Security
+        // module. Keep those separate from item groups.
         if (IsUserScreen(access.ScreenName))
         {
             if (_session.GroupId != 1) { message = "إدارة المستخدمين متاحة للمجموعة الإدارية فقط."; return false; }
             using var form = new UserManagementForm(_session, new UserManagementService(db)) { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
+        }
+
+        if (IsUserGroupScreen(access.ScreenName))
+        {
+            if (_session.GroupId != 1) { message = "إدارة مجموعات المستخدمين متاحة للمجموعة الإدارية فقط."; return false; }
+            using var form = new UserGroupsForm(_session, new UserGroupsService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
@@ -79,10 +87,26 @@ public sealed class ScreenRouter
     {
         if (string.IsNullOrWhiteSpace(name)) return false;
         var n = name.Trim();
-        return n.Equals("مستخدم جديد", StringComparison.OrdinalIgnoreCase) || n.Equals("إضافة مستخدم", StringComparison.OrdinalIgnoreCase) ||
-               n.Equals("تعديل مستخدم", StringComparison.OrdinalIgnoreCase) || n.Equals("المستخدمون", StringComparison.OrdinalIgnoreCase) ||
-               n.Equals("المستخدمين", StringComparison.OrdinalIgnoreCase) || n.Equals("المستخدمون النظام", StringComparison.OrdinalIgnoreCase) ||
+        return n.Equals("مستخدم جديد", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("إضافة مستخدم", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("تعديل مستخدم", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("المستخدمون", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("المستخدمين", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("المستخدمون النظام", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("FrmUsers", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("FrmEditUser", StringComparison.OrdinalIgnoreCase) ||
                n.Equals("UserManagementForm", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsUserGroupScreen(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        var n = name.Trim();
+        return n.Equals("FrmGroups", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("FrmSecurityGroup", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("مجموعات المستخدمين", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("مجموعة المستخدمين", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("UserGroupsForm", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool TryResolveItemMaster(string screenName, out string tableName, out string displayName)
@@ -92,7 +116,6 @@ public sealed class ScreenRouter
         {
             case "FrmCompany": tableName = "Item_Company"; displayName = "الشركات"; return true;
             case "FrmClass": tableName = "Item_Class"; displayName = "الفئات"; return true;
-            case "FrmGroups": tableName = "Item_Groups"; displayName = "المجموعات"; return true;
             default: return false;
         }
     }

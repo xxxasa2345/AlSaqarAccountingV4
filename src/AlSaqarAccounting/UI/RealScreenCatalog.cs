@@ -68,6 +68,13 @@ public static class RealScreenCatalog
             ["FrmSalesMan"] = (cs, s, a) => new SalesMenForm(
                 s, a, new SalesManService(CreateDb(cs))),
 
+            // مناطق المناديب — الشاشة الأصلية هي FrmPlace وتستخدم dbo.Account_Place.
+            ["FrmPlace"] = (cs, s, a) => new PlacesForm(
+                s, a, new PlacesService(CreateDb(cs))),
+
+            ["مناطق المناديب"] = (cs, s, a) => new PlacesForm(
+                s, a, new PlacesService(CreateDb(cs))),
+
             // مراكز التكلفة,
 
             ["FrmCostCenter"] = (cs, s, a) => new CostCentersForm(
