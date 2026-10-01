@@ -192,7 +192,7 @@ public sealed class SalesService
 public sealed class SalesEntrySettings
 {
     public bool VatEnabled { get; init; }
-    public decimal VatRate { get; init; } = 0.15m;
+    public decimal VatRate { get; init; } = 0m;
     public int? DefaultStoreId { get; init; }
 }
 
