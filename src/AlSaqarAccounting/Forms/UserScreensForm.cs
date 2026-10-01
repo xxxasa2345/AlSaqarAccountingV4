@@ -1,5 +1,6 @@
 using System.Data;
 using AlSaqarAccounting.Core;
+using AlSaqarAccounting.UI;
 using AlSaqarAccounting.Services;
 
 namespace AlSaqarAccounting.Forms;
@@ -10,6 +11,7 @@ namespace AlSaqarAccounting.Forms;
 public sealed class UserScreensForm : Form
 {
     private readonly AppSession _session;
+    private readonly ScreenAccess _access;
     private readonly SecurityAdministrationService _service;
     private readonly DataGridView _grid = new()
     {
@@ -29,9 +31,10 @@ public sealed class UserScreensForm : Form
     private readonly CheckBox _isShow = new() { Text = "تظهر في القائمة", Checked = true, AutoSize = true };
     private int? _editingId;
 
-    public UserScreensForm(AppSession session, SecurityAdministrationService service)
+    public UserScreensForm(AppSession session, ScreenAccess access, SecurityAdministrationService service)
     {
         _session = session;
+        _access = access;
         _service = service;
         Text = "شاشات النظام — dbo.User_Screens";
         Width = 1200;
@@ -64,11 +67,11 @@ public sealed class UserScreensForm : Form
 
         editor.Controls.Add(_isShow, 0, 1);
         var buttons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft };
-        var save = new Button { Text = "حفظ", Width = 100 };
+        var save = new Button { Text = "حفظ", Width = 100, Enabled = _access.AllowSave || _access.AllowEdit };
         save.Click += async (_, _) => await SaveAsync();
         var add = new Button { Text = "شاشة جديدة", Width = 120 };
         add.Click += (_, _) => ClearEditor();
-        var delete = new Button { Text = "حذف", Width = 100 };
+        var delete = new Button { Text = "حذف", Width = 100, Enabled = _access.AllowDelete };
         delete.Click += async (_, _) => await DeleteAsync();
         var refresh = new Button { Text = "تحديث", Width = 100 };
         refresh.Click += async (_, _) => await ReloadAsync();
@@ -130,6 +133,8 @@ public sealed class UserScreensForm : Form
     {
         try
         {
+            if ((_editingId.HasValue && !_access.AllowEdit) || (!_editingId.HasValue && !_access.AllowSave))
+                throw new UnauthorizedAccessException("لا تملك صلاحية حفظ/تعديل شاشات النظام.");
             await _service.SaveScreenAsync(
                 _editingId,
                 _name.Text,
@@ -151,6 +156,12 @@ public sealed class UserScreensForm : Form
 
     private async Task DeleteAsync()
     {
+        if (!_access.AllowDelete)
+        {
+            MessageBox.Show(this, "لا تملك صلاحية حذف شاشات النظام.", "الصلاحيات", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         if (!_editingId.HasValue)
             return;
 
