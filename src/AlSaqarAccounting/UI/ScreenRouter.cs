@@ -36,16 +36,16 @@ public sealed class ScreenRouter
 
         if (IsScreenCatalogScreen(access.ScreenName))
         {
-            if (_session.GroupId != 1) { message = "إدارة شاشات النظام متاحة للمجموعة الإدارية فقط."; return false; }
-            using var form = new UserScreensForm(_session, new SecurityAdministrationService(db))
+            if (!access.AllowEnter) { message = "لا تملك صلاحية فتح شاشة إدارة شاشات النظام."; return false; }
+            using var form = new UserScreensForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
         if (IsPermissionScreen(access.ScreenName))
         {
-            if (_session.GroupId != 1) { message = "إدارة صلاحيات الشاشات متاحة للمجموعة الإدارية فقط."; return false; }
-            using var form = new UserPermissionsForm(_session, new SecurityAdministrationService(db))
+            if (!access.AllowEnter) { message = "لا تملك صلاحية فتح شاشة إدارة الصلاحيات."; return false; }
+            using var form = new UserPermissionsForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
@@ -54,7 +54,7 @@ public sealed class ScreenRouter
         // module. Keep those separate from item groups.
         if (IsUserScreen(access.ScreenName))
         {
-            if (_session.GroupId != 1) { message = "إدارة المستخدمين متاحة للمجموعة الإدارية فقط."; return false; }
+            if (!access.AllowEnter) { message = "لا تملك صلاحية فتح إدارة المستخدمين."; return false; }
             using var form = new UserManagementForm(_session, new UserManagementService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
@@ -62,14 +62,14 @@ public sealed class ScreenRouter
         if (IsSecurityGroupPermissionScreen(access.ScreenName))
         {
             if (_session.GroupId != 1) { message = "إدارة صلاحيات المجموعة متاحة للمجموعة الإدارية فقط."; return false; }
-            using var form = new UserPermissionsForm(_session, new SecurityAdministrationService(db))
+            using var form = new UserPermissionsForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
         if (IsUserGroupScreen(access.ScreenName))
         {
-            if (_session.GroupId != 1) { message = "إدارة مجموعات المستخدمين متاحة للمجموعة الإدارية فقط."; return false; }
+            if (!access.AllowEnter) { message = "لا تملك صلاحية فتح مجموعات المستخدمين."; return false; }
             using var form = new UserGroupsForm(_session, new UserGroupsService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
