@@ -146,8 +146,7 @@ public sealed class UserPermissionsForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر تحميل الصلاحيات:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر تحميل الصلاحيات:\r\n" + ex.GetBaseException().Message,
                 "صلاحيات الشاشات", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally { UseWaitCursor = false; }
@@ -214,8 +213,7 @@ public sealed class UserPermissionsForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر حفظ الصلاحية:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر حفظ الصلاحية:\r\n" + ex.GetBaseException().Message,
                 "صلاحيات الشاشات", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -238,8 +236,7 @@ public sealed class UserPermissionsForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر حذف الصلاحية:
-" + ex.GetBaseException().Message,
+            MessageBox.Show(this, "تعذر حذف الصلاحية:\r\n" + ex.GetBaseException().Message,
                 "صلاحيات الشاشات", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
