@@ -59,6 +59,14 @@ public sealed class ScreenRouter
             form.ShowDialog(owner); return true;
         }
 
+        if (IsSecurityGroupPermissionScreen(access.ScreenName))
+        {
+            if (_session.GroupId != 1) { message = "إدارة صلاحيات المجموعة متاحة للمجموعة الإدارية فقط."; return false; }
+            using var form = new UserPermissionsForm(_session, new SecurityAdministrationService(db))
+            { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
+        }
+
         if (IsUserGroupScreen(access.ScreenName))
         {
             if (_session.GroupId != 1) { message = "إدارة مجموعات المستخدمين متاحة للمجموعة الإدارية فقط."; return false; }
@@ -152,12 +160,18 @@ public sealed class ScreenRouter
                n.Equals("UserManagementForm", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static bool IsSecurityGroupPermissionScreen(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        var n = name.Trim();
+        return n.Equals("FrmSecurityGroup", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool IsUserGroupScreen(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return false;
         var n = name.Trim();
         return n.Equals("FrmGroups", StringComparison.OrdinalIgnoreCase) ||
-               n.Equals("FrmSecurityGroup", StringComparison.OrdinalIgnoreCase) ||
                n.Equals("مجموعات المستخدمين", StringComparison.OrdinalIgnoreCase) ||
                n.Equals("مجموعة المستخدمين", StringComparison.OrdinalIgnoreCase) ||
                n.Equals("UserGroupsForm", StringComparison.OrdinalIgnoreCase);
