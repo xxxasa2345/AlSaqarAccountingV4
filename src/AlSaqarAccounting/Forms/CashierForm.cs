@@ -312,7 +312,7 @@ public sealed class CashierForm : Form
         }
         catch (Exception ex)
         {
-            _status.Text = "\u0001: " + ex.GetBaseException().Message; // "خطأ: "
+            _status.Text = "خطأ: " + ex.GetBaseException().Message; // "خطأ: "
         }
         finally { UseWaitCursor = false; }
     }
@@ -356,11 +356,11 @@ public sealed class CashierForm : Form
         }
         
         // Rename columns
-        if (_salesGrid.Columns.Contains("NoteNum")) _salesGrid.Columns["NoteNum"].HeaderText = "\u0001"; // "رقم الفاتورة"
-        if (_salesGrid.Columns.Contains("SupplierName")) _salesGrid.Columns["SupplierName"].HeaderText = "\u0001"; // "العميل"
-        if (_salesGrid.Columns.Contains("Purchases_Date")) _salesGrid.Columns["Purchases_Date"].HeaderText = "\u0001"; // "التاريخ"
-        if (_salesGrid.Columns.Contains("TotalPrices")) _salesGrid.Columns["TotalPrices"].HeaderText = "\u0001"; // "الإجمالي"
-        if (_salesGrid.Columns.Contains("Net")) _salesGrid.Columns["Net"].HeaderText = "\u0001"; // "الصافي"
+        if (_salesGrid.Columns.Contains("NoteNum")) _salesGrid.Columns["NoteNum"].HeaderText = "رقم الفاتورة"; // "رقم الفاتورة"
+        if (_salesGrid.Columns.Contains("SupplierName")) _salesGrid.Columns["SupplierName"].HeaderText = "العميل"; // "العميل"
+        if (_salesGrid.Columns.Contains("Purchases_Date")) _salesGrid.Columns["Purchases_Date"].HeaderText = "التاريخ"; // "التاريخ"
+        if (_salesGrid.Columns.Contains("TotalPrices")) _salesGrid.Columns["TotalPrices"].HeaderText = "الإجمالي"; // "الإجمالي"
+        if (_salesGrid.Columns.Contains("Net")) _salesGrid.Columns["Net"].HeaderText = "الصافي"; // "الصافي"
     }
 
     private async Task SearchCustomersAsync()
@@ -640,8 +640,8 @@ public sealed class CashierForm : Form
             ClearCart();
             await LoadSalesAsync();
             
-            _status.Text = $"\u0001 {saleId}"; // "تم البيع رقم: ..."
-            MessageBox.Show(this, $"\u0001 {saleId}", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "تم البيع بنجاح رقم: ..."
+            _status.Text = $"تم البيع رقم: {saleId}"; // "تم البيع رقم: ..."
+            MessageBox.Show(this, $"تم البيع بنجاح رقم: {saleId}", "تم البيع", MessageBoxButtons.OK, MessageBoxIcon.Information); // "تم البيع بنجاح رقم: ..."
         }
         catch (Exception ex)
         {
