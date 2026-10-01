@@ -433,6 +433,13 @@ public sealed class InvoicesForm : Form
 
     private void EditInvoice()
     {
+        if (_salesMode)
+        {
+            MessageBox.Show(this, "تعديل تفاصيل فاتورة المبيعات يتم من شاشة المبيعات التشغيلية.",
+                "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
         if (!_access.AllowEdit || !_selectedInvoiceId.HasValue)
         {
             MessageBox.Show(this, "يرجى اختيار فاتورة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -459,7 +466,7 @@ public sealed class InvoicesForm : Form
     {
         if (!_access.AllowDelete || !_selectedInvoiceId.HasValue)
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "يرجى اختيار فاتورة"
+            MessageBox.Show(this, "يرجى اختيار فاتورة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
         
@@ -478,7 +485,7 @@ public sealed class InvoicesForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally { UseWaitCursor = false; }
     }
@@ -487,7 +494,7 @@ public sealed class InvoicesForm : Form
     {
         if (!_selectedInvoiceId.HasValue)
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "يرجى اختيار فاتورة"
+            MessageBox.Show(this, "يرجى اختيار فاتورة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
         
@@ -746,7 +753,7 @@ internal sealed class InvoiceEditForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally { UseWaitCursor = false; }
     }
@@ -813,7 +820,7 @@ internal sealed class InvoiceEditForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally { UseWaitCursor = false; }
     }
