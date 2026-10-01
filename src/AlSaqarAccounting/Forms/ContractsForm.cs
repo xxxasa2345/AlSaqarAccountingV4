@@ -99,7 +99,7 @@ public sealed class ContractsForm : Form
         AddField(editor, "", _note, 0, 2, true); // "ملاحظات"
         editor.SetColumnSpan(_note, 3);
 
-        var save = new Button { Text = "", Width = 100, Height = 32, Enabled = _access.AllowSave }; // "حفظ"
+        var save = new Button { Text = "", Width = 100, Height = 32, Enabled = _access.AllowSave || _access.AllowEdit }; // "حفظ"
         var cancel = new Button { Text = "", Width = 100, Height = 32 }; // "إلغاء"
         save.Click += async (_, _) => await SaveAsync();
         cancel.Click += (_, _) => ClearEditor();
@@ -240,7 +240,14 @@ public sealed class ContractsForm : Form
 
     private async Task SaveAsync()
     {
-        if (!_access.AllowSave) return;
+        if (_editingId.HasValue)
+        {
+            if (!_access.AllowEdit) return;
+        }
+        else if (!_access.AllowSave)
+        {
+            return;
+        }
         
         var contract = new Contract_Contract
         {
@@ -261,7 +268,6 @@ public sealed class ContractsForm : Form
             UseWaitCursor = true;
             if (_editingId.HasValue)
             {
-                if (!_access.AllowEdit) return;
                 contract.ID = _editingId.Value;
                 await _service.UpdateAsync(contract, _session);
                 _status.Text = "  "; // "تم تعديل العقد بنجاح"

@@ -113,7 +113,7 @@ public sealed class BranchesForm : Form
         AddField(editor, "الهاتف", _phone, 1, 0);
         AddField(editor, "العنوان", _address, 2, 0);
 
-        var save = new Button { Text = "حفظ", Dock = DockStyle.Fill, Enabled = _access.AllowSave };
+        var save = new Button { Text = "حفظ", Dock = DockStyle.Fill, Enabled = _access.AllowSave || _access.AllowEdit };
         var cancel = new Button { Text = "إلغاء", Dock = DockStyle.Fill };
         save.Click += async (_, _) => await SaveAsync();
         cancel.Click += (_, _) => ClearEditor();
@@ -211,7 +211,14 @@ public sealed class BranchesForm : Form
 
     private async Task SaveAsync()
     {
-        if (!_access.AllowSave) return;
+        if (_editingId.HasValue)
+        {
+            if (!_access.AllowEdit) return;
+        }
+        else if (!_access.AllowSave)
+        {
+            return;
+        }
         var name = _name.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -225,7 +232,6 @@ public sealed class BranchesForm : Form
             UseWaitCursor = true;
             if (_editingId.HasValue)
             {
-                if (!_access.AllowEdit) return;
                 await _service.UpdateAsync(_editingId.Value, name, _phone.Text, null, _address.Text, null, _session);
                 _status.Text = "تم تعديل الفرع بنجاح.";
             }
