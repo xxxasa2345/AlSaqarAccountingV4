@@ -129,9 +129,6 @@ public static class ScreenEntityMap
             ["تعديل مستخدم"] = "User_Login",
             ["كلمة المرور"] = "User_Login",
             ["تغيير كلمة المرور"] = "User_Login",
-            ["الشاشات"] = "User_Screens",
-            ["شاشات النظام"] = "User_Screens",
-            ["صلاحيات الشاشات"] = "User_Permission",
             ["إدارة التراخيص"] = "App_Licenses",
             ["التراخيص"] = "App_Licenses"
         };
