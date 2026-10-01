@@ -22,6 +22,21 @@ internal static class Program
                 .Build();
 
             var connectionFactory = new SqlConnectionFactory(configuration);
+            var licenseService = new LicenseService(new DbExecutor(connectionFactory));
+
+            // The first installation receives a 30-day machine-bound trial.
+            // After that the application requires an active database license.
+            licenseService.EnsureTrialAsync().GetAwaiter().GetResult();
+            var license = licenseService.ValidateInstalledAsync().GetAwaiter().GetResult();
+            if (!license.IsValid)
+            {
+                using var activation = new LicenseActivationForm(licenseService);
+                Application.Run(activation);
+                license = licenseService.ValidateInstalledAsync().GetAwaiter().GetResult();
+                if (!license.IsValid)
+                    return;
+            }
+
             var storedProcedures = new StoredProcedureExecutor(connectionFactory);
             var auth = new AuthService(connectionFactory);
             var schema = new SchemaService(connectionFactory);
@@ -33,24 +48,12 @@ internal static class Program
         {
             try
             {
-                var logPath = Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "startup-error.log");
-
-                File.WriteAllText(
-                    logPath,
-                    $"Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\r\n\r\n{ex}");
+                var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "startup-error.log");
+                File.WriteAllText(logPath, $"Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\r\n\r\n{ex}");
             }
-            catch
-            {
-                // Ignore logging failures.
-            }
+            catch { }
 
-            MessageBox.Show(
-                ex.ToString(),
-                "خطأ عند تشغيل AlSaqarAccounting",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show(ex.ToString(), "خطأ عند تشغيل AlSaqarAccounting", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
