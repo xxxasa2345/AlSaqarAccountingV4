@@ -60,7 +60,7 @@ public sealed class ScreenRouter
         }
         if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) || string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
         {
-            using var form = new InvoicesForm(_session, access, new InvoiceService(db), new CustomerService(db), new SupplierService(db), new ItemsService(db)) { StartPosition = FormStartPosition.CenterParent };
+            using var form = new InvoicesForm(_session, access, new InvoiceService(db), new SalesService(db), new StoresService(db), new CustomerService(db), new SupplierService(db), new ItemsService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
         if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) && realScreen is not null)
