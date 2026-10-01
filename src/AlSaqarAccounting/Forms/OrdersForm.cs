@@ -1,3 +1,4 @@
+using System.Data;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Services;
 using AlSaqarAccounting.UI;
@@ -5,9 +6,9 @@ using AlSaqarAccounting.UI;
 namespace AlSaqarAccounting.Forms;
 
 /// <summary>
-/// Operational sales invoices screen (فواتير المبيعات). Lists through the
-/// original Select_Order_Orders procedure, creates invoices through
-/// SalesEntryForm → Insert_Order_Order_ALL, and deletes through
+/// Operational sales invoices screen. Lists invoices through the original
+/// database procedure, creates them through SalesService and the original
+/// Insert_Order_Order_ALL procedure, and deletes them through
 /// Delete_Order_Orders.
 /// </summary>
 public sealed class OrdersForm : BrowseScreenBase
@@ -15,11 +16,7 @@ public sealed class OrdersForm : BrowseScreenBase
     private readonly SalesService _sales;
     private readonly StoresService _stores;
 
-    public OrdersForm(
-        AppSession session,
-        ScreenAccess access,
-        SalesService sales,
-        StoresService stores)
+    public OrdersForm(AppSession session, ScreenAccess access, SalesService sales, StoresService stores)
         : base(session, access)
     {
         _sales = sales;
@@ -35,13 +32,16 @@ public sealed class OrdersForm : BrowseScreenBase
     {
         AddButton(toolbar, "فاتورة جديدة", Access.AllowSave, async () =>
         {
-            using var form = new RealSalesInvoiceFormFixed(Session, Access, _sales, _stores);
+            // Use the validated operational entry form directly. It loads
+            // customers, items, stores and branch VAT settings, then saves
+            // through SalesService -> Insert_Order_Order_ALL.
+            using var form = new SalesEntryForm(Session, Access, _sales, _stores);
             form.ShowDialog(this);
             if (form.Saved)
                 await ReloadAsync();
         });
 
-        AddButton(toolbar, "حذف الفاتورة", Access.AllowDelete, async () => await DeleteInvoiceAsync());
+        AddButton(toolbar, "حذف الفاتورة", Access.AllowDelete, DeleteInvoiceAsync);
     }
 
     private async Task DeleteInvoiceAsync()
@@ -54,11 +54,15 @@ public sealed class OrdersForm : BrowseScreenBase
         }
 
         var label = RowValue(row, "SupplierName", "Name", "CustSuppName")?.ToString() ?? string.Empty;
-        var confirmation = MessageBox.Show(this,
-            $"هل تريد حذف الفاتورة رقم {invoiceId}؟" +
+        var confirmation = MessageBox.Show(
+            this,
+            $"هل تريد حذف الفاتورة رقم {invoiceId}?" +
             (string.IsNullOrWhiteSpace(label) ? string.Empty : $"\r\n{label}") +
             "\r\nسيتم حذف تفاصيلها أيضاً عبر الإجراء الأصلي Delete_Order_Orders.",
-            "تأكيد الحذف", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            "تأكيد الحذف",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning);
+
         if (confirmation != DialogResult.Yes)
             return;
 
@@ -71,8 +75,12 @@ public sealed class OrdersForm : BrowseScreenBase
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "تعذر حذف الفاتورة:\r\n" + ex.GetBaseException().Message,
-                "حذف الفاتورة", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(
+                this,
+                "تعذر حذف الفاتورة:\r\n" + ex.GetBaseException().Message,
+                "حذف الفاتورة",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
         finally
         {
@@ -80,7 +88,7 @@ public sealed class OrdersForm : BrowseScreenBase
         }
     }
 
-    private static void AddButton(FlowLayoutPanel toolbar, string text, bool enabled, Func<Task> action)
+    private static void AddButton(FlowLayoutPanel panel, string text, bool enabled, Func<Task> action)
     {
         var button = new Button
         {
@@ -92,6 +100,6 @@ public sealed class OrdersForm : BrowseScreenBase
             FlatStyle = FlatStyle.Flat
         };
         button.Click += async (_, _) => await action();
-        toolbar.Controls.Add(button);
+        panel.Controls.Add(button);
     }
 }
