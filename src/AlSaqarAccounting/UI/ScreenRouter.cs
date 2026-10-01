@@ -5,12 +5,6 @@ using AlSaqarAccounting.Forms;
 
 namespace AlSaqarAccounting.UI;
 
-/// <summary>
-/// Routes a permitted screen to its concrete implementation. Specialized ERP
-/// Forms are always preferred. If a migrated Form is not registered yet, the
-/// router first tries a matching real Form type and only then uses the SQL-backed
-/// schema/procedure screen as the compatibility last mile.
-/// </summary>
 public sealed class ScreenRouter
 {
     private readonly string _connectionString;
@@ -25,7 +19,6 @@ public sealed class ScreenRouter
     public bool TryOpen(Form owner, ScreenAccess access, out string message)
     {
         message = string.Empty;
-
         if (!access.AllowEnter)
         {
             message = "لا تملك صلاحية فتح هذه الشاشة.";
@@ -33,6 +26,23 @@ public sealed class ScreenRouter
         }
 
         var db = new DbExecutor(new SqlConnectionFactory(_connectionString));
+
+        // إدارة التراخيص: شاشة إدارية حقيقية مرتبطة بجدول dbo.App_Licenses.
+        // لا تمر عبر DynamicErpScreenForm حتى لا تتحول إلى شاشة عامة.
+        if (string.Equals(access.ScreenName, "إدارة التراخيص", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(access.ScreenName, "التراخيص", StringComparison.OrdinalIgnoreCase))
+        {
+            if (_session.GroupId != 1)
+            {
+                message = "إدارة التراخيص متاحة للمجموعة الإدارية فقط.";
+                return false;
+            }
+            var licenseService = new LicenseService(db);
+            using var licenseForm = new LicenseManagementForm(_session, licenseService);
+            licenseForm.StartPosition = FormStartPosition.CenterParent;
+            licenseForm.ShowDialog(owner);
+            return true;
+        }
 
         if (string.Equals(access.ScreenName, "FrmUnit", StringComparison.OrdinalIgnoreCase))
         {
@@ -68,21 +78,13 @@ public sealed class ScreenRouter
             var customerService = new CustomerService(db);
             var supplierService = new SupplierService(db);
             var itemsService = new ItemsService(db);
-            using var form = new InvoicesForm(
-                _session,
-                access,
-                invoiceService,
-                customerService,
-                supplierService,
-                itemsService);
+            using var form = new InvoicesForm(_session, access, invoiceService, customerService, supplierService, itemsService);
             form.StartPosition = FormStartPosition.CenterParent;
             form.ShowDialog(owner);
             return true;
         }
 
-        // First: explicit migrated screen catalog.
-        if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) &&
-            realScreen is not null)
+        if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) && realScreen is not null)
         {
             using (realScreen)
             {
@@ -92,9 +94,6 @@ public sealed class ScreenRouter
             return true;
         }
 
-        // Second: a concrete Form whose class name matches the original screen name.
-        // This is deliberately attempted before the generic DB-backed form so a newly
-        // migrated screen cannot accidentally be swallowed by the fallback.
         var type = FindFormType(access.ScreenName);
         if (type is not null && type != typeof(DynamicErpScreenForm))
         {
@@ -110,16 +109,10 @@ public sealed class ScreenRouter
             message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
         }
 
-        // Third: real SQL-backed compatibility screen. ScreenEntityMap contains
-        // the original Arabic labels and known Order_* / Account_* / Item_* entities.
         var dynamicService = new DynamicErpScreenService(db);
         try
         {
-            using var dynamicScreen = new DynamicErpScreenForm(
-                _session,
-                access,
-                dynamicService,
-                access.ScreenName);
+            using var dynamicScreen = new DynamicErpScreenForm(_session, access, dynamicService, access.ScreenName);
             dynamicScreen.StartPosition = FormStartPosition.CenterParent;
             dynamicScreen.ShowDialog(owner);
             return true;
@@ -129,104 +122,51 @@ public sealed class ScreenRouter
             message = ex.GetBaseException().Message;
         }
 
-        message = string.IsNullOrWhiteSpace(message)
-            ? "تعذر إنشاء الشاشة من قاعدة البيانات."
-            : message;
+        message = string.IsNullOrWhiteSpace(message) ? "تعذر إنشاء الشاشة من قاعدة البيانات." : message;
         return false;
     }
 
     private static bool TryResolveItemMaster(string screenName, out string tableName, out string displayName)
     {
-        tableName = string.Empty;
-        displayName = string.Empty;
-
+        tableName = string.Empty; displayName = string.Empty;
         switch (screenName.Trim())
         {
-            case "FrmCompany":
-                tableName = "Item_Company";
-                displayName = "الشركات";
-                return true;
-            case "FrmClass":
-                tableName = "Item_Class";
-                displayName = "الفئات";
-                return true;
-            case "FrmGroups":
-                tableName = "Item_Groups";
-                displayName = "المجموعات";
-                return true;
-            default:
-                return false;
+            case "FrmCompany": tableName = "Item_Company"; displayName = "الشركات"; return true;
+            case "FrmClass": tableName = "Item_Class"; displayName = "الفئات"; return true;
+            case "FrmGroups": tableName = "Item_Groups"; displayName = "المجموعات"; return true;
+            default: return false;
         }
     }
 
     private static Type? FindFormType(string screenName)
     {
-        if (string.IsNullOrWhiteSpace(screenName))
-            return null;
-
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()
-                     .OrderByDescending(a => a == typeof(ScreenRouter).Assembly))
+        if (string.IsNullOrWhiteSpace(screenName)) return null;
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().OrderByDescending(a => a == typeof(ScreenRouter).Assembly))
         {
             Type[] types;
-            try
-            {
-                types = assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                types = ex.Types.Where(t => t is not null).Cast<Type>().ToArray();
-            }
-
-            var match = types.FirstOrDefault(t =>
-                typeof(Form).IsAssignableFrom(t) &&
-                !t.IsAbstract &&
-                string.Equals(t.Name, screenName.Trim(), StringComparison.OrdinalIgnoreCase));
-
-            if (match is not null)
-                return match;
+            try { types = assembly.GetTypes(); }
+            catch (ReflectionTypeLoadException ex) { types = ex.Types.Where(t => t is not null).Cast<Type>().ToArray(); }
+            var match = types.FirstOrDefault(t => typeof(Form).IsAssignableFrom(t) && !t.IsAbstract && string.Equals(t.Name, screenName.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (match is not null) return match;
         }
         return null;
     }
 
-    private bool TryCreateForm(
-        Type type,
-        ScreenAccess access,
-        out Form? form,
-        out string? error)
+    private bool TryCreateForm(Type type, ScreenAccess access, out Form? form, out string? error)
     {
-        form = null;
-        error = null;
+        form = null; error = null;
         try
         {
-            foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
-                         .OrderBy(c => c.GetParameters().Length))
+            foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).OrderBy(c => c.GetParameters().Length))
             {
                 var parameters = ctor.GetParameters();
-                if (parameters.Length == 0)
-                {
-                    form = (Form?)ctor.Invoke(null);
-                    if (form is not null) return true;
-                }
-                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(AppSession))
-                {
-                    form = (Form?)ctor.Invoke(new object?[] { _session });
-                    if (form is not null) return true;
-                }
-                if (parameters.Length == 1 &&
-                    (parameters[0].ParameterType == typeof(int) || parameters[0].ParameterType == typeof(int?)) &&
-                    access.ScreenNum.HasValue)
-                {
-                    form = (Form?)ctor.Invoke(new object?[] { access.ScreenNum.Value });
-                    if (form is not null) return true;
-                }
+                if (parameters.Length == 0) { form = (Form?)ctor.Invoke(null); if (form is not null) return true; }
+                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(AppSession)) { form = (Form?)ctor.Invoke(new object?[] { _session }); if (form is not null) return true; }
+                if (parameters.Length == 1 && (parameters[0].ParameterType == typeof(int) || parameters[0].ParameterType == typeof(int?)) && access.ScreenNum.HasValue) { form = (Form?)ctor.Invoke(new object?[] { access.ScreenNum.Value }); if (form is not null) return true; }
             }
             error = $"الشاشة {type.Name} موجودة لكن لا يوجد Constructor مدعوم حاليًا.";
             return false;
         }
-        catch (Exception ex)
-        {
-            error = ex.GetBaseException().Message;
-            return false;
-        }
+        catch (Exception ex) { error = ex.GetBaseException().Message; return false; }
     }
 }
