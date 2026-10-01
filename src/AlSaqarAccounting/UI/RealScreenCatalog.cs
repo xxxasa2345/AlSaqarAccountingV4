@@ -256,14 +256,6 @@ public static class RealScreenCatalog
 
             ["الفئات"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Class", "الفئات"),
 
-            ["FrmCountry"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Country", "الدول"),
-
-            ["الدول"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Country", "الدول"),
-
-            ["FrmDoctor"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Doctor", "الأطباء"),
-
-            ["الأطباء"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Doctor", "الأطباء"),
-
             ["المجموعات"] = (cs, s, a) => new ItemMasterForm(s, a, new ItemMasterService(CreateDb(cs)), "Item_Groups", "المجموعات"),
 
             ["FrmContract"] = (cs, s, a) => new ContractsForm(s, a, new ContractService(CreateDb(cs))),
