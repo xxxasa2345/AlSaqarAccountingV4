@@ -394,6 +394,8 @@ public static class RealScreenCatalog
                 session,
                 access,
                 new InvoiceService(db),
+                new SalesService(db),
+                new StoresService(db),
                 new CustomerService(db),
                 new SupplierService(db),
                 new ItemsService(db));
