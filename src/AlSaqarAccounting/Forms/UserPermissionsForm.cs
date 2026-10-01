@@ -1,5 +1,6 @@
 using System.Data;
 using AlSaqarAccounting.Core;
+using AlSaqarAccounting.UI;
 using AlSaqarAccounting.Services;
 
 namespace AlSaqarAccounting.Forms;
@@ -10,6 +11,7 @@ namespace AlSaqarAccounting.Forms;
 public sealed class UserPermissionsForm : Form
 {
     private readonly AppSession _session;
+    private readonly ScreenAccess _access;
     private readonly SecurityAdministrationService _service;
 
     private readonly DataGridView _grid = new()
@@ -46,9 +48,10 @@ public sealed class UserPermissionsForm : Form
     private readonly CheckBox _allowExport = new() { Text = "تصدير" };
     private int? _editingId;
 
-    public UserPermissionsForm(AppSession session, SecurityAdministrationService service)
+    public UserPermissionsForm(AppSession session, ScreenAccess access, SecurityAdministrationService service)
     {
         _session = session;
+        _access = access;
         _service = service;
         Text = "صلاحيات الشاشات — dbo.User_Permission";
         Width = 1300;
@@ -96,11 +99,11 @@ public sealed class UserPermissionsForm : Form
             Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.RightToLeft
         };
-        var save = new Button { Text = "حفظ", Width = 100 };
+        var save = new Button { Text = "حفظ", Width = 100, Enabled = _access.AllowSave || _access.AllowEdit };
         save.Click += async (_, _) => await SaveAsync();
         var add = new Button { Text = "صلاحية جديدة", Width = 120 };
         add.Click += (_, _) => ClearEditor();
-        var delete = new Button { Text = "حذف", Width = 100 };
+        var delete = new Button { Text = "حذف", Width = 100, Enabled = _access.AllowDelete };
         delete.Click += async (_, _) => await DeleteAsync();
         var refresh = new Button { Text = "تحديث", Width = 100 };
         refresh.Click += async (_, _) => await LoadAllAsync();
@@ -190,6 +193,8 @@ public sealed class UserPermissionsForm : Form
     {
         try
         {
+            if ((_editingId.HasValue && !_access.AllowEdit) || (!_editingId.HasValue && !_access.AllowSave))
+                throw new UnauthorizedAccessException("لا تملك صلاحية حفظ/تعديل صلاحيات الشاشات.");
             if (!TryComboInt(_group, out var groupId))
                 throw new InvalidOperationException("اختر مجموعة المستخدمين.");
             if (!TryComboInt(_screen, out var screenId))
@@ -220,6 +225,12 @@ public sealed class UserPermissionsForm : Form
 
     private async Task DeleteAsync()
     {
+        if (!_access.AllowDelete)
+        {
+            MessageBox.Show(this, "لا تملك صلاحية حذف صلاحيات الشاشات.", "الصلاحيات", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         if (!_editingId.HasValue)
             return;
 
