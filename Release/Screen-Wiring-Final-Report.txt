@@ -1,0 +1,21 @@
+﻿AlSaqarAccounting - Screen Wiring Report
+Generated: 2026-10-01 09:53:35
+
+Repository: C:\Users\hp\Desktop\AlSaqarAccountingV4
+Forms: 47
+Entity mappings: 111
+
+=== Added mappings ===
+عروض اسعار -> Order_PriceOffer
+
+=== Router checks ===
+RealScreenCatalog = True
+DynamicErpScreenForm = True
+FindFormType = True
+TryCreateForm = True
+UserManagementForm = True
+ItemMasterForm = True
+InvoicesForm = True
+
+=== Git conflicts ===
+None

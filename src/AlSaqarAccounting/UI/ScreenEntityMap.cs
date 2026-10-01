@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace AlSaqarAccounting.UI;
@@ -68,6 +68,7 @@ public static class ScreenEntityMap
             ["المستودعات"] = "Account_Stores",
             ["المندوبين"] = "Account_SalesMan",
             ["المندوبون"] = "Account_SalesMan",
+            ["مناطق المناديب"] = "Account_Place",
             ["مراكز التكلفة"] = "Account_CostCenters",
             ["المشاريع"] = "Account_Projects",
             ["العقود"] = "Contract_Contract",
@@ -91,6 +92,7 @@ public static class ScreenEntityMap
             ["تحويلات المخازن"] = "Order_StoreTransfer",
             ["عروض أسعار"] = "Order_PriceOffer",
             ["عروض الأسعار"] = "Order_PriceOffer",
+            ["عروض اسعار"] = "Order_PriceOffer",
             ["الجرد"] = "Order_Gard",
             ["كميات المخزون"] = "ItemQuantity",
             ["الكميات الافتتاحية"] = "Order_OpenQuantity",
@@ -178,3 +180,10 @@ public static class ScreenEntityMap
         return builder.ToString();
     }
 }
+
+
+
+
+
+
+

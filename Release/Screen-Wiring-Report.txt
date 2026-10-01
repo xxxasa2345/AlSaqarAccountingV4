@@ -1,0 +1,449 @@
+﻿AlSaqarAccounting - Screen Wiring Report
+Generated: 2026-10-01 09:50:04
+
+=== ROUTER FILE ===
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\ScreenRouter.cs
+
+=== MAP FILE ===
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\ScreenEntityMap.cs
+
+=== MAIN FORM ===
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\MainForm.cs
+
+=== ROUTER SCREENS ===
+FrmClass
+FrmCompany
+FrmGroups
+
+=== ENTITY MAP ===
+FrmAccountTree -> Account_Accounts
+FrmBranches -> Account_Branch
+FrmCardAccount -> Account_Accounts
+FrmClass -> Item_Class
+FrmCompany -> Item_Company
+FrmContract -> Contract_Contract
+FrmCostCenter -> Account_CostCenters
+FrmCostCenterTree -> Account_CostCenters
+FrmCountry -> Item_Country
+FrmCustomer -> Account_DefualtCustomer
+FrmDalala -> OrderDalala_Dalala
+FrmDefualtAccount -> Account_DefualtAccount
+FrmDefualtCustomer -> Account_DefualtCustomer
+FrmDelivery -> Restaurant_Delivery
+FrmDoctor -> Item_Doctor
+FrmEJAR -> Contract_EJAR
+FrmEmployee -> Emp_Employee
+FrmEntryPermission -> Scaffold_EntryPermission
+FrmExitPermission -> Scaffold_ExitPermission
+FrmGuarantee -> Contract_Guarantee
+FrmItems -> Item_Items
+FrmManufacturing -> Order_Manufacturing
+FrmManufacturingOrder -> Order_ManufacturingOrder
+FrmPayment -> Order_PaymentItem
+FrmPayroll -> Emp_Payroll
+FrmPlace -> Account_Place
+FrmProjects -> Account_Projects
+FrmReceipts -> Account_Receipts
+FrmRecipt -> OrderRent_Recipt
+FrmRecipt3 -> OrderRent_Recipt3
+FrmRent -> OrderRent_Rent
+FrmRentalExpenses -> RentalExpenses
+FrmRentalInvoice -> Orders_RentalInvoice
+FrmRepair -> Repairs_Repair
+FrmRepairs -> Repairs_Repair
+FrmReservation -> Order_Reservation
+FrmRoom -> Restaurant_Room
+FrmSalesMan -> Account_SalesMan
+FrmSending -> OrderDalala_Sending
+FrmStores -> Account_Stores
+FrmSuppliers -> Account_CustSup
+FrmTable -> Restaurant_Table
+FrmUnit -> Item_Unit
+FrmZatcaIntgration -> ResultElectronicInvoiceXmls
+إدارة التراخيص -> App_Licenses
+إضافة مستخدم -> User_Login
+إعدادات الطابعات -> Printers
+إعدادات طابعات المطبخ -> PrintersCook
+إعدادات طابعة الكاشير -> PrintersCook
+الأصناف -> Item_Items
+التراخيص -> App_Licenses
+الجرد -> Order_Gard
+الحسابات -> Account_Accounts
+الشاشات -> User_Screens
+الشركات -> Item_Company
+الصلاحيات -> User_Permission
+الصنف -> Item_Items
+الطابعات -> Printers
+الطابعة -> Printers
+العقود -> Contract_Contract
+العملاء -> Account_DefualtCustomer
+الفروع -> Account_Branch
+الفئات -> Item_Class
+الكميات الافتتاحية -> Order_OpenQuantity
+المبيعات -> Order_Orders
+المجموعات -> Item_Groups
+المخازن -> Account_Stores
+المستخدمون -> User_Login
+المستخدمون النظام -> User_Login
+المستخدمين -> User_Login
+المستودعات -> Account_Stores
+المشاريع -> Account_Projects
+المشتريات -> Order_Purchases
+المندوبون -> Account_SalesMan
+المندوبين -> Account_SalesMan
+الموردون -> Account_CustSup
+الموردين -> Account_CustSup
+الوحدات -> Item_Unit
+أمر توريد المخازن -> Order_RecItem
+أمر توريد للمخازن -> Order_RecItem
+أمر صرف للمخازن -> Order_PaymentItem
+بونص العقود -> Contract_Bounce
+تحويل إلى فرع -> Order_TransferToBranch
+تحويل من فرع -> Order_TransferFromBranch
+تحويلات المخازن -> Order_StoreTransfer
+تعديل مستخدم -> User_Login
+شاشات النظام -> User_Screens
+شجرة الحسابات -> Account_Accounts
+صلاحيات الشاشات -> User_Permission
+ضمانات العقود -> Contract_Guarantee
+طابعات الكاشير -> PrintersCook
+طابعات المطبخ -> PrintersCook
+طبعات المطبخ -> PrintersCook
+طلب الاستقبال من فرع -> Order_TransferFromBranch
+طلب التحويل إلى فرع -> Order_TransferToBranch
+طلبات التحويل للفروع -> Order_TransferToBranch
+عروض أسعار -> Order_PriceOffer
+عروض الأسعار -> Order_PriceOffer
+كميات المخزون -> ItemQuantity
+مجموعات المستخدمين -> User_Groups
+مجموعة المستخدمين -> User_Groups
+مراكز التكلفة -> Account_CostCenters
+مرتجعات المبيعات -> Order_OrderReturn
+مرتجعات المبيعات بدون فاتورة -> Order_OrderReturn
+مرتجعات المبيعات بفاتورة -> Order_OrderReturn
+مرتجعات المشتريات -> Order_PurchasesReturn
+مرتجعات المشتريات بدون فاتورة -> Order_PurchasesReturn
+مرتجعات المشتريات بفاتورة -> Order_PurchasesReturn
+مستخدم جديد -> User_Login
+مناطق المناديب -> Account_Place
+
+=== FORMS ===
+AccountingForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\AccountingForm.cs
+AccountsTreeForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\AccountsTreeForm.cs
+AdvancedItemsForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\AdvancedItemsForm.cs
+BranchesForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\BranchesForm.cs
+CashierForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\CashierForm.cs
+ContractBounceForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ContractBounceForm.cs
+ContractsForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ContractsForm.cs
+CostCentersForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\CostCentersForm.cs
+CustomersForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\CustomersForm.cs
+DynamicErpScreenForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\DynamicErpScreenForm.cs
+GuaranteesForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\GuaranteesForm.cs
+InventoryCountForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\InventoryCountForm.cs
+InventorySettlementMinusForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\InventorySettlementMinusForm.cs
+InventoryStockForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\InventoryStockForm.cs
+InvoicesForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\InvoicesForm.cs
+ItemMasterForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ItemMasterForm.cs
+ItemsForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ItemsForm.cs
+ItemUnitForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ItemUnitForm.cs
+LicenseActivationForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\LicenseActivationForm.cs
+LicenseManagementForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\LicenseManagementForm.cs
+LoginForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\LoginForm.cs
+MainForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\MainForm.cs
+OpenQuantitiesForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\OpenQuantitiesForm.cs
+OpenQuantityEntryForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\OpenQuantityEntryForm.cs
+OrdersForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\OrdersForm.cs
+PriceOffersForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PriceOffersForm.cs
+PrinterSettingsForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PrinterSettingsForm.cs
+ProcedureDocumentBrowseForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ProcedureDocumentBrowseForm.cs
+ProjectsForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ProjectsForm.cs
+PurchaseReturnsForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PurchaseReturnsForm.cs
+PurchasesEntryForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PurchasesEntryForm.cs
+PurchasesForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PurchasesForm.cs
+RealSalesInvoiceForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\RealSalesInvoiceForm.cs
+ReceiptsForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ReceiptsForm.cs
+SalesEntryForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\SalesEntryForm.cs
+SalesMenForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\SalesMenForm.cs
+SalesReturnsForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\SalesReturnsForm.cs
+StoresForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\StoresForm.cs
+StoreTransfersForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\StoreTransfersForm.cs
+SuppliersForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\SuppliersForm.cs
+TransferFromBranchForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\TransferFromBranchForm.cs
+TransferToBranchForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\TransferToBranchForm.cs
+UserManagementForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\UserManagementForm.cs
+VoucherEntryForm | C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\VoucherEntryForm.cs
+
+=== ALL C# FILES ===
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\GlobalUsings.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Program.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Compat\IsExternalInit.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Core\AppSession.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Core\DbExecutor.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Core\SqlConnectionFactory.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Core\StoredProcedureExecutor.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\AccountingForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\AccountsTreeForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\AdvancedItemsForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\BranchesForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\BrowseScreenBase.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\CashierForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ContractBounceForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ContractsForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\CostCentersForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\CustomersForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\DynamicErpScreenForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\GuaranteesForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\InventoryCountForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\InventorySettlementMinusForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\InventoryStockForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\InvoicesForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ItemMasterForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ItemsForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ItemUnitForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\LicenseActivationForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\LicenseManagementForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\LoginForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\MainForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\OpenQuantitiesForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\OpenQuantityEntryForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\OrdersForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PriceOffersForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PrinterSettingsForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ProcedureDocumentBrowseForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ProjectsForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PurchaseReturnsForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PurchasesEntryForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\PurchasesForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\RealSalesInvoiceForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\RealSalesInvoiceFormFixed.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ReceiptsForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\SalesEntryForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\SalesMenForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\SalesReturnsForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\ScreenToolbox.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\StoresForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\StoreTransfersForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\SuppliersForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\TransferFromBranchForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\TransferToBranchForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\UserManagementForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Forms\VoucherEntryForm.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\AccountStartBalance.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\AccountYearEndClosing.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\AccountYears.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Accounts.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_AccountType.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Branch.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_CostCenters.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_CustSup.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_CustTailor.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_DefualtAccount.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_DefualtAccount2.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_DefualtCustomer.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Final.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Nature.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Place.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Projects.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_ProjectsDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Receipts.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_ReceiptsDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_SalesMan.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Stores.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Suspended.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Account_Type.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\AgeingAnalysis.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\App_FiscalYearState.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Car_Receive.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\CashReceiptsType.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Contract_Bounce.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Contract_Contract.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Contract_ContractDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Contract_EJAR.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Contract_Files.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Contract_Guarantee.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Contract_GuaranteeDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Contract_Store.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\EmployeeAllowances.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_Allowances.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_Employee.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_Entrusted.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_EntrustedEmployee.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_EntrustedEmployeeDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_Payroll.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_PayrollDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_PayrollTemp.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Emp_PayrollTempDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Halls.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\ItemQuantity.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Items_ContentAlignment_ForCashier.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Add.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Class.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Company.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Country.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Doctor.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Groups.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Guarantee.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_ItemComponent.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Items.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Type.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Item_Unit.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\LoginLogs.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderDalala_Dalala.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderDalala_DalalaDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderDalala_Sending.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderDalala_SendingDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderRent_Recipt.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderRent_Recipt3.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderRent_RecpitDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderRent_RecpitDetails3.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderRent_Rent.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrderRent_RentDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrdersReturn_RentalInvoice.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Orders_PriceShowRental.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Orders_RentalInvoice.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\OrdertReturn_RentalInvoiceDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Ordert_PriceShowRentalDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Ordert_RentalInvoiceDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_CheckoutOrders.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_CheckoutOrdersDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Extension.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Gard.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_GardDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_InventorySettlementMinus.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_InventorySettlementMinusDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Manufacturing.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_ManufacturingDetailsItems.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_ManufacturingDetailsNew.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_ManufacturingOrder.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_ManufacturingOrderDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_MoveHall.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_OpenQuantity.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_OpenQuantityDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_OrderReturn.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_OrderReturnDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Orders.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_OrdersDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_OrdersDetailsDraft.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_OrdersDraft.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PaymentItem.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PaymentItemDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PriceOffer.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PriceOfferDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Purchases.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PurchasesDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PurchasesOrder.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PurchasesOrderDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PurchasesReturn.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_PurchasesReturnDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_RecItem.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_RecItemDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Reservation.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Reservations.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_StoreTransfer.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_StoreTransferDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_TransferFromBranch.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_TransferFromBranchDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_TransferToBranch.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_TransferToBranchDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Transfer_Master.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Transfer_MasterDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Transfer_StatusType.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_Transfer_TrackingType.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Order_TypeElectronicInvoice.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\PriceOffer_Reservations.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Printers.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\PrintersCook.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\RebuildAllIndexes.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\RentalExpenses.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\RentalExpensesDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Repairs_Groups.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Repairs_Malfunctions.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Repairs_Repair.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Repairs_RepairDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Restaurant_Delivery.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Restaurant_DeliveryMan.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Restaurant_Room.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Restaurant_Table.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Restaurant_Type.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\ResultElectronicInvoiceXmls.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffolds_Contract.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffolds_ContractDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffolds_MinutesEnd.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffolds_MinutesEndDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffolds_MinutesStarted.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffolds_MinutesStartedDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffold_EntryPermission.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffold_EntryPermissionDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffold_ExitPermission.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffold_ExitPermissionDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffold_PriceOffer.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Scaffold_PriceOfferDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Tafqit.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\TblRemember.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\TblSetting.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\TempAccounts.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\TempAgeingAnalysis.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\TempBudget.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\TempTranMaterDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\TempTrialBalanceByTotal.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Temp_Accounts.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Tran_Tran.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Tran_TranDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Tran_TranTemp.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Tran_TranTempDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Tran_Type.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\User_DayClose.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\User_Groups.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\User_Login.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\User_Permission.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\User_Screens.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\User_SellPrice.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_AppType.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_Branch.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_Company.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_Franchise.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_Master.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_MasterDetails.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_Statuse.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_Type.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\Virg_Virgins.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Models\__EFMigrationsHistory.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\obj\Release\net48\.NETFramework,Version=v4.8.AssemblyAttributes.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\obj\Release\net48\AlSaqarAccounting.AssemblyInfo.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\AccountingService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\AccountsTreeService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\AuthService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\BranchService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\CashierService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\ContractService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\CustomerService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\CustSupService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\DocumentsService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\DynamicErpScreenService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\InventoryOperationsService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\InvoiceService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\ItemMasterService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\ItemsService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\ItemUnitService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\LicenseService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\OpenQuantityService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\PrinterSettingsService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\PurchasesService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\SalesManService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\SalesService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\SchemaService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\SecurityService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\StoredProcedureContract.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\StoreService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\StoresService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\SupplierService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\TvpTableBuilder.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\UserManagementService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\Services\VouchersService.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\CatalogDataScreen.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\OperationalDataScreen.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\OperationalScreenDefinition.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\RealScreenCatalog.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\ScreenAccess.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\ScreenEntityMap.cs
+C:\Users\hp\Desktop\AlSaqarAccountingV4\src\AlSaqarAccounting\UI\ScreenRouter.cs
