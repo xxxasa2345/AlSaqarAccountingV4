@@ -168,14 +168,21 @@ public sealed class ItemMasterForm : Form
 
     private async Task SaveAsync()
     {
-        if (!_access.AllowSave) return;
+        if (_editingId.HasValue)
+        {
+            if (!_access.AllowEdit) return;
+        }
+        else if (!_access.AllowSave)
+        {
+            return;
+        }
+
         var name = _name.Text.Trim();
         try
         {
             UseWaitCursor = true;
             if (_editingId.HasValue)
             {
-                if (!_access.AllowEdit) return;
                 await _service.UpdateAsync(_tableName, _editingId.Value, name, _session);
                 _status.Text = "تم التعديل بنجاح.";
             }

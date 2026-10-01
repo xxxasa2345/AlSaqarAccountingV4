@@ -22,7 +22,6 @@ public sealed class ScreenRouter
         if (string.Equals(access.ScreenName, "إدارة التراخيص", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(access.ScreenName, "التراخيص", StringComparison.OrdinalIgnoreCase))
         {
-            if (_session.GroupId != 1) { message = "إدارة التراخيص متاحة للمجموعة الإدارية فقط."; return false; }
             using var form = new LicenseManagementForm(_session, new LicenseService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
@@ -36,7 +35,6 @@ public sealed class ScreenRouter
 
         if (IsScreenCatalogScreen(access.ScreenName))
         {
-            if (!access.AllowEnter) { message = "لا تملك صلاحية فتح شاشة إدارة شاشات النظام."; return false; }
             using var form = new UserScreensForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
@@ -44,7 +42,6 @@ public sealed class ScreenRouter
 
         if (IsPermissionScreen(access.ScreenName))
         {
-            if (!access.AllowEnter) { message = "لا تملك صلاحية فتح شاشة إدارة الصلاحيات."; return false; }
             using var form = new UserPermissionsForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
@@ -54,14 +51,12 @@ public sealed class ScreenRouter
         // module. Keep those separate from item groups.
         if (IsUserScreen(access.ScreenName))
         {
-            if (!access.AllowEnter) { message = "لا تملك صلاحية فتح إدارة المستخدمين."; return false; }
-            using var form = new UserManagementForm(_session, new UserManagementService(db)) { StartPosition = FormStartPosition.CenterParent };
+            using var form = new UserManagementForm(_session, access, new UserManagementService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
         if (IsSecurityGroupPermissionScreen(access.ScreenName))
         {
-            if (_session.GroupId != 1) { message = "إدارة صلاحيات المجموعة متاحة للمجموعة الإدارية فقط."; return false; }
             using var form = new UserPermissionsForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
@@ -69,8 +64,7 @@ public sealed class ScreenRouter
 
         if (IsUserGroupScreen(access.ScreenName))
         {
-            if (!access.AllowEnter) { message = "لا تملك صلاحية فتح مجموعات المستخدمين."; return false; }
-            using var form = new UserGroupsForm(_session, new UserGroupsService(db)) { StartPosition = FormStartPosition.CenterParent };
+            using var form = new UserGroupsForm(_session, access, new UserGroupsService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
@@ -209,9 +203,48 @@ public sealed class ScreenRouter
             foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).OrderBy(c => c.GetParameters().Length))
             {
                 var parameters = ctor.GetParameters();
-                if (parameters.Length == 0) { form = (Form?)ctor.Invoke(null); if (form is not null) return true; }
-                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(AppSession)) { form = (Form?)ctor.Invoke(new object?[] { _session }); if (form is not null) return true; }
-                if (parameters.Length == 1 && (parameters[0].ParameterType == typeof(int) || parameters[0].ParameterType == typeof(int?)) && access.ScreenNum.HasValue) { form = (Form?)ctor.Invoke(new object?[] { access.ScreenNum.Value }); if (form is not null) return true; }
+                if (parameters.Length == 0)
+                {
+                    form = (Form?)ctor.Invoke(null);
+                    if (form is not null) return true;
+                }
+
+                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(AppSession))
+                {
+                    form = (Form?)ctor.Invoke(new object?[] { _session });
+                    if (form is not null) return true;
+                }
+
+                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(ScreenAccess))
+                {
+                    form = (Form?)ctor.Invoke(new object?[] { access });
+                    if (form is not null) return true;
+                }
+
+                if (parameters.Length == 1 &&
+                    (parameters[0].ParameterType == typeof(int) || parameters[0].ParameterType == typeof(int?)) &&
+                    access.ScreenNum.HasValue)
+                {
+                    form = (Form?)ctor.Invoke(new object?[] { access.ScreenNum.Value });
+                    if (form is not null) return true;
+                }
+
+                if (parameters.Length == 2 &&
+                    parameters[0].ParameterType == typeof(AppSession) &&
+                    parameters[1].ParameterType == typeof(ScreenAccess))
+                {
+                    form = (Form?)ctor.Invoke(new object?[] { _session, access });
+                    if (form is not null) return true;
+                }
+
+                if (parameters.Length == 2 &&
+                    parameters[0].ParameterType == typeof(AppSession) &&
+                    (parameters[1].ParameterType == typeof(int) || parameters[1].ParameterType == typeof(int?)) &&
+                    access.ScreenNum.HasValue)
+                {
+                    form = (Form?)ctor.Invoke(new object?[] { _session, access.ScreenNum.Value });
+                    if (form is not null) return true;
+                }
             }
             error = $"الشاشة {type.Name} موجودة لكن لا يوجد Constructor مدعوم حاليًا."; return false;
         }

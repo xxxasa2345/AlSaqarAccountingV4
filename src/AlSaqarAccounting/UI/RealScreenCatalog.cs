@@ -376,7 +376,6 @@ public static class RealScreenCatalog
         }
 
         if (normalized.Contains("مندوب", StringComparison.OrdinalIgnoreCase) ||
-            normalized.Contains("salesman", StringComparison.OrdinalIgnoreCase) ||
             normalized.Contains("salesman", StringComparison.OrdinalIgnoreCase))
         {
             form = new SalesMenForm(session, access, new SalesManService(db));
