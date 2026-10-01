@@ -49,11 +49,11 @@ END";
     {
         await EnsureSchemaAsync(cancellationToken).ConfigureAwait(false);
         var machine = GetMachineFingerprint();
-        var count = await _db.QuerySingleAsync<LicenseCount>(
-            "SELECT COUNT(*) AS LicenseCount FROM dbo.App_Licenses WHERE MachineFingerprint=@Machine AND IsActive=1;",
+        var count = await _db.QuerySingleAsync<LicenseCountResult>(
+            "SELECT COUNT(*) AS Count FROM dbo.App_Licenses WHERE MachineFingerprint=@Machine AND IsActive=1;",
             p => p.AddWithValue("@Machine", machine), cancellationToken).ConfigureAwait(false);
 
-        if (count != null && count.LicenseCount > 0)
+        if (count != null && count.Count > 0)
             return;
 
         var key = GenerateKey();
@@ -211,7 +211,11 @@ VALUES (@Id,@Hash,@Type,@Product,@Company,@Customer,SYSDATETIME(),@Expires,@MaxU
         catch { return Task.FromResult<string?>(null); }
     }
 
-    private sealed class LicenseCount { public int LicenseCount { get; set; } }
+    private sealed class LicenseCountResult
+    {
+        public int Count { get; set; }
+    }
+
     private sealed class LicenseRow
     {
         public Guid LicenseId { get; set; }
