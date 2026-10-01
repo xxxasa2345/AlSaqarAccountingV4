@@ -285,21 +285,21 @@ public sealed class InvoicesForm : Form
     {
         if (_invoicesData == null) return;
         
-        var filter = string.Empty;
+        var clauses = new System.Collections.Generic.List<string>();
         var searchTerm = EscapeRowFilterValue(_searchText.Text.Trim());
         var customerTerm = EscapeRowFilterValue(_customerSupplierText.Text.Trim());
-        
+
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            filter = $"Convert([NoteNum], 'System.String') LIKE '%{searchTerm}%' OR Convert([SupplierName], 'System.String') LIKE '%{searchTerm}%' OR Convert([Note], 'System.String') LIKE '%{searchTerm}%' ";
+            clauses.Add($"(Convert([NoteNum], 'System.String') LIKE '%{searchTerm}%' OR Convert([SupplierName], 'System.String') LIKE '%{searchTerm}%' OR Convert([Note], 'System.String') LIKE '%{searchTerm}%')");
         }
-        
+
         if (!string.IsNullOrWhiteSpace(customerTerm))
         {
-            if (!string.IsNullOrWhiteSpace(filter))
-                filter += "AND ";
-            filter += $"Convert([SupplierName], 'System.String') LIKE '%{customerTerm}%' ";
+            clauses.Add($"Convert([SupplierName], 'System.String') LIKE '%{customerTerm}%'");
         }
+
+        var filter = string.Join(" AND ", clauses);
         
         try
         {
