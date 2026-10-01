@@ -11,119 +11,78 @@ public sealed class ScreenRouter
     private readonly AppSession _session;
 
     public ScreenRouter(string connectionString, AppSession session)
-    {
-        _connectionString = connectionString;
-        _session = session;
-    }
+    { _connectionString = connectionString; _session = session; }
 
     public bool TryOpen(Form owner, ScreenAccess access, out string message)
     {
         message = string.Empty;
-        if (!access.AllowEnter)
-        {
-            message = "لا تملك صلاحية فتح هذه الشاشة.";
-            return false;
-        }
-
+        if (!access.AllowEnter) { message = "لا تملك صلاحية فتح هذه الشاشة."; return false; }
         var db = new DbExecutor(new SqlConnectionFactory(_connectionString));
 
-        // إدارة التراخيص: شاشة إدارية حقيقية مرتبطة بجدول dbo.App_Licenses.
-        // لا تمر عبر DynamicErpScreenForm حتى لا تتحول إلى شاشة عامة.
         if (string.Equals(access.ScreenName, "إدارة التراخيص", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(access.ScreenName, "التراخيص", StringComparison.OrdinalIgnoreCase))
         {
-            if (_session.GroupId != 1)
-            {
-                message = "إدارة التراخيص متاحة للمجموعة الإدارية فقط.";
-                return false;
-            }
-            var licenseService = new LicenseService(db);
-            using var licenseForm = new LicenseManagementForm(_session, licenseService);
-            licenseForm.StartPosition = FormStartPosition.CenterParent;
-            licenseForm.ShowDialog(owner);
-            return true;
+            if (_session.GroupId != 1) { message = "إدارة التراخيص متاحة للمجموعة الإدارية فقط."; return false; }
+            using var form = new LicenseManagementForm(_session, new LicenseService(db)) { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
+        }
+
+        // المستخدمون ومستخدم جديد يجب أن يفتحا شاشة CRUD الحقيقية على dbo.User_Login.
+        if (IsUserScreen(access.ScreenName))
+        {
+            if (_session.GroupId != 1) { message = "إدارة المستخدمين متاحة للمجموعة الإدارية فقط."; return false; }
+            using var form = new UserManagementForm(_session, new UserManagementService(db)) { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
         }
 
         if (string.Equals(access.ScreenName, "FrmUnit", StringComparison.OrdinalIgnoreCase))
         {
-            var service = new ItemUnitService(db);
-            using var form = new ItemUnitForm(_session, access, service);
-            form.StartPosition = FormStartPosition.CenterParent;
-            form.ShowDialog(owner);
-            return true;
+            using var form = new ItemUnitForm(_session, access, new ItemUnitService(db)) { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
         }
-
         if (TryResolveItemMaster(access.ScreenName, out var tableName, out var displayName))
         {
-            var service = new ItemMasterService(db);
-            using var form = new ItemMasterForm(_session, access, service, tableName, displayName);
-            form.StartPosition = FormStartPosition.CenterParent;
-            form.ShowDialog(owner);
-            return true;
+            using var form = new ItemMasterForm(_session, access, new ItemMasterService(db), tableName, displayName) { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
         }
-
         if (string.Equals(access.ScreenName, "FrmItems", StringComparison.OrdinalIgnoreCase))
         {
-            var service = new ItemsService(db);
-            using var form = new ItemsForm(_session, access, service);
-            form.StartPosition = FormStartPosition.CenterParent;
-            form.ShowDialog(owner);
-            return true;
+            using var form = new ItemsForm(_session, access, new ItemsService(db)) { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
         }
-
-        if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) || string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
         {
-            var invoiceService = new InvoiceService(db);
-            var customerService = new CustomerService(db);
-            var supplierService = new SupplierService(db);
-            var itemsService = new ItemsService(db);
-            using var form = new InvoicesForm(_session, access, invoiceService, customerService, supplierService, itemsService);
-            form.StartPosition = FormStartPosition.CenterParent;
-            form.ShowDialog(owner);
-            return true;
+            using var form = new InvoicesForm(_session, access, new InvoiceService(db), new CustomerService(db), new SupplierService(db), new ItemsService(db)) { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
         }
-
         if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) && realScreen is not null)
         {
-            using (realScreen)
-            {
-                realScreen.StartPosition = FormStartPosition.CenterParent;
-                realScreen.ShowDialog(owner);
-            }
+            using (realScreen) { realScreen.StartPosition = FormStartPosition.CenterParent; realScreen.ShowDialog(owner); }
             return true;
         }
-
         var type = FindFormType(access.ScreenName);
         if (type is not null && type != typeof(DynamicErpScreenForm))
         {
             if (TryCreateForm(type, access, out var form, out var formError) && form is not null)
-            {
-                using (form)
-                {
-                    form.StartPosition = FormStartPosition.CenterParent;
-                    form.ShowDialog(owner);
-                }
-                return true;
-            }
+            { using (form) { form.StartPosition = FormStartPosition.CenterParent; form.ShowDialog(owner); } return true; }
             message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
         }
-
-        var dynamicService = new DynamicErpScreenService(db);
         try
         {
-            using var dynamicScreen = new DynamicErpScreenForm(_session, access, dynamicService, access.ScreenName);
-            dynamicScreen.StartPosition = FormStartPosition.CenterParent;
-            dynamicScreen.ShowDialog(owner);
-            return true;
+            using var dynamicScreen = new DynamicErpScreenForm(_session, access, new DynamicErpScreenService(db), access.ScreenName) { StartPosition = FormStartPosition.CenterParent };
+            dynamicScreen.ShowDialog(owner); return true;
         }
-        catch (Exception ex)
-        {
-            message = ex.GetBaseException().Message;
-        }
+        catch (Exception ex) { message = ex.GetBaseException().Message; return false; }
+    }
 
-        message = string.IsNullOrWhiteSpace(message) ? "تعذر إنشاء الشاشة من قاعدة البيانات." : message;
-        return false;
+    private static bool IsUserScreen(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        var n = name.Trim();
+        return n.Equals("مستخدم جديد", StringComparison.OrdinalIgnoreCase) || n.Equals("إضافة مستخدم", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("تعديل مستخدم", StringComparison.OrdinalIgnoreCase) || n.Equals("المستخدمون", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("المستخدمين", StringComparison.OrdinalIgnoreCase) || n.Equals("المستخدمون النظام", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("UserManagementForm", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool TryResolveItemMaster(string screenName, out string tableName, out string displayName)
@@ -144,8 +103,7 @@ public sealed class ScreenRouter
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().OrderByDescending(a => a == typeof(ScreenRouter).Assembly))
         {
             Type[] types;
-            try { types = assembly.GetTypes(); }
-            catch (ReflectionTypeLoadException ex) { types = ex.Types.Where(t => t is not null).Cast<Type>().ToArray(); }
+            try { types = assembly.GetTypes(); } catch (ReflectionTypeLoadException ex) { types = ex.Types.Where(t => t is not null).Cast<Type>().ToArray(); }
             var match = types.FirstOrDefault(t => typeof(Form).IsAssignableFrom(t) && !t.IsAbstract && string.Equals(t.Name, screenName.Trim(), StringComparison.OrdinalIgnoreCase));
             if (match is not null) return match;
         }
@@ -164,8 +122,7 @@ public sealed class ScreenRouter
                 if (parameters.Length == 1 && parameters[0].ParameterType == typeof(AppSession)) { form = (Form?)ctor.Invoke(new object?[] { _session }); if (form is not null) return true; }
                 if (parameters.Length == 1 && (parameters[0].ParameterType == typeof(int) || parameters[0].ParameterType == typeof(int?)) && access.ScreenNum.HasValue) { form = (Form?)ctor.Invoke(new object?[] { access.ScreenNum.Value }); if (form is not null) return true; }
             }
-            error = $"الشاشة {type.Name} موجودة لكن لا يوجد Constructor مدعوم حاليًا.";
-            return false;
+            error = $"الشاشة {type.Name} موجودة لكن لا يوجد Constructor مدعوم حاليًا."; return false;
         }
         catch (Exception ex) { error = ex.GetBaseException().Message; return false; }
     }
