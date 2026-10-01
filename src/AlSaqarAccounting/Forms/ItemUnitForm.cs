@@ -54,7 +54,7 @@ public sealed class ItemUnitForm : Form
         editor.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
         editor.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
         editor.Controls.Add(_name, 0, 0);
-        var save = new Button { Text = "حفظ", Dock = DockStyle.Fill, Enabled = _access.AllowSave };
+        var save = new Button { Text = "حفظ", Dock = DockStyle.Fill, Enabled = _access.AllowSave || _access.AllowEdit };
         var cancel = new Button { Text = "إلغاء", Dock = DockStyle.Fill };
         save.Click += async (_, _) => await SaveAsync();
         cancel.Click += (_, _) => ClearEditor();
@@ -118,7 +118,14 @@ public sealed class ItemUnitForm : Form
 
     private async Task SaveAsync()
     {
-        if (!_access.AllowSave) return;
+        if (_editingId.HasValue)
+        {
+            if (!_access.AllowEdit) return;
+        }
+        else if (!_access.AllowSave)
+        {
+            return;
+        }
         var name = _name.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -130,7 +137,6 @@ public sealed class ItemUnitForm : Form
             UseWaitCursor = true;
             if (_editingId.HasValue)
             {
-                if (!_access.AllowEdit) return;
                 await _service.UpdateAsync(_editingId.Value, name, _session);
                 _status.Text = "تم تعديل الوحدة بنجاح.";
             }
