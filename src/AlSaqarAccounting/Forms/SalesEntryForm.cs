@@ -29,10 +29,10 @@ public sealed class SalesEntryForm : Form
     private readonly DateTimePicker _date = new() { Dock = DockStyle.Fill, Format = DateTimePickerFormat.Short };
     private readonly TextBox _noteNum = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
     private readonly TextBox _note = new() { Dock = DockStyle.Fill, RightToLeft = RightToLeft.Yes };
-    private readonly NumericUpDown _quantity = new() { Dock = DockStyle.Fill, Minimum = 0, DecimalPlaces = 2, Value = 1 };
-    private readonly NumericUpDown _price = new() { Dock = DockStyle.Fill, Minimum = 0, DecimalPlaces = 2 };
-    private readonly NumericUpDown _discount = new() { Dock = DockStyle.Fill, Minimum = 0, DecimalPlaces = 2 };
-    private readonly NumericUpDown _paid = new() { Dock = DockStyle.Fill, Minimum = 0, DecimalPlaces = 2 };
+    private readonly NumericUpDown _quantity = new() { Dock = DockStyle.Fill, Minimum = 0, Maximum = 1000000000, DecimalPlaces = 2, Value = 1 };
+    private readonly NumericUpDown _price = new() { Dock = DockStyle.Fill, Minimum = 0, Maximum = 100000000000m, DecimalPlaces = 2 };
+    private readonly NumericUpDown _discount = new() { Dock = DockStyle.Fill, Minimum = 0, Maximum = 100000000000m, DecimalPlaces = 2 };
+    private readonly NumericUpDown _paid = new() { Dock = DockStyle.Fill, Minimum = 0, Maximum = 100000000000m, DecimalPlaces = 2 };
 
     private readonly DataGridView _grid = new()
     {
