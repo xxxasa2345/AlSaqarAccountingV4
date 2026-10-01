@@ -40,7 +40,7 @@ public sealed class CashierForm : Form
     private decimal _total = 0;
     private decimal _tax = 0;
     private decimal _net = 0;
-    private const decimal _taxRate = 0.15m; // 15% VAT
+    private const decimal _taxRate = 0m;
 
     public CashierForm(AppSession session, ScreenAccess access, CashierService cashierService, ItemsService itemsService, CustomerService customerService)
     {
@@ -56,7 +56,7 @@ public sealed class CashierForm : Form
 
     private void InitializeUi()
     {
-        Text = "\u0001\u0001 - \u0001"; // "نظام الكاشير - نقطة البيع"
+        Text = "نظام الكاشير - نقطة البيع"; // "نظام الكاشير - نقطة البيع"
         Width = 1400;
         Height = 900;
         MinimumSize = new Size(1200, 800);
@@ -69,7 +69,7 @@ public sealed class CashierForm : Form
         var header = new Panel { Dock = DockStyle.Top, Height = 100, Padding = new Padding(12), BackColor = Color.FromArgb(245, 247, 250) };
         var title = new Label
         {
-            Text = "\u0001", // "نظام الكاشير"
+            Text = "نظام الكاشير",
             Dock = DockStyle.Top,
             Height = 38,
             Font = new Font("Tahoma", 20, FontStyle.Bold),
@@ -77,7 +77,7 @@ public sealed class CashierForm : Form
         };
         var info = new Label
         {
-            Text = $"\u0001: {_session.UserName} | \u0001: {_session.BranchId?.ToString() ?? "-"} | \u0001: {DateTime.Now:yyyy-MM-dd}", // "المستخدم: ... | الفرع: ... | التاريخ: ..."
+            Text = $"المستخدم: {_session.UserName} | الفرع: {_session.BranchId?.ToString() ?? "-"} | التاريخ: {DateTime.Now:yyyy-MM-dd}",
             Dock = DockStyle.Top,
             Height = 25,
             ForeColor = Color.DimGray,
@@ -88,7 +88,7 @@ public sealed class CashierForm : Form
 
         // Customer Panel
         var customerPanel = new Panel { Dock = DockStyle.Top, Height = 80, Padding = new Padding(8), BackColor = Color.FromArgb(240, 248, 255) };
-        var customerTitle = new Label { Text = "\u0001", Width = 100, TextAlign = ContentAlignment.MiddleRight }; // "العميل:"
+        var customerTitle = new Label { Text = "العميل:", Width = 100, TextAlign = ContentAlignment.MiddleRight };
         _customerSearch.Dock = DockStyle.Fill;
         _customerSearch.RightToLeft = RightToLeft.Yes;
         _customerLabel.Width = 300;
@@ -102,7 +102,7 @@ public sealed class CashierForm : Form
         customerLayout.Controls.Add(customerTitle, 0, 0);
         customerLayout.Controls.Add(_customerSearch, 1, 0);
         customerLayout.Controls.Add(_customerLabel, 2, 0);
-        var selectCustomerBtn = new Button { Text = "\u0001", Width = 100, Height = 30 }; // "اختر"
+        var selectCustomerBtn = new Button { Text = "اختر", Width = 100, Height = 30 };
         selectCustomerBtn.Click += (_, _) => ShowCustomerSelection();
         customerLayout.Controls.Add(selectCustomerBtn, 3, 0);
         customerPanel.Controls.Add(customerLayout);
@@ -112,7 +112,7 @@ public sealed class CashierForm : Form
         
         // Top Panel - Sales Cart
         var cartPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(8) };
-        var cartTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "سلة المشتريات"
+        var cartTitle = new Label { Text = "سلة المشتريات", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight };
         
         // Cart Grid
         _cartGrid.Dock = DockStyle.Fill;
@@ -127,18 +127,18 @@ public sealed class CashierForm : Form
         _cartGrid.CellClick += (_, e) => { if (e.RowIndex >= 0 && _cartGrid.Columns[e.ColumnIndex].Name == "Delete") RemoveFromCart(e.RowIndex); };
         
         // Add columns to cart grid
-        _cartGrid.Columns.Add("Delete", "\u0001"); // "حذف"
+        _cartGrid.Columns.Add("Delete", "حذف");
         _cartGrid.Columns["Delete"].Width = 60;
         _cartGrid.Columns["Delete"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-        _cartGrid.Columns.Add("ItemName", "\u0001"); // "المنتج"
-        _cartGrid.Columns.Add("Barcode", "\u0001"); // "الباركود"
-        _cartGrid.Columns.Add("Quantity", "\u0001"); // "الكمية"
+        _cartGrid.Columns.Add("ItemName", "المنتج");
+        _cartGrid.Columns.Add("Barcode", "الباركود");
+        _cartGrid.Columns.Add("Quantity", "الكمية");
         _cartGrid.Columns["Quantity"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        _cartGrid.Columns.Add("Price", "\u0001"); // "السعر"
+        _cartGrid.Columns.Add("Price", "السعر");
         _cartGrid.Columns["Price"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        _cartGrid.Columns.Add("Discount", "\u0001"); // "الخصم"
+        _cartGrid.Columns.Add("Discount", "الخصم");
         _cartGrid.Columns["Discount"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        _cartGrid.Columns.Add("Total", "\u0001"); // "الإجمالي"
+        _cartGrid.Columns.Add("Total", "الإجمالي");
         _cartGrid.Columns["Total"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         
         cartPanel.Controls.Add(_cartGrid);
@@ -154,26 +154,26 @@ public sealed class CashierForm : Form
         itemLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80));
         itemLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
         
-        var barcodeLabel = new Label { Text = "\u0001", Width = 100, TextAlign = ContentAlignment.MiddleRight }; // "باركود:"
+        var barcodeLabel = new Label { Text = "باركود:", Width = 100, TextAlign = ContentAlignment.MiddleRight };
         _barcodeText.Dock = DockStyle.Fill;
         _barcodeText.RightToLeft = RightToLeft.Yes;
         _barcodeText.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) AddItemByBarcode(); };
         
-        var quantityLabel = new Label { Text = "\u0001", Width = 60, TextAlign = ContentAlignment.MiddleRight }; // "كمية:"
+        var quantityLabel = new Label { Text = "كمية:", Width = 60, TextAlign = ContentAlignment.MiddleRight };
         _quantityText.Width = 60;
         _quantityText.Text = "1";
         _quantityText.TextAlign = HorizontalAlignment.Right;
         
-        var priceLabel = new Label { Text = "\u0001", Width = 60, TextAlign = ContentAlignment.MiddleRight }; // "سعر:"
+        var priceLabel = new Label { Text = "سعر:", Width = 60, TextAlign = ContentAlignment.MiddleRight };
         _priceText.Width = 60;
         _priceText.TextAlign = HorizontalAlignment.Right;
         
-        var discountLabel = new Label { Text = "\u0001", Width = 60, TextAlign = ContentAlignment.MiddleRight }; // "خصم:"
+        var discountLabel = new Label { Text = "خصم:", Width = 60, TextAlign = ContentAlignment.MiddleRight };
         _discountText.Width = 60;
         _discountText.Text = "0";
         _discountText.TextAlign = HorizontalAlignment.Right;
         
-        var addBtn = new Button { Text = "\u0001", Width = 100, Height = 30 }; // "إضافة"
+        var addBtn = new Button { Text = "إضافة", Width = 100, Height = 30 };
         addBtn.Click += (_, _) => AddItemToCart();
         
         itemLayout.Controls.Add(barcodeLabel, 0, 0);
@@ -189,7 +189,7 @@ public sealed class CashierForm : Form
 
         // Bottom Panel - Sales History
         var salesPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(8) };
-        var salesTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "آخر المبيعات"
+        var salesTitle = new Label { Text = "آخر المبيعات", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight };
         
         _salesGrid.Dock = DockStyle.Fill;
         _salesGrid.ReadOnly = true;
@@ -209,7 +209,7 @@ public sealed class CashierForm : Form
         // Totals Panel
         var totalsPanel = new Panel { Dock = DockStyle.Right, Width = 250, Padding = new Padding(8), BackColor = Color.FromArgb(240, 248, 255) };
         
-        var totalsTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "الإجمالي"
+        var totalsTitle = new Label { Text = "الإجمالي", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight };
         
         var totalLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 5 };
         totalLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
@@ -220,17 +220,17 @@ public sealed class CashierForm : Form
         totalLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 35));
         totalLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         
-        var subtotalLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "المبلغ:"
+        var subtotalLabel = new Label { Text = "المبلغ:", TextAlign = ContentAlignment.MiddleRight };
         _totalLabel.Text = "0.00";
         _totalLabel.TextAlign = ContentAlignment.MiddleLeft;
         _totalLabel.Font = new Font("Tahoma", 12, FontStyle.Bold);
         
-        var taxLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "الضريبة:"
+        var taxLabel = new Label { Text = "الضريبة:", TextAlign = ContentAlignment.MiddleRight };
         _taxLabel.Text = "0.00";
         _taxLabel.TextAlign = ContentAlignment.MiddleLeft;
         _taxLabel.Font = new Font("Tahoma", 12, FontStyle.Bold);
         
-        var netLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "الصافي:"
+        var netLabel = new Label { Text = "الصافي:", TextAlign = ContentAlignment.MiddleRight };
         _netLabel.Text = "0.00";
         _netLabel.TextAlign = ContentAlignment.MiddleLeft;
         _netLabel.Font = new Font("Tahoma", 14, FontStyle.Bold);
@@ -247,16 +247,16 @@ public sealed class CashierForm : Form
         // Action Buttons
         var actionPanel = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 120, FlowDirection = FlowDirection.RightToLeft, WrapContents = false, Padding = new Padding(4) };
         
-        var completeBtn = new Button { Text = "\u0001", Width = 120, Height = 40, BackColor = Color.FromArgb(0, 120, 215), ForeColor = Color.White, Font = new Font("Tahoma", 10, FontStyle.Bold) };
+        var completeBtn = new Button { Text = "إتمام البيع", Width = 120, Height = 40, BackColor = Color.FromArgb(0, 120, 215), ForeColor = Color.White, Font = new Font("Tahoma", 10, FontStyle.Bold), Enabled = _access.AllowSave };
         completeBtn.Click += async (_, _) => await CompleteSaleAsync();
         
-        var printBtn = new Button { Text = "\u0001", Width = 100, Height = 40 }; // "طباعة"
+        var printBtn = new Button { Text = "طباعة", Width = 100, Height = 40, Enabled = _access.AllowPrint };
         printBtn.Click += (_, _) => PrintReceipt();
         
-        var clearBtn = new Button { Text = "\u0001", Width = 100, Height = 40 }; // "مسح السلة"
+        var clearBtn = new Button { Text = "مسح السلة", Width = 100, Height = 40 };
         clearBtn.Click += (_, _) => ClearCart();
         
-        var newSaleBtn = new Button { Text = "\u0001", Width = 100, Height = 40 }; // "بيع جديد"
+        var newSaleBtn = new Button { Text = "بيع جديد", Width = 100, Height = 40 };
         newSaleBtn.Click += (_, _) => NewSale();
         
         actionPanel.Controls.Add(completeBtn);
@@ -308,7 +308,7 @@ public sealed class CashierForm : Form
             _itemsData = await _itemsService.ListAsync();
             _customersData = await _customerService.ListAsync(_session.BranchId);
             await LoadSalesAsync();
-            _status.Text = "\u0001"; // "النظام جاهز"
+            _status.Text = "النظام جاهز";
         }
         catch (Exception ex)
         {
@@ -327,7 +327,7 @@ public sealed class CashierForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -386,13 +386,13 @@ public sealed class CashierForm : Form
     {
         if (_customersData == null || _customersData.Rows.Count == 0)
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "لا يوجد عملاء"
+            MessageBox.Show(this, "لا يوجد عملاء", "اختيار العميل", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
         
         using var form = new Form
         {
-            Text = "\u0001", // "اختر عميل"
+            Text = "اختر عميل",
             Width = 600,
             Height = 400,
             StartPosition = FormStartPosition.CenterParent,
@@ -411,7 +411,7 @@ public sealed class CashierForm : Form
             SelectionMode = DataGridViewSelectionMode.FullRowSelect
         };
         
-        var selectBtn = new Button { Text = "\u0001", Width = 100, Height = 30, DialogResult = DialogResult.OK }; // "اختر"
+        var selectBtn = new Button { Text = "اختر", Width = 100, Height = 30, DialogResult = DialogResult.OK };
         selectBtn.Dock = DockStyle.Bottom;
         selectBtn.Click += (_, _) =>
         {
@@ -448,7 +448,7 @@ public sealed class CashierForm : Form
         }
         else
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Warning); // "الباركود غير موجود"
+            MessageBox.Show(this, "الباركود غير موجود", "البحث", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 
@@ -463,7 +463,7 @@ public sealed class CashierForm : Form
         var rows = _itemsData.Select("item_Name LIKE '%" + itemName.Replace("'", "''") + "%'");
         if (rows.Length == 0)
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Warning); // "المنتج غير موجود"
+            MessageBox.Show(this, "المنتج غير موجود", "البحث", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         
@@ -587,13 +587,13 @@ public sealed class CashierForm : Form
     {
         if (_cartData == null || _cartData.Rows.Count == 0)
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Warning); // "السلة فارغة"
+            MessageBox.Show(this, "السلة فارغة", "إتمام البيع", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         
         if (!_selectedCustomerId.HasValue)
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Warning); // "يرجى اختيار عميل"
+            MessageBox.Show(this, "يرجى اختيار عميل", "إتمام البيع", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         
@@ -609,7 +609,7 @@ public sealed class CashierForm : Form
             Net = _net,
             OrderCashierType = true,
             CashMoney = _net, // Full payment by cash
-            Note = "\u0001" // "مبيعات كاشير"
+            Note = "مبيعات كاشير"
         };
         
         // Create details
@@ -623,7 +623,7 @@ public sealed class CashierForm : Form
                 UnitPrice = Convert.ToDecimal(row["Price"]),
                 TotalPrice = Convert.ToDecimal(row["Total"]),
                 VAT = Convert.ToDecimal(row["Price"]) * _taxRate, // VAT per item
-                ItemUnitType = "\u0001", // "قطعة"
+                ItemUnitType = "قطعة",
                 IsPrint = true
             });
         }
@@ -645,7 +645,7 @@ public sealed class CashierForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ في البيع"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ في البيع", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally { UseWaitCursor = false; }
     }
@@ -660,7 +660,7 @@ public sealed class CashierForm : Form
         
         using var form = new Form
         {
-            Text = $"\u0001 {saleId}", // "تفاصيل البيع رقم: ..."
+            Text = $"تفاصيل البيع رقم: {saleId}",
             Width = 800,
             Height = 500,
             StartPosition = FormStartPosition.CenterParent,
@@ -678,7 +678,7 @@ public sealed class CashierForm : Form
             DataSource = details
         };
         
-        var closeBtn = new Button { Text = "\u0001", Width = 100, Height = 30, DialogResult = DialogResult.OK }; // "إغلاق"
+        var closeBtn = new Button { Text = "إغلاق", Width = 100, Height = 30, DialogResult = DialogResult.OK };
         closeBtn.Dock = DockStyle.Bottom;
         closeBtn.Click += (_, _) => form.Close();
         
@@ -703,20 +703,20 @@ public sealed class CashierForm : Form
                 float y = yPos;
                 
                 // Header
-                e.Graphics.DrawString("\u0001", boldFont, Brushes.Black, x, y); // "شركة السقر"
+                e.Graphics.DrawString("شركة الصقر", boldFont, Brushes.Black, x, y);
                 y += 30;
-                e.Graphics.DrawString("\u0001", font, Brushes.Black, x, y); // "فاتورة بيع"
+                e.Graphics.DrawString("فاتورة بيع", font, Brushes.Black, x, y);
                 y += 25;
-                e.Graphics.DrawString($"\u0001: {DateTime.Now:yyyy-MM-dd HH:mm}", smallFont, Brushes.Black, x, y); // "التاريخ: ..."
+                e.Graphics.DrawString($"التاريخ: {DateTime.Now:yyyy-MM-dd HH:mm}", smallFont, Brushes.Black, x, y);
                 y += 20;
-                e.Graphics.DrawString($"\u0001: {_customerLabel.Text}", font, Brushes.Black, x, y); // "العميل: ..."
+                e.Graphics.DrawString($"العميل: {_customerLabel.Text}", font, Brushes.Black, x, y);
                 y += 25;
                 
                 // Items
-                e.Graphics.DrawString("\u0001", font, Brushes.Black, x, y); // "المنتج"
-                e.Graphics.DrawString("\u0001", font, Brushes.Black, x + 300, y); // "الكمية"
-                e.Graphics.DrawString("\u0001", font, Brushes.Black, x + 400, y); // "السعر"
-                e.Graphics.DrawString("\u0001", font, Brushes.Black, x + 500, y); // "الإجمالي"
+                e.Graphics.DrawString("المنتج", font, Brushes.Black, x, y);
+                e.Graphics.DrawString("الكمية", font, Brushes.Black, x + 300, y);
+                e.Graphics.DrawString("السعر", font, Brushes.Black, x + 400, y);
+                e.Graphics.DrawString("الإجمالي", font, Brushes.Black, x + 500, y);
                 y += 25;
                 
                 if (_cartData != null)
@@ -737,17 +737,17 @@ public sealed class CashierForm : Form
                 }
                 
                 y += 20;
-                e.Graphics.DrawString("\u0001", font, Brushes.Black, x, y); // "الإجمالي:"
+                e.Graphics.DrawString("الإجمالي:", font, Brushes.Black, x, y);
                 e.Graphics.DrawString(_total.ToString("N2"), font, Brushes.Black, x + 500, y);
                 y += 25;
-                e.Graphics.DrawString("\u0001", font, Brushes.Black, x, y); // "الضريبة:"
+                e.Graphics.DrawString("الضريبة:", font, Brushes.Black, x, y);
                 e.Graphics.DrawString(_tax.ToString("N2"), font, Brushes.Black, x + 500, y);
                 y += 25;
-                e.Graphics.DrawString("\u0001", boldFont, Brushes.Black, x, y); // "الصافي:"
+                e.Graphics.DrawString("الصافي:", boldFont, Brushes.Black, x, y);
                 e.Graphics.DrawString(_net.ToString("N2"), boldFont, Brushes.Black, x + 500, y);
                 
                 y += 40;
-                e.Graphics.DrawString("\u0001", smallFont, Brushes.Black, x, y); // "شكرا لثقتكم"
+                e.Graphics.DrawString("شكراً لثقتكم", smallFont, Brushes.Black, x, y);
             };
             
             var printDialog = new PrintDialog { Document = printDoc };
@@ -758,7 +758,7 @@ public sealed class CashierForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ في الطباعة"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ في الطباعة", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
