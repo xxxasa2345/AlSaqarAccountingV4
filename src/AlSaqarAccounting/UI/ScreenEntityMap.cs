@@ -52,7 +52,6 @@ public static class ScreenEntityMap
             ["FrmRoom"] = "Restaurant_Room",
             ["FrmTable"] = "Restaurant_Table",
             ["FrmZatcaIntgration"] = "ResultElectronicInvoiceXmls",
-
             ["الأصناف"] = "Item_Items",
             ["الصنف"] = "Item_Items",
             ["الوحدات"] = "Item_Unit",
@@ -96,7 +95,6 @@ public static class ScreenEntityMap
             ["كميات المخزون"] = "ItemQuantity",
             ["الكميات الافتتاحية"] = "Order_OpenQuantity",
             ["بونص العقود"] = "Contract_Bounce",
-
             ["الطابعات"] = "Printers",
             ["الطابعة"] = "Printers",
             ["إعدادات الطابعات"] = "Printers",
@@ -105,8 +103,6 @@ public static class ScreenEntityMap
             ["طابعات المطبخ"] = "PrintersCook",
             ["طبعات المطبخ"] = "PrintersCook",
             ["إعدادات طابعات المطبخ"] = "PrintersCook",
-
-            // Security / administration screens: these must read the original GTSdb2026 tables.
             ["الشاشات"] = "User_Screens",
             ["شاشات النظام"] = "User_Screens",
             ["صلاحيات الشاشات"] = "User_Permission",
@@ -115,7 +111,12 @@ public static class ScreenEntityMap
             ["مجموعة المستخدمين"] = "User_Groups",
             ["المستخدمون"] = "User_Login",
             ["المستخدمين"] = "User_Login",
-            ["المستخدمون النظام"] = "User_Login"
+            ["المستخدمون النظام"] = "User_Login",
+            ["مستخدم جديد"] = "User_Login",
+            ["إضافة مستخدم"] = "User_Login",
+            ["تعديل مستخدم"] = "User_Login",
+            ["إدارة التراخيص"] = "App_Licenses",
+            ["التراخيص"] = "App_Licenses"
         };
 
     public static string? Resolve(string screenName)
@@ -124,15 +125,11 @@ public static class ScreenEntityMap
         var raw = screenName.Trim();
         if (Exact.TryGetValue(raw, out var table)) return table;
         var n = Normalize(raw);
-
-        if (n.Contains("اعداداتطابعةالكاشير", StringComparison.OrdinalIgnoreCase) ||
-            n.Contains("طابعاتالكاشير", StringComparison.OrdinalIgnoreCase) ||
-            n.Contains("طابعاتالمطبخ", StringComparison.OrdinalIgnoreCase) ||
-            n.Contains("طبعاتالمطبخ", StringComparison.OrdinalIgnoreCase)) return "PrintersCook";
+        if (n.Contains("اعداداتطابعةالكاشير", StringComparison.OrdinalIgnoreCase) || n.Contains("طابعاتالكاشير", StringComparison.OrdinalIgnoreCase) || n.Contains("طابعاتالمطبخ", StringComparison.OrdinalIgnoreCase) || n.Contains("طبعاتالمطبخ", StringComparison.OrdinalIgnoreCase)) return "PrintersCook";
         if (n.Contains("طابعات", StringComparison.OrdinalIgnoreCase) || n.Contains("طابعة", StringComparison.OrdinalIgnoreCase)) return "Printers";
         if (n.Contains("صلاحيات", StringComparison.OrdinalIgnoreCase) || n.Contains("صلاحيه", StringComparison.OrdinalIgnoreCase)) return "User_Permission";
         if (n.Contains("مجموعاتالمستخدمين", StringComparison.OrdinalIgnoreCase) || n.Contains("مجموعةالمستخدمين", StringComparison.OrdinalIgnoreCase)) return "User_Groups";
-        if (n.Contains("مستخدمين", StringComparison.OrdinalIgnoreCase) || n.Contains("مستخدمون", StringComparison.OrdinalIgnoreCase)) return "User_Login";
+        if (n.Contains("مستخدمين", StringComparison.OrdinalIgnoreCase) || n.Contains("مستخدمون", StringComparison.OrdinalIgnoreCase) || n.Contains("مستخدمجديد", StringComparison.OrdinalIgnoreCase)) return "User_Login";
         if (n.Contains("شاشاتالنظام", StringComparison.OrdinalIgnoreCase) || n.Equals("الشاشات", StringComparison.OrdinalIgnoreCase) || n.Contains("الشاشات", StringComparison.OrdinalIgnoreCase)) return "User_Screens";
         if (n.Contains("اصناف", StringComparison.OrdinalIgnoreCase) || n.Contains("الصنف", StringComparison.OrdinalIgnoreCase)) return "Item_Items";
         if (n.Contains("وحدات", StringComparison.OrdinalIgnoreCase) || n.Contains("الوحدات", StringComparison.OrdinalIgnoreCase)) return "Item_Unit";
