@@ -12,6 +12,7 @@ public sealed class UserGroupsForm : Form
 {
     private readonly AppSession _session;
     private readonly UserGroupsService _service;
+    private readonly ScreenAccess _access;
     private readonly DataGridView _grid = new()
     {
         Dock = DockStyle.Fill,
@@ -33,9 +34,10 @@ public sealed class UserGroupsForm : Form
     private readonly CheckBox _selectQuantityPrice = new() { Text = "اختيار سعر الكمية" };
     private int? _editingId;
 
-    public UserGroupsForm(AppSession session, UserGroupsService service)
+    public UserGroupsForm(AppSession session, ScreenAccess access, UserGroupsService service)
     {
         _session = session;
+        _access = access;
         _service = service;
         Text = "مجموعات المستخدمين — قاعدة البيانات الأصلية";
         Width = 1180;
@@ -86,13 +88,13 @@ public sealed class UserGroupsForm : Form
             FlowDirection = FlowDirection.RightToLeft
         };
 
-        var save = new Button { Text = "حفظ", Width = 100 };
+        var save = new Button { Text = "حفظ", Width = 100, Enabled = _access.AllowSave || _access.AllowEdit };
         save.Click += async (_, _) => await SaveAsync();
 
         var add = new Button { Text = "مجموعة جديدة", Width = 120 };
         add.Click += (_, _) => ClearEditor();
 
-        var delete = new Button { Text = "حذف", Width = 100 };
+        var delete = new Button { Text = "حذف", Width = 100, Enabled = _access.AllowDelete };
         delete.Click += async (_, _) => await DeleteAsync();
 
         var refresh = new Button { Text = "تحديث", Width = 100 };
@@ -163,6 +165,10 @@ public sealed class UserGroupsForm : Form
     {
         try
         {
+            if ((_editingId.HasValue && !_access.AllowEdit) ||
+                (!_editingId.HasValue && !_access.AllowSave))
+                throw new UnauthorizedAccessException("لا تملك صلاحية حفظ/تعديل مجموعات المستخدمين.");
+
             await _service.SaveAsync(
                 _editingId,
                 _name.Text,
@@ -189,6 +195,13 @@ public sealed class UserGroupsForm : Form
 
     private async Task DeleteAsync()
     {
+        if (!_access.AllowDelete)
+        {
+            MessageBox.Show(this, "لا تملك صلاحية حذف مجموعات المستخدمين.", "الصلاحيات",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         if (!_editingId.HasValue)
             return;
 
