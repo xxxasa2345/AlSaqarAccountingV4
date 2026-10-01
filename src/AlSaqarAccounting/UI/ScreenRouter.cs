@@ -27,6 +27,29 @@ public sealed class ScreenRouter
             form.ShowDialog(owner); return true;
         }
 
+        if (IsPasswordScreen(access.ScreenName))
+        {
+            using var form = new ChangePasswordForm(_session, new SecurityAdministrationService(db))
+            { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
+        }
+
+        if (IsScreenCatalogScreen(access.ScreenName))
+        {
+            if (_session.GroupId != 1) { message = "إدارة شاشات النظام متاحة للمجموعة الإدارية فقط."; return false; }
+            using var form = new UserScreensForm(_session, new SecurityAdministrationService(db))
+            { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
+        }
+
+        if (IsPermissionScreen(access.ScreenName))
+        {
+            if (_session.GroupId != 1) { message = "إدارة صلاحيات الشاشات متاحة للمجموعة الإدارية فقط."; return false; }
+            using var form = new UserPermissionsForm(_session, new SecurityAdministrationService(db))
+            { StartPosition = FormStartPosition.CenterParent };
+            form.ShowDialog(owner); return true;
+        }
+
         // Original GTSErpSystem places user-management screens in the Security
         // module. Keep those separate from item groups.
         if (IsUserScreen(access.ScreenName))
@@ -81,6 +104,37 @@ public sealed class ScreenRouter
             dynamicScreen.ShowDialog(owner); return true;
         }
         catch (Exception ex) { message = ex.GetBaseException().Message; return false; }
+    }
+
+    private static bool IsPasswordScreen(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        var n = name.Trim();
+        return n.Equals("FrmPassword", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("كلمة المرور", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("تغيير كلمة المرور", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("ChangePasswordForm", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsScreenCatalogScreen(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        var n = name.Trim();
+        return n.Equals("FrmScreens", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("الشاشات", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("شاشات النظام", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("UserScreensForm", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsPermissionScreen(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        var n = name.Trim();
+        return n.Equals("FrmPermission", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("FrmPermissions", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("الصلاحيات", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("صلاحيات الشاشات", StringComparison.OrdinalIgnoreCase) ||
+               n.Equals("UserPermissionsForm", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsUserScreen(string? name)
