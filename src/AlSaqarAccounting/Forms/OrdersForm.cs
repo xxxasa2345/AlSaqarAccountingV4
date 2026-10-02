@@ -65,7 +65,7 @@ public sealed class OrdersForm : BrowseScreenBase
         try
         {
             UseWaitCursor = true;
-            await _sales.DeleteAsync(invoiceId, Session.BranchId);
+            await _sales.DeleteAsync(invoiceId, Session, Access.Id);
             Status.Text = $"تم حذف الفاتورة {invoiceId}.";
             await ReloadAsync();
         }
