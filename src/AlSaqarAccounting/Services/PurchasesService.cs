@@ -23,6 +23,23 @@ public sealed class PurchasesService
     public Task<DataTable> ListItemsAsync(CancellationToken cancellationToken = default)
         => _db.ExecuteStoredProcedureAsync("dbo.Get_All_Items", cancellationToken: cancellationToken);
 
+    /// <summary>
+    /// Loads the original purchase-print dataset through dbo.Print_Order_Purchases.
+    /// The catalog proves the contract is exactly @ID int + @BranchID int.
+    /// </summary>
+    public Task<DataTable> PrintAsync(
+        int invoiceId,
+        int? branchId,
+        CancellationToken cancellationToken = default)
+        => _db.ExecuteStoredProcedureAsync(
+            "dbo.Print_Order_Purchases",
+            p =>
+            {
+                p.Add("@ID", SqlDbType.Int).Value = invoiceId;
+                p.Add("@BranchID", SqlDbType.Int).Value = (object?)branchId ?? DBNull.Value;
+            },
+            cancellationToken);
+
     public async Task CreateAsync(
         PurchaseInvoice invoice,
         AppSession session,
