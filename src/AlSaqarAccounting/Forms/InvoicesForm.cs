@@ -362,7 +362,7 @@ public sealed class InvoicesForm : Form
         {
             if (_salesMode)
             {
-                _detailsData = await _invoiceService.GetInvoiceDetailsAsync(_selectedInvoiceId.Value);
+                _detailsData = await _invoiceService.GetInvoiceDetailsAsync(_selectedInvoiceId.Value, _session);
             }
             else
             {
@@ -823,7 +823,7 @@ internal sealed class InvoiceEditForm : Form
             
             if (_invoiceId.HasValue)
             {
-                var invoice = await _invoiceService.GetInvoiceByIdAsync(_invoiceId.Value);
+                var invoice = await _invoiceService.GetInvoiceByIdAsync(_invoiceId.Value, _session);
                 if (invoice != null)
                 {
                     _invoiceNumberText.Text = invoice.NoteNum ?? string.Empty;
@@ -836,7 +836,7 @@ internal sealed class InvoiceEditForm : Form
                     
                     if (_salesMode)
                     {
-                        _invoiceDetails = await _invoiceService.GetInvoiceDetailsAsync(_invoiceId.Value);
+                        _invoiceDetails = await _invoiceService.GetInvoiceDetailsAsync(_invoiceId.Value, _session);
                     }
                     else
                     {
