@@ -640,8 +640,7 @@ public sealed class InvoicesForm : Form
 
     private static string EscapeCsv(string value)
     {
-        if (value.Contains(',') || value.Contains('"') || value.Contains('\r') || value.Contains('
-'))
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\r') || value.Contains('\n'))
             return "\"" + value.Replace("\"", "\"\"") + "\"";
         return value;
     }
