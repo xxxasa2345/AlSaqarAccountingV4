@@ -124,15 +124,30 @@ public sealed class PurchasesService
     }
 
     /// <summary>Deletes a purchase invoice through the original delete procedure.</summary>
-    public Task DeleteAsync(int invoiceId, int? branchId, CancellationToken cancellationToken = default)
-        => _db.ExecuteStoredProcedureNonQueryAsync(
+    public async Task DeleteAsync(
+        int invoiceId,
+        AppSession session,
+        int screenId,
+        CancellationToken cancellationToken = default)
+    {
+        if (!session.BranchId.HasValue)
+            throw new InvalidOperationException("حذف فواتير المشتريات يتطلب فرعاً فعّالاً.");
+
+        await _authorization.RequireAsync(
+            session,
+            screenId,
+            PermissionAction.Delete,
+            cancellationToken).ConfigureAwait(false);
+
+        await _db.ExecuteStoredProcedureNonQueryAsync(
             "dbo.Delete_Order_Purchases",
             p =>
             {
                 p.Add("@PurBranchID", SqlDbType.Int).Value = invoiceId;
-                p.Add("@BranchID", SqlDbType.Int).Value = (object?)branchId ?? DBNull.Value;
+                p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
             },
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
+    }
 
     private Task<DataTable> ExecuteBranchProcedureAsync(
         string procedureName,
