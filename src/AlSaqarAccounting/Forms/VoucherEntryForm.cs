@@ -167,40 +167,40 @@ public sealed class VoucherEntryForm : Form
         var toolbar = new FlowLayoutPanel
         {
             Dock = DockStyle.Bottom,
-            Height = 48,
+            Height = 54,
             FlowDirection = FlowDirection.RightToLeft,
-            Padding = new Padding(6)
+            Padding = new Padding(8, 7, 8, 7),
+            WrapContents = false
         };
-        var save = new Button
+
+        Button Action(string text, int width, bool enabled, Action action, bool primary = false)
         {
-            Text = "حفظ السند",
-            Width = 130,
-            Height = 32,
-            Enabled = _access.AllowSave,
-            FlatStyle = FlatStyle.Flat
-        };
-        save.Click += async (_, _) => await SaveAsync();
-        ErpTheme.ConfigureToolbarButton(save, true);
-        var removeLine = new Button
-        {
-            Text = "حذف السطر المحدد",
-            Width = 130,
-            Height = 32,
-            FlatStyle = FlatStyle.Flat
-        };
-        removeLine.Click += (_, _) => RemoveSelectedLine();
-        ErpTheme.ConfigureToolbarButton(removeLine);
-        var close = new Button { Text = "إغلاق", Width = 100, Height = 32, FlatStyle = FlatStyle.Flat };
-        close.Click += (_, _) => Close();
-        ErpTheme.ConfigureToolbarButton(close);
-        toolbar.Controls.Add(save);
-        toolbar.Controls.Add(removeLine);
-        toolbar.Controls.Add(close);
+            var button = new Button
+            {
+                Text = text,
+                Width = width,
+                Height = 36,
+                Enabled = enabled,
+                Margin = new Padding(4)
+            };
+            button.Click += (_, _) => action();
+            ErpTheme.ConfigureToolbarButton(button, primary);
+            toolbar.Controls.Add(button);
+            return button;
+        }
+
+        Action("حفظ السند", 130, _access.AllowSave, () => _ = SaveAsync(), true);
+        Action("حذف السطر", 125, true, RemoveSelectedLine);
+        Action("إعادة الموازنة", 120, true, UpdateBalance);
+        Action("سند جديد", 110, _access.AllowSave, NewDraft);
+        Action("إغلاق", 100, true, Close);
+
         Controls.Add(toolbar);
 
         Controls.Add(_grid);
         Controls.Add(_balance);
         ErpTheme.ConfigureGrid(_grid);
+        ErpTheme.StyleRecursive(this);
         UpdateBalance();
     }
 
@@ -329,6 +329,22 @@ public sealed class VoucherEntryForm : Form
             ? $"السند متوازن — إجمالي المدين: {debit:N2} / إجمالي الدائن: {credit:N2}"
             : $"السند غير متوازن — المدين: {debit:N2} / الدائن: {credit:N2} (الفرق: {difference:N2})";
         _balance.ForeColor = difference == 0 ? Color.Green : Color.Firebrick;
+    }
+
+
+    private void NewDraft()
+    {
+        _lines.Rows.Clear();
+        _typeCombo.SelectedIndex = _typeCombo.Items.Count > 0 ? 0 : -1;
+        _docCode.Clear();
+        _date.Value = DateTime.Today;
+        _note.Clear();
+        _accountCombo.SelectedIndex = _accountCombo.Items.Count > 0 ? 0 : -1;
+        _lineDescription.Clear();
+        _debit.Value = 0;
+        _credit.Value = 0;
+        _accountCombo.Focus();
+        UpdateBalance();
     }
 
     private async Task SaveAsync()
