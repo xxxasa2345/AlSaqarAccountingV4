@@ -48,50 +48,13 @@ public sealed class PurchasesForm : BrowseScreenBase
                 await ReloadAsync();
         });
 
-        // المقابل التشغيلي لزر BtnNewSuppliers في FrmPurchases الأصلي:
-        // يفتح شاشة الموردين الحقيقية بدل وظيفة شكلية.
-        AddButton(toolbar, "مورد جديد", Access.AllowSave, async () =>
-        {
-            using var form = new SuppliersForm(
-                Session,
-                Access,
-                new CustSupService(new DbExecutor(new SqlConnectionFactory(
-                    GetConnectionString()))));
-            form.ShowDialog(this);
-            await ReloadAsync();
-        });
+        AddButton(toolbar, "مورد جديد", Access.AllowEnter, async () => await OpenRelatedAsync("الموردون"));
 
         AddButton(toolbar, "طباعة", Access.AllowPrint, async () => await PrintSelectedInvoiceAsync());
 
-        // المقابل التشغيلي لـ BtnORDPurchaseReturnID في FrmPurchases الأصلي.
-        // لا نخترع عملية إنشاء: نفتح شاشة المرتجعات التشغيلية المرتبطة
-        // بالإجراءات الأصلية Select_Order_PurchasesReturn / Print_Order_PurchasesReturn.
-        AddButton(toolbar, "مرتجع مشتريات", Access.AllowEnter, async () =>
-        {
-            using var form = new PurchaseReturnsForm(
-                Session,
-                Access,
-                new InventoryOperationsService(new DbExecutor(
-                    new SqlConnectionFactory(GetConnectionString()))));
-            form.ShowDialog(this);
-            await ReloadAsync();
-        });
-
-        // في الأصل، BtnCovertSales يفتح شاشة المبيعات بعد التحقق من وجود أصناف.
-        // هنا ننفذ نفس مسار الفتح عبر OrdersForm التشغيلي الحالي، دون ادعاء
-        // تحويل تلقائي للبيانات ما لم يكن عقد التحويل مثبتاً.
-        AddButton(toolbar, "فتح المبيعات", Access.AllowEnter, async () =>
-        {
-            using var form = new OrdersForm(
-                Session,
-                Access,
-                new SalesService(new DbExecutor(
-                    new SqlConnectionFactory(GetConnectionString()))),
-                new StoresService(new DbExecutor(
-                    new SqlConnectionFactory(GetConnectionString()))));
-            form.ShowDialog(this);
-            await ReloadAsync();
-        });
+        AddButton(toolbar, "مرتجع مشتريات", Access.AllowEnter, async () => await OpenRelatedAsync("مرتجعات المشتريات بفاتورة"));
+        AddButton(toolbar, "فتح المبيعات", Access.AllowEnter, async () => await OpenRelatedAsync("المبيعات"));
+        AddButton(toolbar, "المخازن", Access.AllowEnter, async () => await OpenRelatedAsync("المخازن"));
 
         AddButton(toolbar, "حذف الفاتورة", Access.AllowDelete, async () => await DeleteInvoiceAsync());
     }
@@ -101,6 +64,39 @@ public sealed class PurchasesForm : BrowseScreenBase
         // BrowseScreenBase لا يعرّض سلسلة الاتصال مباشرة؛ نستخرجها من نفس DbExecutor
         // المستخدمة في الخدمة الحالية عبر Session's configured database connection.
         return _purchases.ConnectionString;
+    }
+
+    private async Task OpenRelatedAsync(string screenName)
+    {
+        try
+        {
+            UseWaitCursor = true;
+            var security = new SecurityService(new SqlConnectionFactory(_purchases.ConnectionString));
+            var screens = await security.GetAccessibleScreensAsync(Session);
+            var target = screens.FirstOrDefault(s =>
+                string.Equals(s.ScreenName?.Trim(), screenName, StringComparison.OrdinalIgnoreCase));
+
+            if (target is null)
+            {
+                Status.Text = $"لا توجد صلاحية لفتح «{screenName}».";
+                return;
+            }
+
+            var router = new ScreenRouter(_purchases.ConnectionString, Session);
+            if (!router.TryOpen(this, target, out var message))
+                Status.Text = string.IsNullOrWhiteSpace(message) ? "تعذر فتح الشاشة المرتبطة." : message;
+            else
+                Status.Text = $"تم فتح «{screenName}».";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, "تعذر فتح العملية المرتبطة:\r\n" + ex.GetBaseException().Message,
+                "المشتريات", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
     }
 
     private async Task PrintSelectedInvoiceAsync()
