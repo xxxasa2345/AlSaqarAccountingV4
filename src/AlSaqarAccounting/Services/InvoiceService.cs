@@ -267,8 +267,18 @@ VALUES (
     /// <summary>
     /// Update invoice
     /// </summary>
-    public async Task<int> UpdateInvoiceAsync(Order_Orders invoice, AppSession session, CancellationToken cancellationToken = default)
+    public async Task<int> UpdateInvoiceAsync(
+        Order_Orders invoice,
+        AppSession session,
+        int screenId,
+        CancellationToken cancellationToken = default)
     {
+        await _authorization.RequireAsync(
+            session, screenId, PermissionAction.Edit, cancellationToken).ConfigureAwait(false);
+
+        if (!session.BranchId.HasValue)
+            throw new InvalidOperationException("التعديل يتطلب فرعاً فعّالاً.");
+
         const string sql = @"
 UPDATE dbo.Order_Orders
 SET 
