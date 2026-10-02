@@ -14,8 +14,13 @@ namespace AlSaqarAccounting.Services;
 public sealed class DynamicErpScreenService
 {
     private readonly DbExecutor _db;
+    private readonly AuthorizationService _authorization;
 
-    public DynamicErpScreenService(DbExecutor db) => _db = db;
+    public DynamicErpScreenService(DbExecutor db)
+    {
+        _db = db;
+        _authorization = new AuthorizationService(db);
+    }
 
     public async Task<DynamicErpDefinition> ResolveAsync(
         string screenName,
@@ -55,9 +60,22 @@ public sealed class DynamicErpScreenService
         if (!string.IsNullOrWhiteSpace(definition.TableName))
         {
             var table = QuoteIdentifier(definition.TableName!);
+            var orderColumn = QuoteIdentifier(definition.KeyColumn ?? definition.Columns.FirstOrDefault()?.Name ?? "1");
+            var branchClause = string.Empty;
+            Action<SqlParameterCollection>? parameters = null;
+
+            if (definition.HasBranchColumn)
+            {
+                if (!branchId.HasValue)
+                    throw new InvalidOperationException("هذه الشاشة تحتاج إلى فرع فعّال.");
+                branchClause = " WHERE [BranchID] = @BranchID";
+                parameters = p => p.Add("@BranchID", SqlDbType.Int).Value = branchId.Value;
+            }
+
             return _db.QueryAsync(
-                $"SELECT TOP (5000) * FROM dbo.{table} ORDER BY {QuoteIdentifier(definition.KeyColumn ?? definition.Columns.FirstOrDefault()?.Name ?? "1")};",
-                cancellationToken: cancellationToken);
+                $"SELECT TOP (5000) * FROM dbo.{table}{branchClause} ORDER BY {orderColumn};",
+                parameters,
+                cancellationToken);
         }
 
         return _db.ExecuteStoredProcedureAsync(
@@ -79,8 +97,15 @@ public sealed class DynamicErpScreenService
         IReadOnlyDictionary<string, object?> values,
         int? key,
         AppSession session,
+        int screenId,
         CancellationToken cancellationToken = default)
     {
+        var action = key.HasValue ? PermissionAction.Edit : PermissionAction.Save;
+        await _authorization.RequireAsync(
+            session, screenId, action, cancellationToken).ConfigureAwait(false);
+
+        if (definition.HasBranchColumn && !session.BranchId.HasValue)
+            throw new InvalidOperationException("الحفظ يتطلب فرعاً فعّالاً.");
         if (string.IsNullOrWhiteSpace(definition.TableName))
             throw new InvalidOperationException("هذه الشاشة مرتبطة بإجراء قراءة فقط، وليس بجدول CRUD مباشر.");
 
@@ -106,10 +131,13 @@ public sealed class DynamicErpScreenService
             }
 
             AddAuditUpdateParameters(cmd, session, writable);
+            var branchClause = definition.HasBranchColumn ? " AND [BranchID]=@__branch" : string.Empty;
             cmd.CommandText =
                 $"UPDATE dbo.{QuoteIdentifier(definition.TableName!)} SET {string.Join(", ", assignments)} " +
-                $"WHERE {QuoteIdentifier(definition.KeyColumn!)}=@__id;";
+                $"WHERE {QuoteIdentifier(definition.KeyColumn!)}=@__id{branchClause};";
             cmd.Parameters.Add("@__id", SqlDbType.Int).Value = key.Value;
+            if (definition.HasBranchColumn)
+                cmd.Parameters.Add("@__branch", SqlDbType.Int).Value = session.BranchId!.Value;
         }
         else
         {
@@ -139,18 +167,32 @@ public sealed class DynamicErpScreenService
         await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public Task DeleteAsync(
+    public async Task DeleteAsync(
         DynamicErpDefinition definition,
         int key,
+        AppSession session,
+        int screenId,
         CancellationToken cancellationToken = default)
     {
+        await _authorization.RequireAsync(
+            session, screenId, PermissionAction.Delete, cancellationToken).ConfigureAwait(false);
+
         if (string.IsNullOrWhiteSpace(definition.TableName) || string.IsNullOrWhiteSpace(definition.KeyColumn))
             throw new InvalidOperationException("هذا الكيان لا يدعم حذفاً عاماً آمناً.");
 
-        return _db.ExecuteAsync(
-            $"DELETE FROM dbo.{QuoteIdentifier(definition.TableName!)} WHERE {QuoteIdentifier(definition.KeyColumn!)}=@ID;",
-            p => p.Add("@ID", SqlDbType.Int).Value = key,
-            cancellationToken);
+        if (definition.HasBranchColumn && !session.BranchId.HasValue)
+            throw new InvalidOperationException("الحذف يتطلب فرعاً فعّالاً.");
+
+        var branchClause = definition.HasBranchColumn ? " AND [BranchID]=@BranchID" : string.Empty;
+        return await _db.ExecuteAsync(
+            $"DELETE FROM dbo.{QuoteIdentifier(definition.TableName!)} WHERE {QuoteIdentifier(definition.KeyColumn!)}=@ID{branchClause};",
+            p =>
+            {
+                p.Add("@ID", SqlDbType.Int).Value = key;
+                if (definition.HasBranchColumn)
+                    p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId!.Value;
+            },
+            cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<DynamicErpDefinition> BuildTableDefinitionAsync(
@@ -413,7 +455,11 @@ public sealed record DynamicErpDefinition(
     string? ListProcedure,
     bool ListProcedureNeedsBranch,
     string? KeyColumn,
-    IReadOnlyList<DynamicErpColumn> Columns);
+    IReadOnlyList<DynamicErpColumn> Columns)
+{
+    public bool HasBranchColumn =>
+        Columns.Any(c => c.Name.Equals("BranchID", StringComparison.OrdinalIgnoreCase));
+}
 
 public sealed record DynamicErpColumn(
     string Name,
@@ -430,5 +476,6 @@ public sealed record DynamicErpColumn(
         !IsComputed &&
         !IsPrimaryKey &&
         !IsAudit &&
-        !Name.Equals("YearId", StringComparison.OrdinalIgnoreCase);
+        !Name.Equals("YearId", StringComparison.OrdinalIgnoreCase) &&
+        !Name.Equals("BranchID", StringComparison.OrdinalIgnoreCase);
 }
