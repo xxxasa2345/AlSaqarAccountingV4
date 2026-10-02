@@ -80,6 +80,7 @@ public sealed class PurchasesEntryForm : Form
         _stores = stores;
         _custSup = custSup;
 
+        ErpTheme.ApplyForm(this);
         Text = "الصقر للمحاسبة — فاتورة مشتريات جديدة";
         Width = 1200;
         Height = 780;
