@@ -480,7 +480,7 @@ public sealed class InvoicesForm : Form
             if (_salesMode)
                 await _salesService.DeleteAsync(_selectedInvoiceId.Value, _session.BranchId);
             else
-                await _invoiceService.DeleteInvoiceAsync(_selectedInvoiceId.Value);
+                await _invoiceService.DeleteInvoiceAsync(_selectedInvoiceId.Value, _session, _access.Id);
             await LoadInvoices();
             _status.Text = "تم حذف الفاتورة";
         }
@@ -640,7 +640,8 @@ public sealed class InvoicesForm : Form
 
     private static string EscapeCsv(string value)
     {
-        if (value.Contains(',') || value.Contains('"') || value.Contains('\r') || value.Contains('\n'))
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\r') || value.Contains('
+'))
             return "\"" + value.Replace("\"", "\"\"") + "\"";
         return value;
     }
@@ -895,7 +896,7 @@ internal sealed class InvoiceEditForm : Form
                     Net = decimal.Parse(_netText.Text)
                 };
                 
-                await _invoiceService.UpdateInvoiceAsync(invoice, _session);
+                await _invoiceService.UpdateInvoiceAsync(invoice, _session, _access.Id);
                 MessageBox.Show(this, "تم تحديث الفاتورة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
