@@ -80,6 +80,7 @@ public sealed class PurchasesEntryForm : Form
         _stores = stores;
         _custSup = custSup;
 
+        ErpTheme.ApplyForm(this);
         Text = "الصقر للمحاسبة — فاتورة مشتريات جديدة";
         Width = 1200;
         Height = 780;
@@ -215,6 +216,7 @@ public sealed class PurchasesEntryForm : Form
         removeLine.Click += (_, _) => RemoveSelectedLine();
         var close = new Button { Text = "إغلاق", Width = 100, Height = 32, FlatStyle = FlatStyle.Flat };
         close.Click += (_, _) => Close();
+        ErpTheme.ConfigureToolbarButton(close);
         toolbar.Controls.Add(save);
         toolbar.Controls.Add(removeLine);
         toolbar.Controls.Add(close);
@@ -222,6 +224,7 @@ public sealed class PurchasesEntryForm : Form
 
         Controls.Add(_grid);
         Controls.Add(_totals);
+        ErpTheme.ConfigureGrid(_grid);
         UpdateTotals();
     }
 

@@ -65,6 +65,7 @@ public sealed class VoucherEntryForm : Form
         _access = access;
         _vouchers = vouchers;
 
+        ErpTheme.ApplyForm(this);
         Text = "الصقر للمحاسبة — سند جديد";
         Width = 1100;
         Height = 720;
@@ -159,6 +160,7 @@ public sealed class VoucherEntryForm : Form
             FlatStyle = FlatStyle.Flat
         };
         addLine.Click += (_, _) => AddLine();
+        ErpTheme.ConfigureToolbarButton(addLine, true);
         strip.Controls.Add(addLine, 4, 0);
         Controls.Add(strip);
 
@@ -178,6 +180,7 @@ public sealed class VoucherEntryForm : Form
             FlatStyle = FlatStyle.Flat
         };
         save.Click += async (_, _) => await SaveAsync();
+        ErpTheme.ConfigureToolbarButton(save, true);
         var removeLine = new Button
         {
             Text = "حذف السطر المحدد",
@@ -186,8 +189,10 @@ public sealed class VoucherEntryForm : Form
             FlatStyle = FlatStyle.Flat
         };
         removeLine.Click += (_, _) => RemoveSelectedLine();
+        ErpTheme.ConfigureToolbarButton(removeLine);
         var close = new Button { Text = "إغلاق", Width = 100, Height = 32, FlatStyle = FlatStyle.Flat };
         close.Click += (_, _) => Close();
+        ErpTheme.ConfigureToolbarButton(close);
         toolbar.Controls.Add(save);
         toolbar.Controls.Add(removeLine);
         toolbar.Controls.Add(close);
@@ -195,6 +200,7 @@ public sealed class VoucherEntryForm : Form
 
         Controls.Add(_grid);
         Controls.Add(_balance);
+        ErpTheme.ConfigureGrid(_grid);
         UpdateBalance();
     }
 
