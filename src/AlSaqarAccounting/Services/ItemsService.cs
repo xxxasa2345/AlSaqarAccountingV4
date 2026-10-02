@@ -13,8 +13,13 @@ namespace AlSaqarAccounting.Services;
 public sealed class ItemsService
 {
     private readonly DbExecutor _db;
+    private readonly AuthorizationService _authorization;
 
-    public ItemsService(DbExecutor db) => _db = db;
+    public ItemsService(DbExecutor db)
+    {
+        _db = db;
+        _authorization = new AuthorizationService(db);
+    }
 
     public Task<DataTable> ListAsync(CancellationToken cancellationToken = default)
         => _db.ExecuteStoredProcedureAsync("dbo.Get_All_Items", cancellationToken: cancellationToken);
@@ -22,9 +27,13 @@ public sealed class ItemsService
     public async Task CreateAsync(
         Item_Items item,
         AppSession session,
+        int screenId,
         CancellationToken cancellationToken = default)
     {
         Validate(item);
+
+        await _authorization.RequireAsync(
+            session, screenId, PermissionAction.Save, cancellationToken).ConfigureAwait(false);
 
         var tvp = CreateItemTable(item, session);
         await _db.ExecuteStoredProcedureNonQueryAsync(
@@ -36,6 +45,88 @@ public sealed class ItemsService
                 parameter.Value = tvp;
             },
             cancellationToken);
+    }
+
+    public async Task<int> UpdateAsync(
+        int itemId,
+        Item_Items item,
+        AppSession session,
+        int screenId,
+        CancellationToken cancellationToken = default)
+    {
+        if (itemId <= 0)
+            throw new ArgumentException("معرف الصنف غير صالح.", nameof(itemId));
+
+        Validate(item);
+
+        await _authorization.RequireAsync(
+            session, screenId, PermissionAction.Edit, cancellationToken).ConfigureAwait(false);
+
+        return await _db.ExecuteAsync(
+            @"UPDATE dbo.Item_Items
+              SET Item_code = @ItemCode,
+                  item_Name = @ItemName,
+                  item_Name_English = @EnglishName,
+                  UnitSmall = @UnitSmall,
+                  UnitMedium = @UnitMedium,
+                  UnitLarge = @UnitLarge,
+                  SellPriceSmall = @SellPriceSmall,
+                  Is_Tax = @IsTax,
+                  Tax_Value = @TaxValue,
+                  UserID_Update = @UserID,
+                  UserBranch_Update = @BranchID,
+                  UserMacAddress_Update = @Mac,
+                  UserDate_Update = GETDATE()
+              WHERE ItemId = @ItemId;",
+            p =>
+            {
+                p.Add("@ItemId", SqlDbType.Int).Value = itemId;
+                p.Add("@ItemCode", SqlDbType.NVarChar, 100).Value = item.Item_code.Trim();
+                p.Add("@ItemName", SqlDbType.NVarChar, 300).Value = item.item_Name.Trim();
+                p.Add("@EnglishName", SqlDbType.NVarChar, 300).Value = (object?)item.item_Name_English ?? DBNull.Value;
+                p.Add("@UnitSmall", SqlDbType.Int).Value = (object?)item.UnitSmall ?? DBNull.Value;
+                p.Add("@UnitMedium", SqlDbType.Int).Value = (object?)item.UnitMedium ?? DBNull.Value;
+                p.Add("@UnitLarge", SqlDbType.Int).Value = (object?)item.UnitLarge ?? DBNull.Value;
+                p.Add("@SellPriceSmall", SqlDbType.Decimal).Value = (object?)item.SellPriceSmall ?? DBNull.Value;
+                p.Add("@IsTax", SqlDbType.Bit).Value = (object?)item.Is_Tax ?? DBNull.Value;
+                p.Add("@TaxValue", SqlDbType.Decimal).Value = (object?)item.Tax_Value ?? DBNull.Value;
+                p.Add("@UserID", SqlDbType.Int).Value = session.UserId;
+                p.Add("@BranchID", SqlDbType.Int).Value = (object?)session.BranchId ?? DBNull.Value;
+                p.Add("@Mac", SqlDbType.NVarChar, 200).Value = Environment.MachineName;
+            },
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<int> DeleteAsync(
+        int itemId,
+        AppSession session,
+        int screenId,
+        CancellationToken cancellationToken = default)
+    {
+        if (itemId <= 0)
+            throw new ArgumentException("معرف الصنف غير صالح.", nameof(itemId));
+
+        await _authorization.RequireAsync(
+            session, screenId, PermissionAction.Delete, cancellationToken).ConfigureAwait(false);
+
+        var refs = await _db.QueryAsync(
+            @"SELECT
+                  (SELECT COUNT(1) FROM dbo.ItemQuantity WHERE ItemID = @ItemId) +
+                  (SELECT COUNT(1) FROM dbo.Order_OrdersDetails WHERE ItemID = @ItemId) +
+                  (SELECT COUNT(1) FROM dbo.Order_PurchasesDetails WHERE ItemID = @ItemId) +
+                  (SELECT COUNT(1) FROM dbo.Item_ItemComponent
+                   WHERE ItemID_Master = @ItemId OR ItemID_Complant = @ItemId) AS RefCount;",
+            p => p.Add("@ItemId", SqlDbType.Int).Value = itemId,
+            cancellationToken).ConfigureAwait(false);
+
+        if (refs.Rows.Count > 0 && Convert.ToInt32(refs.Rows[0]["RefCount"]) > 0)
+            throw new InvalidOperationException(
+                "لا يمكن حذف الصنف لأنه مستخدم في حركات أو أرصدة مخزنية. استخدم التعطيل/الإيقاف بدلاً من الحذف.");
+
+        return await _db.ExecuteAsync(
+            "DELETE FROM dbo.Item_Items WHERE ItemId = @ItemId;",
+            p => p.Add("@ItemId", SqlDbType.Int).Value = itemId,
+            cancellationToken).ConfigureAwait(false);
     }
 
     private static DataTable CreateItemTable(Item_Items item, AppSession session)
