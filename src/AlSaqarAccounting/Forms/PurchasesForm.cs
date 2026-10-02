@@ -62,6 +62,37 @@ public sealed class PurchasesForm : BrowseScreenBase
         });
 
         AddButton(toolbar, "طباعة", Access.AllowPrint, async () => await PrintSelectedInvoiceAsync());
+
+        // المقابل التشغيلي لـ BtnORDPurchaseReturnID في FrmPurchases الأصلي.
+        // لا نخترع عملية إنشاء: نفتح شاشة المرتجعات التشغيلية المرتبطة
+        // بالإجراءات الأصلية Select_Order_PurchasesReturn / Print_Order_PurchasesReturn.
+        AddButton(toolbar, "مرتجع مشتريات", Access.AllowEnter, async () =>
+        {
+            using var form = new PurchaseReturnsForm(
+                Session,
+                Access,
+                new InventoryOperationsService(new DbExecutor(
+                    new SqlConnectionFactory(GetConnectionString()))));
+            form.ShowDialog(this);
+            await ReloadAsync();
+        });
+
+        // في الأصل، BtnCovertSales يفتح شاشة المبيعات بعد التحقق من وجود أصناف.
+        // هنا ننفذ نفس مسار الفتح عبر OrdersForm التشغيلي الحالي، دون ادعاء
+        // تحويل تلقائي للبيانات ما لم يكن عقد التحويل مثبتاً.
+        AddButton(toolbar, "فتح المبيعات", Access.AllowEnter, async () =>
+        {
+            using var form = new OrdersForm(
+                Session,
+                Access,
+                new SalesService(new DbExecutor(
+                    new SqlConnectionFactory(GetConnectionString()))),
+                new StoresService(new DbExecutor(
+                    new SqlConnectionFactory(GetConnectionString()))));
+            form.ShowDialog(this);
+            await ReloadAsync();
+        });
+
         AddButton(toolbar, "حذف الفاتورة", Access.AllowDelete, async () => await DeleteInvoiceAsync());
     }
 
