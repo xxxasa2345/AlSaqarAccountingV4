@@ -19,6 +19,7 @@ public sealed class PurchasesForm : BrowseScreenBase
     private readonly PurchasesService _purchases;
     private readonly StoresService _stores;
     private readonly CustSupService _custSup;
+    private readonly ScreenAccessResolver _accessResolver;
 
     public PurchasesForm(
         AppSession session,
@@ -31,6 +32,7 @@ public sealed class PurchasesForm : BrowseScreenBase
         _purchases = purchases;
         _stores = stores;
         _custSup = custSup;
+        _accessResolver = new ScreenAccessResolver(new DbExecutor(new SqlConnectionFactory(GetConnectionString())));
     }
 
     protected override string ScreenTitle => "فواتير المشتريات";
@@ -52,9 +54,13 @@ public sealed class PurchasesForm : BrowseScreenBase
         // يفتح شاشة الموردين الحقيقية بدل وظيفة شكلية.
         AddButton(toolbar, "مورد جديد", Access.AllowSave, async () =>
         {
+            var childAccess = await ResolveChildAccessAsync("الموردون");
+            if (childAccess is null)
+                return;
+
             using var form = new SuppliersForm(
                 Session,
-                Access,
+                childAccess,
                 new CustSupService(new DbExecutor(new SqlConnectionFactory(
                     GetConnectionString()))));
             form.ShowDialog(this);
@@ -68,9 +74,13 @@ public sealed class PurchasesForm : BrowseScreenBase
         // بالإجراءات الأصلية Select_Order_PurchasesReturn / Print_Order_PurchasesReturn.
         AddButton(toolbar, "مرتجع مشتريات", Access.AllowEnter, async () =>
         {
+            var childAccess = await ResolveChildAccessAsync("مرتجعات المشتريات");
+            if (childAccess is null)
+                return;
+
             using var form = new PurchaseReturnsForm(
                 Session,
-                Access,
+                childAccess,
                 new InventoryOperationsService(new DbExecutor(
                     new SqlConnectionFactory(GetConnectionString()))));
             form.ShowDialog(this);
@@ -82,9 +92,13 @@ public sealed class PurchasesForm : BrowseScreenBase
         // تحويل تلقائي للبيانات ما لم يكن عقد التحويل مثبتاً.
         AddButton(toolbar, "فتح المبيعات", Access.AllowEnter, async () =>
         {
+            var childAccess = await ResolveChildAccessAsync("المبيعات");
+            if (childAccess is null)
+                return;
+
             using var form = new OrdersForm(
                 Session,
-                Access,
+                childAccess,
                 new SalesService(new DbExecutor(
                     new SqlConnectionFactory(GetConnectionString()))),
                 new StoresService(new DbExecutor(
@@ -94,6 +108,19 @@ public sealed class PurchasesForm : BrowseScreenBase
         });
 
         AddButton(toolbar, "حذف الفاتورة", Access.AllowDelete, async () => await DeleteInvoiceAsync());
+    }
+
+    private async Task<ScreenAccess?> ResolveChildAccessAsync(string screenName)
+    {
+        try
+        {
+            return await _accessResolver.GetAsync(Session, screenName).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.GetBaseException().Message, "صلاحيات الشاشة", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return null;
+        }
     }
 
     private string GetConnectionString()
