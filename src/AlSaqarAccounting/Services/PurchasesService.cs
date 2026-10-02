@@ -17,6 +17,8 @@ public sealed class PurchasesService
 
     public PurchasesService(DbExecutor db) => _db = db;
 
+    internal string ConnectionString => _db.ConnectionString;
+
     public Task<DataTable> ListAsync(int? branchId, CancellationToken cancellationToken = default)
         => ExecuteBranchProcedureAsync("dbo.Select_Order_Purchases", branchId, cancellationToken);
 
