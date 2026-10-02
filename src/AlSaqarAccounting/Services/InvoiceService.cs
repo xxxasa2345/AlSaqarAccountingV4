@@ -251,7 +251,7 @@ VALUES (
     {
         return _db.QueryAsync(
             "SELECT * FROM dbo.Order_OrdersDetails WHERE Purchese_ID = @InvoiceId ORDER BY SN",
-            p => { p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId; p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value; }, cancellationToken);
+            p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId, cancellationToken);
     }
 
     /// <summary>
@@ -261,7 +261,7 @@ VALUES (
     {
         return _db.QuerySingleAsync<Order_Orders>(
             "SELECT * FROM dbo.Order_Orders WHERE ID = @InvoiceId",
-            p => { p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId; p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value; }, cancellationToken);
+            p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId, cancellationToken);
     }
 
     /// <summary>
@@ -293,7 +293,7 @@ SET
     UserBranch_Update = @UserBranch_Update,
     UserMacAddress_Update = @UserMacAddress_Update,
     UserDate_Update = GETDATE()
-WHERE ID = @ID AND (UserBranch_Add = @BranchID);";
+WHERE ID = @ID AND BranchID = @BranchID;";
 
         return await _db.ExecuteAsync(sql, p =>
         {
@@ -325,17 +325,55 @@ WHERE ID = @ID AND (UserBranch_Add = @BranchID);";
     /// <summary>
     /// Delete invoice
     /// </summary>
-    public async Task<int> DeleteInvoiceAsync(int invoiceId, CancellationToken cancellationToken = default)
+    public async Task<int> DeleteInvoiceAsync(
+        int invoiceId,
+        AppSession session,
+        int screenId,
+        CancellationToken cancellationToken = default)
     {
-        // Delete details first
-        await _db.ExecuteAsync(
-            "DELETE FROM dbo.Order_OrdersDetails WHERE Purchese_ID = @InvoiceId AND EXISTS (SELECT 1 FROM dbo.Order_Orders h WHERE h.ID = @InvoiceId AND (h.UserBranch_Add = @BranchID OR h.UserBranch_Add IS NULL))",
-            p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId, cancellationToken);
+        await _authorization.RequireAsync(
+            session, screenId, PermissionAction.Delete, cancellationToken).ConfigureAwait(false);
 
-        // Delete header
-        return await _db.ExecuteAsync(
-            "DELETE FROM dbo.Order_Orders WHERE ID = @InvoiceId AND OrderCashierType = 0 AND (UserBranch_Add = @BranchID OR UserBranch_Add IS NULL)",
-            p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId, cancellationToken);
+        if (!session.BranchId.HasValue)
+            throw new InvalidOperationException("الحذف يتطلب فرعاً فعّالاً.");
+
+        using var cn = new SqlConnection(_db.ConnectionString);
+        await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
+        using var transaction = cn.BeginTransaction();
+
+        try
+        {
+            const string detailsSql = @"
+DELETE FROM dbo.Order_OrdersDetails
+WHERE Purchese_ID = @InvoiceId
+  AND BranchID = @BranchID;";
+
+            using (var detailsCmd = new SqlCommand(detailsSql, cn, transaction))
+            {
+                detailsCmd.Parameters.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId;
+                detailsCmd.Parameters.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
+                await detailsCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            const string headerSql = @"
+DELETE FROM dbo.Order_Orders
+WHERE ID = @InvoiceId
+  AND OrderCashierType = 0
+  AND BranchID = @BranchID;";
+
+            using var headerCmd = new SqlCommand(headerSql, cn, transaction);
+            headerCmd.Parameters.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId;
+            headerCmd.Parameters.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
+            var affected = await headerCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+
+            transaction.Commit();
+            return affected;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
 
     #endregion
