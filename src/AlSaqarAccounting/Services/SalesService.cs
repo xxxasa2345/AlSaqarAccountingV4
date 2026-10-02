@@ -16,7 +16,11 @@ public sealed class SalesService
     private readonly DbExecutor _db;
     private readonly AuthorizationService _authorization;
 
-    public SalesService(DbExecutor db)\n    {\n        _db = db;\n        _authorization = new AuthorizationService(db);\n    }
+    public SalesService(DbExecutor db)
+    {
+        _db = db;
+        _authorization = new AuthorizationService(db);
+    }
 
     public Task<DataTable> ListAsync(int? branchId, CancellationToken cancellationToken = default)
         => ExecuteBranchProcedureAsync("dbo.Select_Order_Orders", branchId, cancellationToken);
