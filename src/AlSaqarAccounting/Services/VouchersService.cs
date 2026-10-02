@@ -17,8 +17,9 @@ namespace AlSaqarAccounting.Services;
 public sealed class VouchersService
 {
     private readonly DbExecutor _db;
+    private readonly AuthorizationService _authorization;
 
-    public VouchersService(DbExecutor db) => _db = db;
+    public VouchersService(DbExecutor db)\n    {\n        _db = db;\n        _authorization = new AuthorizationService(db);\n    }
 
     public Task<DataTable> ListAsync(int? branchId, CancellationToken cancellationToken = default)
         => ExecuteBranchProcedureAsync("dbo.Select_SearchAccountReceipt", branchId, cancellationToken);
@@ -132,7 +133,7 @@ public sealed class VouchersService
             p =>
             {
                 p.Add("@ReferenceCode", SqlDbType.Int).Value = referenceCode;
-                p.Add("@BranchID", SqlDbType.Int).Value = (object?)branchId ?? DBNull.Value;
+                p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
                 p.Add("@TranTypeID", SqlDbType.Int).Value = tranTypeId;
             },
             cancellationToken);
