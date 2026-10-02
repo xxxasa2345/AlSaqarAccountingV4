@@ -22,6 +22,8 @@ public sealed class SalesService
         _authorization = new AuthorizationService(db);
     }
 
+    internal string ConnectionString => _db.ConnectionString;
+
     public Task<DataTable> ListAsync(int? branchId, CancellationToken cancellationToken = default)
         => ExecuteBranchProcedureAsync("dbo.Select_Order_Orders", branchId, cancellationToken);
 
