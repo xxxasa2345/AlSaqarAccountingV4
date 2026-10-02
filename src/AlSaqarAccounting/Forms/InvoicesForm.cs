@@ -478,7 +478,7 @@ public sealed class InvoicesForm : Form
         {
             UseWaitCursor = true;
             if (_salesMode)
-                await _salesService.DeleteAsync(_selectedInvoiceId.Value, _session.BranchId);
+                await _salesService.DeleteAsync(_selectedInvoiceId.Value, _session, _access.Id);
             else
                 await _invoiceService.DeleteInvoiceAsync(_selectedInvoiceId.Value, _session, _access.Id);
             await LoadInvoices();
@@ -508,7 +508,7 @@ public sealed class InvoicesForm : Form
 
             var invoiceId = _selectedInvoiceId.Value;
             var details = _salesMode
-                ? await _invoiceService.GetInvoiceDetailsAsync(invoiceId)
+                ? await _invoiceService.GetInvoiceDetailsAsync(invoiceId, _session)
                 : await _invoiceService.GetPurchaseInvoiceDetailsAsync(invoiceId);
 
             var invoiceNumber = GetRowValue(headerRow.Row, "NoteNum");
