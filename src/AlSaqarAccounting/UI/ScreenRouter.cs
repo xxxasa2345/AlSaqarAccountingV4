@@ -165,8 +165,7 @@ public sealed class ScreenRouter
     {
         if (string.IsNullOrWhiteSpace(name)) return false;
         var n = name.Trim();
-        return n.Equals("FrmGroups", StringComparison.OrdinalIgnoreCase) ||
-               n.Equals("مجموعات المستخدمين", StringComparison.OrdinalIgnoreCase) ||
+        return n.Equals("مجموعات المستخدمين", StringComparison.OrdinalIgnoreCase) ||
                n.Equals("مجموعة المستخدمين", StringComparison.OrdinalIgnoreCase) ||
                n.Equals("UserGroupsForm", StringComparison.OrdinalIgnoreCase);
     }
@@ -178,6 +177,8 @@ public sealed class ScreenRouter
         {
             case "FrmCompany": tableName = "Item_Company"; displayName = "الشركات"; return true;
             case "FrmClass": tableName = "Item_Class"; displayName = "الفئات"; return true;
+            case "FrmGroups": tableName = "Item_Groups"; displayName = "المجموعات"; return true;
+            case "GroupsForm": tableName = "Item_Groups"; displayName = "المجموعات"; return true;
             default: return false;
         }
     }
