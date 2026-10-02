@@ -72,6 +72,7 @@ public sealed class AccountsTreeForm : Form
         _access = access;
         _service = service;
 
+        ErpTheme.ApplyForm(this);
         Text = "الصقر للمحاسبة — شجرة الحسابات";
         Width = 1280;
         Height = 800;
@@ -81,6 +82,7 @@ public sealed class AccountsTreeForm : Form
         RightToLeftLayout = true;
 
         BuildLayout();
+        ErpTheme.ConfigureGrid(_grid);
         WireEvents();
     }
 
@@ -176,6 +178,7 @@ public sealed class AccountsTreeForm : Form
             Enabled = _access.AllowSave,
             FlatStyle = FlatStyle.Flat
         };
+        ErpTheme.ConfigureToolbarButton(button);
         add.Click += async (_, _) => await AddAccountAsync();
         var rename = new Button
         {
