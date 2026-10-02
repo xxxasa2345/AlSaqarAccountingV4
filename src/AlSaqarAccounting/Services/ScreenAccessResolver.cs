@@ -26,8 +26,20 @@ public sealed class ScreenAccessResolver
         var screens = await _security.GetAccessibleScreensAsync(
             session, cancellationToken).ConfigureAwait(false);
 
+        var aliases = normalized switch
+        {
+            "الموردون" => new[] { "الموردون", "الموردين", "FrmSuppliers" },
+            "مرتجعات المشتريات" => new[] { "مرتجعات المشتريات", "مرتجعات المشتريات بفاتورة", "مرتجعات المشتريات بدون فاتورة", "FrmPurchasesReturn" },
+            "المبيعات" => new[] { "المبيعات", "FrmOrders" },
+            "المشتريات" => new[] { "المشتريات", "FrmPurchases" },
+            "السندات" => new[] { "السندات", "FrmReceipts" },
+            "الكميات الافتتاحية" => new[] { "الكميات الافتتاحية", "كميات افتتاحية", "FrmOpenQuantity" },
+            _ => new[] { normalized }
+        };
+
         return screens.FirstOrDefault(s =>
-            string.Equals(s.ScreenName?.Trim(), normalized, StringComparison.OrdinalIgnoreCase));
+            aliases.Any(a =>
+                string.Equals(s.ScreenName?.Trim(), a, StringComparison.OrdinalIgnoreCase)));
     }
 
     public async Task<ScreenAccess> RequireAsync(
