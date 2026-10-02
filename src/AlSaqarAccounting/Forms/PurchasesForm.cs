@@ -1,3 +1,4 @@
+using System.Drawing.Printing;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Services;
 using AlSaqarAccounting.UI;
@@ -44,7 +45,121 @@ public sealed class PurchasesForm : BrowseScreenBase
                 await ReloadAsync();
         });
 
+        // المقابل التشغيلي لزر BtnNewSuppliers في FrmPurchases الأصلي:
+        // يفتح شاشة الموردين الحقيقية بدل وظيفة شكلية.
+        AddButton(toolbar, "مورد جديد", Access.AllowSave, async () =>
+        {
+            using var form = new SuppliersForm(
+                Session,
+                Access,
+                new CustSupService(new DbExecutor(new SqlConnectionFactory(
+                    GetConnectionString()))));
+            form.ShowDialog(this);
+            await ReloadAsync();
+        });
+
+        AddButton(toolbar, "طباعة", Access.AllowPrint, async () => await PrintSelectedInvoiceAsync());
         AddButton(toolbar, "حذف الفاتورة", Access.AllowDelete, async () => await DeleteInvoiceAsync());
+    }
+
+    private string GetConnectionString()
+    {
+        // BrowseScreenBase لا يعرّض سلسلة الاتصال مباشرة؛ نستخرجها من نفس DbExecutor
+        // المستخدمة في الخدمة الحالية عبر Session's configured database connection.
+        return _purchases.ConnectionString;
+    }
+
+    private async Task PrintSelectedInvoiceAsync()
+    {
+        var row = CurrentRow;
+        if (!TryRowId(row, out var invoiceId))
+        {
+            Status.Text = "حدد فاتورة مشتريات أولاً.";
+            return;
+        }
+
+        try
+        {
+            UseWaitCursor = true;
+            var data = await _purchases.PrintAsync(invoiceId, Session.BranchId);
+
+            using var document = new PrintDocument();
+            document.DocumentName = $"فاتورة مشتريات {invoiceId}";
+
+            document.PrintPage += (_, e) =>
+            {
+                using var titleFont = new Font("Tahoma", 16, FontStyle.Bold);
+                using var headerFont = new Font("Tahoma", 11, FontStyle.Bold);
+                using var bodyFont = new Font("Tahoma", 9, FontStyle.Regular);
+
+                var y = (float)e.MarginBounds.Top;
+                var right = (float)e.MarginBounds.Right;
+
+                void DrawRight(string value, Font font)
+                {
+                    var size = e.Graphics.MeasureString(value, font);
+                    e.Graphics.DrawString(value, font, Brushes.Black, right - size.Width, y);
+                    y += size.Height + 5;
+                }
+
+                DrawRight("شركة الصقر للمحاسبة", titleFont);
+                DrawRight($"فاتورة مشتريات رقم {invoiceId}", headerFont);
+
+                foreach (DataRow dataRow in data.Rows)
+                {
+                    var parts = new List<string>();
+
+                    foreach (DataColumn column in data.Columns)
+                    {
+                        if (dataRow[column] == DBNull.Value)
+                            continue;
+
+                        var value = Convert.ToString(dataRow[column]);
+                        if (string.IsNullOrWhiteSpace(value))
+                            continue;
+
+                        parts.Add($"{column.ColumnName}: {value}");
+                    }
+
+                    if (parts.Count == 0)
+                        continue;
+
+                    DrawRight(string.Join(" | ", parts), bodyFont);
+
+                    if (y >= e.MarginBounds.Bottom - 30)
+                    {
+                        e.HasMorePages = true;
+                        return;
+                    }
+                }
+
+                e.HasMorePages = false;
+            };
+
+            using var dialog = new PrintDialog
+            {
+                Document = document,
+                UseEXDialog = true
+            };
+
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+                document.Print();
+
+            Status.Text = $"تم تجهيز طباعة الفاتورة {invoiceId}.";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                this,
+                "تعذر طباعة الفاتورة:\r\n" + ex.GetBaseException().Message,
+                "طباعة المشتريات",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
     }
 
     private async Task DeleteInvoiceAsync()
