@@ -38,7 +38,41 @@ public sealed class ReceiptsForm : BrowseScreenBase
                 await ReloadAsync();
         });
 
+        AddButton(toolbar, "شجرة الحسابات", Access.AllowEnter, async () => await OpenRelatedAsync("شجرة الحسابات"));
         AddButton(toolbar, "حذف السند", Access.AllowDelete, async () => await DeleteVoucherAsync());
+    }
+
+    private async Task OpenRelatedAsync(string screenName)
+    {
+        try
+        {
+            UseWaitCursor = true;
+            var security = new SecurityService(new SqlConnectionFactory(_vouchers.ConnectionString));
+            var screens = await security.GetAccessibleScreensAsync(Session);
+            var target = screens.FirstOrDefault(s =>
+                string.Equals(s.ScreenName?.Trim(), screenName, StringComparison.OrdinalIgnoreCase));
+
+            if (target is null)
+            {
+                Status.Text = $"لا توجد صلاحية لفتح «{screenName}».";
+                return;
+            }
+
+            var router = new ScreenRouter(_vouchers.ConnectionString, Session);
+            if (!router.TryOpen(this, target, out var message))
+                Status.Text = string.IsNullOrWhiteSpace(message) ? "تعذر فتح الشاشة المرتبطة." : message;
+            else
+                Status.Text = $"تم فتح «{screenName}».";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, "تعذر فتح الشاشة المرتبطة:\r\n" + ex.GetBaseException().Message,
+                "السندات", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
     }
 
     private async Task DeleteVoucherAsync()
