@@ -93,6 +93,30 @@ public sealed class ScreenRouter
             using (realScreen) { realScreen.StartPosition = FormStartPosition.CenterParent; realScreen.ShowDialog(owner); }
             return true;
         }
+
+        // Any remaining known internal screen must be explicitly present in the
+        // verified ScreenEntityMap before schema-driven routing is allowed.
+        if (!string.IsNullOrWhiteSpace(ScreenEntityMap.Resolve(access.ScreenName)))
+        {
+            try
+            {
+                using var mappedScreen = new DynamicErpScreenForm(
+                    _session,
+                    access,
+                    new DynamicErpScreenService(db),
+                    access.ScreenName)
+                { StartPosition = FormStartPosition.CenterParent };
+
+                mappedScreen.ShowDialog(owner);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                message = ex.GetBaseException().Message;
+                return false;
+            }
+        }
+
         var type = FindFormType(access.ScreenName);
         if (type is not null && type != typeof(DynamicErpScreenForm))
         {
@@ -100,12 +124,8 @@ public sealed class ScreenRouter
             { using (form) { form.StartPosition = FormStartPosition.CenterParent; form.ShowDialog(owner); } return true; }
             message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
         }
-        try
-        {
-            using var dynamicScreen = new DynamicErpScreenForm(_session, access, new DynamicErpScreenService(db), access.ScreenName) { StartPosition = FormStartPosition.CenterParent };
-            dynamicScreen.ShowDialog(owner); return true;
-        }
-        catch (Exception ex) { message = ex.GetBaseException().Message; return false; }
+        message = $"الشاشة «{access.ScreenName}» غير مربوطة في ScreenEntityMap.";
+        return false;
     }
 
     private static bool IsPasswordScreen(string? name)
