@@ -179,6 +179,8 @@ public sealed class ScreenRouter
             case "FrmClass": tableName = "Item_Class"; displayName = "الفئات"; return true;
             case "FrmGroups": tableName = "Item_Groups"; displayName = "المجموعات"; return true;
             case "GroupsForm": tableName = "Item_Groups"; displayName = "المجموعات"; return true;
+            case "FrmCountry": tableName = "Item_Country"; displayName = "الدول"; return true;
+            case "FrmDoctor": tableName = "Item_Doctor"; displayName = "الأطباء"; return true;
             default: return false;
         }
     }
