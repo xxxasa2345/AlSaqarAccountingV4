@@ -292,8 +292,8 @@ public sealed class MainForm : Form
     private void SetStatusToolTip(string? groupName)
     {
         _status.ToolTipText =
-            \$"المستخدم: {_session.UserName}\\r\\n" +
-            $"الفرع: {_session.BranchId?.ToString() ?? "-"}\\r\\n" +
+            $"المستخدم: {_session.UserName}\r\n" +
+            $"الفرع: {_session.BranchId?.ToString() ?? "-"}\r\n" +
             $"المجموعة: {groupName ?? _session.GroupId?.ToString() ?? "-"}";
     }
 
