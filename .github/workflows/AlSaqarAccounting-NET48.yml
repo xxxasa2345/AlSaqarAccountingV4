@@ -31,21 +31,46 @@ jobs:
       - name: Build .NET Framework 4.8
         run: msbuild AlSaqarAccounting.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /m /v:minimal
 
-      - name: Verify output
+      - name: Resolve build output
+        id: output
         shell: pwsh
         run: |
-          $output = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Release\net48'
-          $exe = Join-Path $output 'AlSaqarAccounting.exe'
+          $bin = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin'
+          if (-not (Test-Path $bin)) { throw "Build bin directory not found: $bin" }
+
+          $exe = Get-ChildItem -Path $bin -Recurse -File -Filter 'AlSaqarAccounting.exe' |
+            Where-Object { $_.FullName -notmatch '\\obj\\' } |
+            Sort-Object FullName |
+            Select-Object -First 1
+
+          if (-not $exe) {
+            Write-Host "Contents of bin directory:"
+            Get-ChildItem -Path $bin -Recurse -File |
+              Select-Object FullName,Length |
+              Format-Table -AutoSize
+            throw "AlSaqarAccounting.exe not found under: $bin"
+          }
+
+          $output = $exe.Directory.FullName
           $config = Join-Path $output 'appsettings.json'
-          if (-not (Test-Path $exe)) { throw "EXE not found: $exe" }
-          if (-not (Test-Path $config)) { throw "appsettings.json not found: $config" }
-          Write-Host "EXE: $exe"
+
+          if (-not (Test-Path $config)) {
+            Write-Host "Output directory contents:"
+            Get-ChildItem -Path $output -Recurse -File |
+              Select-Object FullName,Length |
+              Format-Table -AutoSize
+            throw "appsettings.json not found beside EXE: $config"
+          }
+
+          "output=$output" >> $env:GITHUB_OUTPUT
+          Write-Host "Resolved output: $output"
+          Write-Host "EXE: $($exe.FullName)"
           Write-Host "Config: $config"
 
       - name: Package Release
         shell: pwsh
         run: |
-          $output = Join-Path $env:GITHUB_WORKSPACE 'src\AlSaqarAccounting\bin\Release\net48'
+          $output = '${{ steps.output.outputs.output }}'
           $out = Join-Path $env:GITHUB_WORKSPACE 'release\AlSaqarAccounting-NET48'
           New-Item -ItemType Directory -Force -Path $out | Out-Null
           Copy-Item "$output\*" $out -Recurse -Force
