@@ -31,6 +31,15 @@ public static class RealScreenCatalog
             ["الحسابات"] = (cs, s, a) => new AccountsTreeForm(
                 s, a, new AccountsTreeService(CreateDb(cs))),
 
+            // بدائل لأسماء شاشات التصميم القديمة: أي زر/سجل قديم يشير إلى
+            // AccountingForm أو AdvancedItemsForm يُوجَّه إلى الشاشة التشغيلية المثبتة
+            // المقابلة بدل فتح شاشة شكلية تحتوي عمليات غير منفذة.
+            ["AccountingForm"] = (cs, s, a) => new AccountsTreeForm(
+                s, a, new AccountsTreeService(CreateDb(cs))),
+
+            ["AdvancedItemsForm"] = (cs, s, a) => new ItemsForm(
+                s, a, new ItemsService(CreateDb(cs))),
+
             // الأمن والصلاحيات — شاشات إدارية حقيقية مرتبطة بجداول User_* الأصلية.
             ["FrmPassword"] = (cs, s, a) => new ChangePasswordForm(
                 s, new SecurityAdministrationService(CreateDb(cs))),
