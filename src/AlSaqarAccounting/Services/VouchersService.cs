@@ -127,12 +127,23 @@ public sealed class VouchersService
 
     /// <summary>Deletes a voucher through the original delete procedure
     /// (header + details are removed by the procedure itself).</summary>
-    public Task DeleteAsync(
+    public async Task DeleteAsync(
         int referenceCode,
-        int? branchId,
+        AppSession session,
+        int screenId,
         int tranTypeId,
         CancellationToken cancellationToken = default)
-        => _db.ExecuteStoredProcedureNonQueryAsync(
+    {
+        if (!session.BranchId.HasValue)
+            throw new InvalidOperationException("حذف السندات يتطلب فرعاً فعّالاً.");
+
+        await _authorization.RequireAsync(
+            session,
+            screenId,
+            PermissionAction.Delete,
+            cancellationToken).ConfigureAwait(false);
+
+        await _db.ExecuteStoredProcedureNonQueryAsync(
             "dbo.Delete_Tran_Tran",
             p =>
             {
@@ -140,7 +151,8 @@ public sealed class VouchersService
                 p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
                 p.Add("@TranTypeID", SqlDbType.Int).Value = tranTypeId;
             },
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
+    }
 
     /// <summary>Voucher serials increment per branch and type, mirroring the
     /// original numbering behaviour.</summary>
