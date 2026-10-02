@@ -41,7 +41,57 @@ public sealed class OrdersForm : BrowseScreenBase
                 await ReloadAsync();
         });
 
+        AddButton(toolbar, "مرتجع مبيعات", awaitButtonAccessAsync("مرتجعات المبيعات بفاتورة"), async () => await OpenRelatedAsync("مرتجعات المبيعات بفاتورة"));
+        AddButton(toolbar, "تحويل إلى فرع", awaitButtonAccessAsync("طلب التحويل إلى فرع"), async () => await OpenRelatedAsync("طلب التحويل إلى فرع"));
+        AddButton(toolbar, "العملاء", awaitButtonAccessAsync("العملاء"), async () => await OpenRelatedAsync("العملاء"));
         AddButton(toolbar, "حذف الفاتورة", Access.AllowDelete, async () => await DeleteInvoiceAsync());
+    }
+
+    private async Task<bool> awaitButtonAccessAsync(string screenName)
+    {
+        try
+        {
+            var security = new SecurityService(new SqlConnectionFactory(_sales.ConnectionString));
+            var screens = await security.GetAccessibleScreensAsync(Session);
+            return screens.Any(s => string.Equals(s.ScreenName?.Trim(), screenName, StringComparison.OrdinalIgnoreCase) && s.AllowEnter);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private async Task OpenRelatedAsync(string screenName)
+    {
+        try
+        {
+            UseWaitCursor = true;
+            var security = new SecurityService(new SqlConnectionFactory(_sales.ConnectionString));
+            var screens = await security.GetAccessibleScreensAsync(Session);
+            var target = screens.FirstOrDefault(s =>
+                string.Equals(s.ScreenName?.Trim(), screenName, StringComparison.OrdinalIgnoreCase));
+
+            if (target is null)
+            {
+                Status.Text = $"لا توجد صلاحية لفتح «{screenName}».";
+                return;
+            }
+
+            var router = new ScreenRouter(_sales.ConnectionString, Session);
+            if (!router.TryOpen(this, target, out var message))
+                Status.Text = string.IsNullOrWhiteSpace(message) ? "تعذر فتح الشاشة المرتبطة." : message;
+            else
+                Status.Text = $"تم فتح «{screenName}».";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, "تعذر فتح العملية المرتبطة:\r\n" + ex.GetBaseException().Message,
+                "المبيعات", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
     }
 
     private async Task DeleteInvoiceAsync()
