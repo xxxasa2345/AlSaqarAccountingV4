@@ -97,7 +97,9 @@ WHERE ID=@ID;",
             "Item_Company" => "Item_Company",
             "Item_Class" => "Item_Class",
             "Item_Groups" => "Item_Groups",
-            _ => throw new ArgumentOutOfRangeException(nameof(tableName), "مصدر شاشة الأصناف غير مسموح به.")
+            "Item_Country" => "Item_Country",
+            "Item_Doctor" => "Item_Doctor",
+            _ => throw new ArgumentOutOfRangeException(nameof(tableName), "مصدر شاشة البيانات الرئيسية غير مسموح به.")
         };
     }
 
