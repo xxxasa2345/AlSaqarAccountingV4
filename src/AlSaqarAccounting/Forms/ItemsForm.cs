@@ -26,6 +26,7 @@ public sealed class ItemsForm : Form
     private readonly NumericUpDown _sellPrice = new();
     private readonly NumericUpDown _tax = new();
     private DataTable? _items;
+    private int? _selectedItemId;
 
     public ItemsForm(AppSession session, ScreenAccess access, ItemsService service)
     {
@@ -37,8 +38,9 @@ public sealed class ItemsForm : Form
 
     private void InitializeUi()
     {
+        ErpTheme.ApplyForm(this);
         Text = "الأصناف";
-        Width = 1250;
+        Width = 1280;
         Height = 760;
         RightToLeft = RightToLeft.Yes;
         StartPosition = FormStartPosition.CenterParent;
@@ -51,13 +53,11 @@ public sealed class ItemsForm : Form
             Padding = new Padding(8)
         };
 
-        var refresh = new Button { Text = "تحديث", Width = 100, Height = 32 };
-        refresh.Click += async (_, _) => await LoadItemsAsync();
-        toolbar.Controls.Add(refresh);
-
-        var save = new Button { Text = "حفظ الصنف", Width = 120, Height = 32, Enabled = _access.AllowSave };
-        save.Click += async (_, _) => await SaveItemAsync();
-        toolbar.Controls.Add(save);
+        AddToolbarButton(toolbar, "جديد", _access.AllowSave, NewItem, true);
+        AddToolbarButton(toolbar, "حفظ الصنف", _access.AllowSave, SaveItemAsync);
+        AddToolbarButton(toolbar, "تعديل", _access.AllowEdit, EditItemAsync);
+        AddToolbarButton(toolbar, "حذف", _access.AllowDelete, DeleteItemAsync);
+        AddToolbarButton(toolbar, "تحديث", _access.AllowEnter, LoadItemsAsync);
 
         toolbar.Controls.Add(new Label { Text = "بحث:", AutoSize = true, Padding = new Padding(8, 8, 2, 0) });
         _search.Width = 260;
@@ -95,6 +95,8 @@ public sealed class ItemsForm : Form
         _grid.AutoGenerateColumns = true;
         _grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         _grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+        _grid.SelectionChanged += (_, _) => LoadSelectedItem();
+        ErpTheme.ConfigureGrid(_grid);
         Controls.Add(_grid);
 
         Shown += async (_, _) => await LoadItemsAsync();
@@ -117,6 +119,78 @@ public sealed class ItemsForm : Form
         control.Minimum = 0;
         AddField(panel, label, control, column, row);
     }
+
+    private static void AddToolbarButton(
+        FlowLayoutPanel toolbar,
+        string text,
+        bool enabled,
+        Func<Task> action,
+        bool primary = false)
+    {
+        var button = new Button
+        {
+            Text = text,
+            Width = text.Length > 7 ? 120 : 95,
+            Height = 34,
+            Enabled = enabled,
+            Margin = new Padding(4),
+            FlatStyle = FlatStyle.Flat
+        };
+        button.Click += async (_, _) => await action();
+        ErpTheme.ConfigureToolbarButton(button, primary);
+        toolbar.Controls.Add(button);
+    }
+
+    private static void AddToolbarButton(
+        FlowLayoutPanel toolbar,
+        string text,
+        bool enabled,
+        Action action,
+        bool primary = false)
+    {
+        var button = new Button
+        {
+            Text = text,
+            Width = text.Length > 7 ? 120 : 95,
+            Height = 34,
+            Enabled = enabled,
+            Margin = new Padding(4),
+            FlatStyle = FlatStyle.Flat
+        };
+        button.Click += (_, _) => action();
+        ErpTheme.ConfigureToolbarButton(button, primary);
+        toolbar.Controls.Add(button);
+    }
+
+    private void NewItem()
+    {
+        _selectedItemId = null;
+        ClearEditor();
+        _grid.ClearSelection();
+        _code.Focus();
+    }
+
+    private void LoadSelectedItem()
+    {
+        if (_grid.CurrentRow?.DataBoundItem is not DataRowView row)
+            return;
+
+        if (!int.TryParse(Convert.ToString(row.Row["ItemId"]), out var id) || id <= 0)
+            return;
+
+        _selectedItemId = id;
+        _code.Text = Convert.ToString(row.Row["Item_code"]) ?? string.Empty;
+        _name.Text = Convert.ToString(row.Row["item_Name"]) ?? string.Empty;
+        _englishName.Text = Convert.ToString(row.Row["item_Name_English"]) ?? string.Empty;
+        _unitSmall.Value = ToDecimalValue(row.Row["UnitSmall"]);
+        _unitMedium.Value = ToDecimalValue(row.Row["UnitMedium"]);
+        _unitLarge.Value = ToDecimalValue(row.Row["UnitLarge"]);
+        _sellPrice.Value = ToDecimalValue(row.Row["SellPriceSmall"]);
+        _tax.Value = ToDecimalValue(row.Row["Tax_Value"]);
+    }
+
+    private static decimal ToDecimalValue(object value)
+        => value == DBNull.Value || value is null ? 0m : Math.Max(0m, Convert.ToDecimal(value));
 
     private async Task LoadItemsAsync()
     {
@@ -153,22 +227,16 @@ public sealed class ItemsForm : Form
             if (!_access.AllowSave)
                 throw new InvalidOperationException("لا تملك صلاحية حفظ الأصناف.");
 
-            var item = new Item_Items
+            if (_selectedItemId.HasValue)
             {
-                Item_code = _code.Text.Trim(),
-                item_Name = _name.Text.Trim(),
-                item_Name_English = _englishName.Text.Trim(),
-                UnitSmall = ToNullableInt(_unitSmall.Value),
-                UnitMedium = ToNullableInt(_unitMedium.Value),
-                UnitLarge = ToNullableInt(_unitLarge.Value),
-                SellPriceSmall = _sellPrice.Value,
-                Is_Tax = _tax.Value > 0,
-                Tax_Value = _tax.Value
-            };
+                await EditItemAsync();
+                return;
+            }
 
             Cursor = Cursors.WaitCursor;
-            await _service.CreateAsync(item, _session);
+            await _service.CreateAsync(BuildEditorItem(), _session, _access.Id);
             ClearEditor();
+            _selectedItemId = null;
             await LoadItemsAsync();
             MessageBox.Show(this, "تم حفظ الصنف في قاعدة البيانات.", "الأصناف", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -181,6 +249,80 @@ public sealed class ItemsForm : Form
             Cursor = Cursors.Default;
         }
     }
+
+    private async Task EditItemAsync()
+    {
+        if (!_selectedItemId.HasValue)
+        {
+            MessageBox.Show(this, "حدد الصنف المطلوب تعديله أولاً.", "الأصناف", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        try
+        {
+            Cursor = Cursors.WaitCursor;
+            await _service.UpdateAsync(_selectedItemId.Value, BuildEditorItem(), _session, _access.Id);
+            await LoadItemsAsync();
+            MessageBox.Show(this, "تم تعديل الصنف في قاعدة البيانات.", "الأصناف", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.GetBaseException().Message, "تعذر تعديل الصنف", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            Cursor = Cursors.Default;
+        }
+    }
+
+    private async Task DeleteItemAsync()
+    {
+        if (!_selectedItemId.HasValue)
+        {
+            MessageBox.Show(this, "حدد الصنف المطلوب حذفه أولاً.", "الأصناف", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (MessageBox.Show(
+                this,
+                $"هل تريد حذف الصنف «{_name.Text.Trim()}»؟",
+                "تأكيد حذف الصنف",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning) != DialogResult.Yes)
+            return;
+
+        try
+        {
+            Cursor = Cursors.WaitCursor;
+            await _service.DeleteAsync(_selectedItemId.Value, _session, _access.Id);
+            _selectedItemId = null;
+            ClearEditor();
+            await LoadItemsAsync();
+            MessageBox.Show(this, "تم حذف الصنف من قاعدة البيانات.", "الأصناف", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.GetBaseException().Message, "تعذر حذف الصنف", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            Cursor = Cursors.Default;
+        }
+    }
+
+    private Item_Items BuildEditorItem()
+        => new()
+        {
+            Item_code = _code.Text.Trim(),
+            item_Name = _name.Text.Trim(),
+            item_Name_English = _englishName.Text.Trim(),
+            UnitSmall = ToNullableInt(_unitSmall.Value),
+            UnitMedium = ToNullableInt(_unitMedium.Value),
+            UnitLarge = ToNullableInt(_unitLarge.Value),
+            SellPriceSmall = _sellPrice.Value,
+            Is_Tax = _tax.Value > 0,
+            Tax_Value = _tax.Value
+        };
 
     private void ClearEditor()
     {
