@@ -1,4 +1,7 @@
+using System.Data;
+using System.Drawing;
 using System.Drawing.Printing;
+using System.Collections.Generic;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Services;
 using AlSaqarAccounting.UI;
