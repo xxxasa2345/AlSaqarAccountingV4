@@ -15,7 +15,11 @@ public sealed class InvoiceService
     private readonly DbExecutor _db;
     private readonly AuthorizationService _authorization;
 
-    public InvoiceService(DbExecutor db)\n    {\n        _db = db;\n        _authorization = new AuthorizationService(db);\n    }
+    public InvoiceService(DbExecutor db)
+    {
+        _db = db;
+        _authorization = new AuthorizationService(db);
+    }
 
     #region Sales Invoices
 
@@ -289,11 +293,12 @@ SET
     UserBranch_Update = @UserBranch_Update,
     UserMacAddress_Update = @UserMacAddress_Update,
     UserDate_Update = GETDATE()
-WHERE ID = @ID AND (UserBranch_Add = @BranchID OR UserBranch_Add IS NULL);";
+WHERE ID = @ID AND (UserBranch_Add = @BranchID);";
 
         return await _db.ExecuteAsync(sql, p =>
         {
-            p.Add("@ID", SqlDbType.Int).Value = invoice.ID;\n            p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
+            p.Add("@ID", SqlDbType.Int).Value = invoice.ID;
+            p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
             p.Add("@SupplierName", SqlDbType.NVarChar, 300).Value = invoice.SupplierName.Trim();
             p.Add("@SupplierPhone", SqlDbType.NVarChar, 100).Value = (object)invoice.SupplierPhone ?? DBNull.Value;
             p.Add("@SupplierVatNum", SqlDbType.NVarChar, 100).Value = (object)invoice.SupplierVatNum ?? DBNull.Value;
