@@ -13,8 +13,9 @@ namespace AlSaqarAccounting.Services;
 public sealed class InvoiceService
 {
     private readonly DbExecutor _db;
+    private readonly AuthorizationService _authorization;
 
-    public InvoiceService(DbExecutor db) => _db = db;
+    public InvoiceService(DbExecutor db)\n    {\n        _db = db;\n        _authorization = new AuthorizationService(db);\n    }
 
     #region Sales Invoices
 
@@ -246,7 +247,7 @@ VALUES (
     {
         return _db.QueryAsync(
             "SELECT * FROM dbo.Order_OrdersDetails WHERE Purchese_ID = @InvoiceId ORDER BY SN",
-            p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId, cancellationToken);
+            p => { p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId; p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value; }, cancellationToken);
     }
 
     /// <summary>
@@ -256,7 +257,7 @@ VALUES (
     {
         return _db.QuerySingleAsync<Order_Orders>(
             "SELECT * FROM dbo.Order_Orders WHERE ID = @InvoiceId",
-            p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId, cancellationToken);
+            p => { p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId; p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value; }, cancellationToken);
     }
 
     /// <summary>
@@ -288,11 +289,11 @@ SET
     UserBranch_Update = @UserBranch_Update,
     UserMacAddress_Update = @UserMacAddress_Update,
     UserDate_Update = GETDATE()
-WHERE ID = @ID;";
+WHERE ID = @ID AND (UserBranch_Add = @BranchID OR UserBranch_Add IS NULL);";
 
         return await _db.ExecuteAsync(sql, p =>
         {
-            p.Add("@ID", SqlDbType.Int).Value = invoice.ID;
+            p.Add("@ID", SqlDbType.Int).Value = invoice.ID;\n            p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
             p.Add("@SupplierName", SqlDbType.NVarChar, 300).Value = invoice.SupplierName.Trim();
             p.Add("@SupplierPhone", SqlDbType.NVarChar, 100).Value = (object)invoice.SupplierPhone ?? DBNull.Value;
             p.Add("@SupplierVatNum", SqlDbType.NVarChar, 100).Value = (object)invoice.SupplierVatNum ?? DBNull.Value;
@@ -323,12 +324,12 @@ WHERE ID = @ID;";
     {
         // Delete details first
         await _db.ExecuteAsync(
-            "DELETE FROM dbo.Order_OrdersDetails WHERE Purchese_ID = @InvoiceId",
+            "DELETE FROM dbo.Order_OrdersDetails WHERE Purchese_ID = @InvoiceId AND EXISTS (SELECT 1 FROM dbo.Order_Orders h WHERE h.ID = @InvoiceId AND (h.UserBranch_Add = @BranchID OR h.UserBranch_Add IS NULL))",
             p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId, cancellationToken);
 
         // Delete header
         return await _db.ExecuteAsync(
-            "DELETE FROM dbo.Order_Orders WHERE ID = @InvoiceId AND OrderCashierType = 0",
+            "DELETE FROM dbo.Order_Orders WHERE ID = @InvoiceId AND OrderCashierType = 0 AND (UserBranch_Add = @BranchID OR UserBranch_Add IS NULL)",
             p => p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId, cancellationToken);
     }
 
