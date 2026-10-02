@@ -25,6 +25,8 @@ public sealed class VouchersService
         _authorization = new AuthorizationService(db);
     }
 
+    internal string ConnectionString => _db.ConnectionString;
+
     public Task<DataTable> ListAsync(int? branchId, CancellationToken cancellationToken = default)
         => ExecuteBranchProcedureAsync("dbo.Select_SearchAccountReceipt", branchId, cancellationToken);
 
