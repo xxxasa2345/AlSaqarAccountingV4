@@ -19,7 +19,11 @@ public sealed class VouchersService
     private readonly DbExecutor _db;
     private readonly AuthorizationService _authorization;
 
-    public VouchersService(DbExecutor db)\n    {\n        _db = db;\n        _authorization = new AuthorizationService(db);\n    }
+    public VouchersService(DbExecutor db)
+    {
+        _db = db;
+        _authorization = new AuthorizationService(db);
+    }
 
     public Task<DataTable> ListAsync(int? branchId, CancellationToken cancellationToken = default)
         => ExecuteBranchProcedureAsync("dbo.Select_SearchAccountReceipt", branchId, cancellationToken);
