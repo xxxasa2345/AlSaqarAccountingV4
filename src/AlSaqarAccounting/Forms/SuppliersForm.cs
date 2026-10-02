@@ -176,6 +176,7 @@ public sealed class SuppliersForm : Form
     {
         _search.TextChanged += (_, _) => ApplySearch();
         _grid.CellDoubleClick += (_, _) => BeginEdit();
+        ErpTheme.ConfigureGrid(_grid);
         Shown += async (_, _) => await LoadAsync();
     }
 
