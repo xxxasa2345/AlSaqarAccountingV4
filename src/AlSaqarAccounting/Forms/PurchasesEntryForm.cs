@@ -193,38 +193,40 @@ public sealed class PurchasesEntryForm : Form
         var toolbar = new FlowLayoutPanel
         {
             Dock = DockStyle.Bottom,
-            Height = 48,
+            Height = 54,
             FlowDirection = FlowDirection.RightToLeft,
-            Padding = new Padding(6)
+            Padding = new Padding(8, 7, 8, 7),
+            WrapContents = false
         };
-        var save = new Button
+
+        Button Action(string text, int width, bool enabled, Action action, bool primary = false)
         {
-            Text = "حفظ الفاتورة",
-            Width = 130,
-            Height = 32,
-            Enabled = _access.AllowSave,
-            FlatStyle = FlatStyle.Flat
-        };
-        save.Click += async (_, _) => await SaveAsync();
-        var removeLine = new Button
-        {
-            Text = "حذف السطر المحدد",
-            Width = 130,
-            Height = 32,
-            FlatStyle = FlatStyle.Flat
-        };
-        removeLine.Click += (_, _) => RemoveSelectedLine();
-        var close = new Button { Text = "إغلاق", Width = 100, Height = 32, FlatStyle = FlatStyle.Flat };
-        close.Click += (_, _) => Close();
-        ErpTheme.ConfigureToolbarButton(close);
-        toolbar.Controls.Add(save);
-        toolbar.Controls.Add(removeLine);
-        toolbar.Controls.Add(close);
+            var button = new Button
+            {
+                Text = text,
+                Width = width,
+                Height = 36,
+                Enabled = enabled,
+                Margin = new Padding(4)
+            };
+            button.Click += (_, _) => action();
+            ErpTheme.ConfigureToolbarButton(button, primary);
+            toolbar.Controls.Add(button);
+            return button;
+        }
+
+        Action("حفظ الفاتورة", 135, _access.AllowSave, () => _ = SaveAsync(), true);
+        Action("حذف السطر", 125, true, RemoveSelectedLine);
+        Action("إعادة الحساب", 120, true, UpdateTotals);
+        Action("فاتورة جديدة", 120, _access.AllowSave, NewDraft);
+        Action("إغلاق", 100, true, Close);
+
         Controls.Add(toolbar);
 
         Controls.Add(_grid);
         Controls.Add(_totals);
         ErpTheme.ConfigureGrid(_grid);
+        ErpTheme.StyleRecursive(this);
         UpdateTotals();
     }
 
@@ -456,6 +458,22 @@ public sealed class PurchasesEntryForm : Form
         {
             UseWaitCursor = false;
         }
+    }
+
+
+    private void NewDraft()
+    {
+        _lines.Rows.Clear();
+        _supplierCombo.SelectedIndex = _supplierCombo.Items.Count > 0 ? 0 : -1;
+        _storeCombo.SelectedIndex = _storeCombo.Items.Count > 0 ? 0 : -1;
+        _paymentCombo.SelectedIndex = 0;
+        _date.Value = DateTime.Today;
+        _noteNum.Clear();
+        _note.Clear();
+        _discount.Value = 0;
+        _paid.Value = 0;
+        _itemCombo.Focus();
+        UpdateTotals();
     }
 
     private static int? TryComboId(ComboBox combo)
