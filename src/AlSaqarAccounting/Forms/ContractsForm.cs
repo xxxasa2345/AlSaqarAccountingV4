@@ -122,6 +122,7 @@ public sealed class ContractsForm : Form
         _grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
         _grid.RightToLeft = RightToLeft.Yes;
         _grid.CellDoubleClick += async (_, e) => { if (e.RowIndex >= 0 && _access.AllowEdit) await BeginEditAsync(); };
+        ErpTheme.ConfigureGrid(_grid);
 
         // Status
         _status.Dock = DockStyle.Bottom;
