@@ -1,4 +1,5 @@
 using System.Data;
+using System.Drawing.Printing;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Models;
 using AlSaqarAccounting.Services;
@@ -490,15 +491,119 @@ public sealed class InvoicesForm : Form
         finally { UseWaitCursor = false; }
     }
 
-    private void PrintInvoice()
+    private async void PrintInvoice()
     {
-        if (!_selectedInvoiceId.HasValue)
+        if (!_access.AllowPrint)
+            return;
+
+        if (!_selectedInvoiceId.HasValue || _invoicesGrid.CurrentRow?.DataBoundItem is not DataRowView headerRow)
         {
             MessageBox.Show(this, "يرجى اختيار فاتورة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
-        
-        MessageBox.Show(this, "طباعة الفواتير قيد التطوير في شاشة الطباعة.", "الفواتير", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        try
+        {
+            UseWaitCursor = true;
+
+            var invoiceId = _selectedInvoiceId.Value;
+            var details = _salesMode
+                ? await _invoiceService.GetInvoiceDetailsAsync(invoiceId)
+                : await _invoiceService.GetPurchaseInvoiceDetailsAsync(invoiceId);
+
+            var invoiceNumber = GetRowValue(headerRow.Row, "NoteNum");
+            var partyName = GetRowValue(headerRow.Row, "SupplierName");
+            var dateText = GetRowValue(headerRow.Row, "Purchases_Date");
+            var total = GetDecimalValue(headerRow.Row, "TotalPrices");
+            var tax = GetDecimalValue(headerRow.Row, "Tax");
+            var net = GetDecimalValue(headerRow.Row, "Net");
+
+            using var printDoc = new PrintDocument();
+            printDoc.DocumentName = $"{(_salesMode ? "فاتورة مبيعات" : "فاتورة مشتريات")} {invoiceNumber}".Trim();
+
+            printDoc.PrintPage += (_, e) =>
+            {
+                using var titleFont = new Font("Tahoma", 16, FontStyle.Bold);
+                using var headerFont = new Font("Tahoma", 11, FontStyle.Bold);
+                using var bodyFont = new Font("Tahoma", 10, FontStyle.Regular);
+                using var totalFont = new Font("Tahoma", 12, FontStyle.Bold);
+
+                float y = e.MarginBounds.Top;
+                float right = e.MarginBounds.Right;
+
+                void DrawRight(string text, Font font)
+                {
+                    var size = e.Graphics.MeasureString(text, font);
+                    e.Graphics.DrawString(text, font, Brushes.Black, right - size.Width, y);
+                    y += size.Height + 6;
+                }
+
+                DrawRight("شركة الصقر للمحاسبة", titleFont);
+                DrawRight(_salesMode ? "فاتورة مبيعات" : "فاتورة مشتريات", headerFont);
+                DrawRight($"رقم الفاتورة: {invoiceNumber}", bodyFont);
+                DrawRight($"التاريخ: {dateText}", bodyFont);
+                DrawRight($"{(_salesMode ? "العميل" : "المورد")}: {partyName}", bodyFont);
+                y += 8;
+
+                e.Graphics.DrawLine(Pens.Black, e.MarginBounds.Left, y, e.MarginBounds.Right, y);
+                y += 10;
+
+                DrawRight("الأصناف", headerFont);
+                foreach (DataRow row in details.Rows)
+                {
+                    var itemId = GetRowValue(row, "ItemID");
+                    var quantity = GetDecimalValue(row, "Quantity");
+                    var unitPrice = GetDecimalValue(row, "UnitPrice");
+                    var lineTotal = GetDecimalValue(row, "TotalPrice");
+                    DrawRight($"الصنف {itemId} | الكمية: {quantity:N2} | السعر: {unitPrice:N2} | الإجمالي: {lineTotal:N2}", bodyFont);
+
+                    if (y > e.MarginBounds.Bottom - 130)
+                    {
+                        e.HasMorePages = true;
+                        return;
+                    }
+                }
+
+                y += 10;
+                e.Graphics.DrawLine(Pens.Black, e.MarginBounds.Left, y, e.MarginBounds.Right, y);
+                y += 12;
+
+                DrawRight($"الإجمالي: {total:N2}", totalFont);
+                DrawRight($"الضريبة: {tax:N2}", bodyFont);
+                DrawRight($"الصافي: {net:N2}", totalFont);
+                DrawRight("شكراً لثقتكم", bodyFont);
+                e.HasMorePages = false;
+            };
+
+            using var dialog = new PrintDialog { Document = printDoc, UseEXDialog = true };
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+                printDoc.Print();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ في الطباعة",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
+    }
+
+    private static string GetRowValue(DataRow row, string column)
+    {
+        if (!row.Table.Columns.Contains(column) || row[column] == DBNull.Value)
+            return string.Empty;
+
+        return Convert.ToString(row[column]) ?? string.Empty;
+    }
+
+    private static decimal GetDecimalValue(DataRow row, string column)
+    {
+        if (!row.Table.Columns.Contains(column) || row[column] == DBNull.Value)
+            return 0m;
+
+        return Convert.ToDecimal(row[column]);
     }
 
     private void ExportInvoices()
