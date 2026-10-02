@@ -343,7 +343,7 @@ public sealed class DynamicErpScreenForm : Form
                 values[column.Name] = ReadValue(_editors[column.Name], column);
 
             UseWaitCursor = true;
-            await _service.SaveAsync(_definition, values, _selectedId, _session);
+            await _service.SaveAsync(_definition, values, _selectedId, _session, _access.Id);
             await LoadAsync();
             _status.Text = _selectedId.HasValue ? "تم تعديل السجل." : "تم حفظ السجل.";
         }
@@ -383,7 +383,7 @@ public sealed class DynamicErpScreenForm : Form
         try
         {
             UseWaitCursor = true;
-            await _service.DeleteAsync(_definition, _selectedId.Value);
+            await _service.DeleteAsync(_definition, _selectedId.Value, _session, _access.Id);
             _selectedId = null;
             await LoadAsync();
         }
