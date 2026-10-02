@@ -81,6 +81,7 @@ public sealed class RealSalesInvoiceFormFixed : Form
         _sales = sales;
         _stores = stores;
 
+        ErpTheme.ApplyForm(this);
         Text = "الصقر للمحاسبة — فاتورة مبيعات";
         Width = 1280;
         Height = 830;
@@ -119,8 +120,10 @@ public sealed class RealSalesInvoiceFormFixed : Form
 
         var save = new Button { Text = "حفظ الفاتورة", Width = 130, Height = 34, Enabled = _access.AllowSave };
         save.Click += async (_, _) => await SaveAsync();
+        ErpTheme.ConfigureToolbarButton(save, true);
         var close = new Button { Text = "إغلاق", Width = 90, Height = 34 };
         close.Click += (_, _) => Close();
+        ErpTheme.ConfigureToolbarButton(close);
         buttons.Controls.Add(save);
         buttons.Controls.Add(close);
 
@@ -165,9 +168,12 @@ public sealed class RealSalesInvoiceFormFixed : Form
         AddField(line, "ملاحظة", _lineNote, 4, 0);
 
         var lineButtons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, WrapContents = false };
-        var add = new Button { Text = "إضافة", Width = 90, Height = 30 };
-        var edit = new Button { Text = "تعديل", Width = 90, Height = 30, Enabled = false };
-        var remove = new Button { Text = "حذف", Width = 80, Height = 30, Enabled = false };
+        var add = new Button { Text = "إضافة", Width = 90, Height = 30 }; 
+        ErpTheme.ConfigureToolbarButton(add, true);
+        var edit = new Button { Text = "تعديل", Width = 90, Height = 30, Enabled = false }; 
+        ErpTheme.ConfigureToolbarButton(edit);
+        var remove = new Button { Text = "حذف", Width = 80, Height = 30, Enabled = false }; 
+        ErpTheme.ConfigureToolbarButton(remove);
         add.Click += (_, _) => AddOrUpdateLine();
         edit.Click += (_, _) => StartEditLine();
         remove.Click += (_, _) => RemoveLine();
@@ -202,6 +208,7 @@ public sealed class RealSalesInvoiceFormFixed : Form
         Controls.Add(body);
         Controls.Add(buttons);
         Controls.Add(header);
+        ErpTheme.ConfigureGrid(_grid);
 
         _grid.SelectionChanged += (_, _) =>
         {
