@@ -215,6 +215,7 @@ public sealed class PurchasesEntryForm : Form
         removeLine.Click += (_, _) => RemoveSelectedLine();
         var close = new Button { Text = "إغلاق", Width = 100, Height = 32, FlatStyle = FlatStyle.Flat };
         close.Click += (_, _) => Close();
+        ErpTheme.ConfigureToolbarButton(close);
         toolbar.Controls.Add(save);
         toolbar.Controls.Add(removeLine);
         toolbar.Controls.Add(close);
@@ -222,6 +223,7 @@ public sealed class PurchasesEntryForm : Form
 
         Controls.Add(_grid);
         Controls.Add(_totals);
+        ErpTheme.ConfigureGrid(_grid);
         UpdateTotals();
     }
 
