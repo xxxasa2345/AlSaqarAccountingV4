@@ -217,7 +217,7 @@ public sealed class PurchasesForm : BrowseScreenBase
         try
         {
             UseWaitCursor = true;
-            await _purchases.DeleteAsync(invoiceId, Session.BranchId);
+            await _purchases.DeleteAsync(invoiceId, Session, Access.Id);
             Status.Text = $"تم حذف فاتورة المشتريات {invoiceId}.";
             await ReloadAsync();
         }

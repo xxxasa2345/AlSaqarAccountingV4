@@ -14,8 +14,13 @@ namespace AlSaqarAccounting.Services;
 public sealed class PurchasesService
 {
     private readonly DbExecutor _db;
+    private readonly AuthorizationService _authorization;
 
-    public PurchasesService(DbExecutor db) => _db = db;
+    public PurchasesService(DbExecutor db)
+    {
+        _db = db;
+        _authorization = new AuthorizationService(db);
+    }
 
     internal string ConnectionString => _db.ConnectionString;
 

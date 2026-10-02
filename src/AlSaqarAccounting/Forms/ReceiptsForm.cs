@@ -64,7 +64,7 @@ public sealed class ReceiptsForm : BrowseScreenBase
         try
         {
             UseWaitCursor = true;
-            await _vouchers.DeleteAsync(referenceCode, Session.BranchId, tranTypeId);
+            await _vouchers.DeleteAsync(referenceCode, Session, Access.Id, tranTypeId);
             Status.Text = $"تم حذف السند {referenceCode}.";
             await ReloadAsync();
         }
