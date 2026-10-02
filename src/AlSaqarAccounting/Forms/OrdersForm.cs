@@ -41,24 +41,10 @@ public sealed class OrdersForm : BrowseScreenBase
                 await ReloadAsync();
         });
 
-        AddButton(toolbar, "مرتجع مبيعات", awaitButtonAccessAsync("مرتجعات المبيعات بفاتورة"), async () => await OpenRelatedAsync("مرتجعات المبيعات بفاتورة"));
-        AddButton(toolbar, "تحويل إلى فرع", awaitButtonAccessAsync("طلب التحويل إلى فرع"), async () => await OpenRelatedAsync("طلب التحويل إلى فرع"));
-        AddButton(toolbar, "العملاء", awaitButtonAccessAsync("العملاء"), async () => await OpenRelatedAsync("العملاء"));
+        AddButton(toolbar, "مرتجع مبيعات", Access.AllowEnter, async () => await OpenRelatedAsync("مرتجعات المبيعات بفاتورة"));
+        AddButton(toolbar, "تحويل إلى فرع", Access.AllowEnter, async () => await OpenRelatedAsync("طلب التحويل إلى فرع"));
+        AddButton(toolbar, "العملاء", Access.AllowEnter, async () => await OpenRelatedAsync("العملاء"));
         AddButton(toolbar, "حذف الفاتورة", Access.AllowDelete, async () => await DeleteInvoiceAsync());
-    }
-
-    private async Task<bool> awaitButtonAccessAsync(string screenName)
-    {
-        try
-        {
-            var security = new SecurityService(new SqlConnectionFactory(_sales.ConnectionString));
-            var screens = await security.GetAccessibleScreensAsync(Session);
-            return screens.Any(s => string.Equals(s.ScreenName?.Trim(), screenName, StringComparison.OrdinalIgnoreCase) && s.AllowEnter);
-        }
-        catch
-        {
-            return false;
-        }
     }
 
     private async Task OpenRelatedAsync(string screenName)
