@@ -278,8 +278,7 @@ public sealed class MainForm : Form
 
             MessageBox.Show(
                 this,
-                "تعذر تحميل الصلاحيات:
-" + ex.GetBaseException().Message,
+                "تعذر تحميل الصلاحيات:\r\n" + ex.GetBaseException().Message,
                 "الصلاحيات",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -293,10 +292,8 @@ public sealed class MainForm : Form
     private void SetStatusToolTip(string? groupName)
     {
         _status.ToolTipText =
-            $"المستخدم: {_session.UserName}
-" +
-            $"الفرع: {_session.BranchId?.ToString() ?? "-"}
-" +
+            \$"المستخدم: {_session.UserName}\\r\\n" +
+            $"الفرع: {_session.BranchId?.ToString() ?? "-"}\\r\\n" +
             $"المجموعة: {groupName ?? _session.GroupId?.ToString() ?? "-"}";
     }
 
