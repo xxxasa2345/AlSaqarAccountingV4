@@ -61,6 +61,7 @@ public sealed class InvoicesForm : Form
 
     private void InitializeUi()
     {
+        ErpTheme.ApplyForm(this);
         Text = "الصقر للمحاسبة - إدارة الفواتير";
         Width = 1400;
         Height = 900;
@@ -197,9 +198,11 @@ public sealed class InvoicesForm : Form
         // Toolbar Panel
         var toolbar = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 50, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(6), WrapContents = false, BackColor = Color.FromArgb(240, 248, 255) };
         
-        AddToolbarButton(toolbar, "جديد", _access.AllowSave, CreateNewInvoice);
+        AddToolbarButton(toolbar, "جديد", _access.AllowSave, CreateNewInvoice, true);
+        AddToolbarButton(toolbar, "عرض التفاصيل", _access.AllowEnter, () => _ = ShowInvoiceDetailsAsync());
         AddToolbarButton(toolbar, "تعديل", _access.AllowEdit && !_salesMode, EditInvoice);
         AddToolbarButton(toolbar, "حذف", _access.AllowDelete, DeleteInvoice);
+        AddToolbarButton(toolbar, "تحديث", _access.AllowEnter, () => LoadInvoices());
         AddToolbarButton(toolbar, "طباعة", _access.AllowPrint, PrintInvoice);
         AddToolbarButton(toolbar, "تصدير", _access.AllowExport, ExportInvoices);
 
@@ -226,10 +229,23 @@ public sealed class InvoicesForm : Form
         Shown += async (_, _) => await LoadInitialDataAsync();
     }
 
-    private static void AddToolbarButton(FlowLayoutPanel panel, string text, bool enabled, Action action)
+    private static void AddToolbarButton(
+        FlowLayoutPanel panel,
+        string text,
+        bool enabled,
+        Action action,
+        bool primary = false)
     {
-        var button = new Button { Text = text, Width = 100, Height = 36, Enabled = enabled, Margin = new Padding(4) };
+        var button = new Button
+        {
+            Text = text,
+            Width = text.Length > 8 ? 125 : 105,
+            Height = 36,
+            Enabled = enabled,
+            Margin = new Padding(4)
+        };
         button.Click += (_, _) => action();
+        ErpTheme.ConfigureToolbarButton(button, primary);
         panel.Controls.Add(button);
     }
 
