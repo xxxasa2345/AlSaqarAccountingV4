@@ -1,4 +1,5 @@
 using System.Data;
+using System.Text;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Models;
 using AlSaqarAccounting.Services;
@@ -536,13 +537,122 @@ public sealed class AdvancedItemsForm : Form
         _stockGrid.DataSource = null;
     }
 
-    private void ImportItems()
+    private async void ImportItems()
     {
-        using var dialog = new OpenFileDialog { Filter = "Excel Files (*.xlsx;*.xls)|*.xlsx;*.xls|CSV Files (*.csv)|*.csv" };
-        if (dialog.ShowDialog(this) == DialogResult.OK)
+        using var dialog = new OpenFileDialog
         {
-            MessageBox.Show(this, "\u0001: " + dialog.FileName, "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "سيتم استيراد الملف: ..."
+            Filter = "CSV Files (*.csv)|*.csv|Excel Files (*.xlsx;*.xls)|*.xlsx;*.xls",
+            Multiselect = false
+        };
+
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+            return;
+
+        if (!dialog.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+        {
+            MessageBox.Show(
+                this,
+                "الاستيراد التشغيلي الحالي يعتمد CSV. احفظ ملف Excel بصيغة CSV ثم استورده.",
+                "استيراد الأصناف",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
         }
+
+        try
+        {
+            UseWaitCursor = true;
+            var imported = 0;
+            var skipped = 0;
+
+            foreach (var line in File.ReadLines(dialog.FileName, Encoding.UTF8).Skip(1))
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+                var fields = ParseCsvLine(line);
+                if (fields.Count < 2 || string.IsNullOrWhiteSpace(fields[0]) || string.IsNullOrWhiteSpace(fields[1]))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var item = new Item_Items
+                {
+                    Item_code = fields[0].Trim(),
+                    item_Name = fields[1].Trim(),
+                    item_Name_English = fields.Count > 2 ? fields[2].Trim() : null,
+                    SellPriceSmall = fields.Count > 3 ? TryDecimal(fields[3]) : null,
+                    Is_Tax = fields.Count > 4 && decimal.TryParse(fields[4], out var tax) && tax > 0,
+                    Tax_Value = fields.Count > 4 ? TryDecimal(fields[4]) : null,
+                    Note = fields.Count > 5 ? fields[5].Trim() : null
+                };
+
+                try
+                {
+                    await _itemsService.CreateAsync(item, _session, _access.Id);
+                    imported++;
+                }
+                catch
+                {
+                    skipped++;
+                }
+            }
+
+            await LoadItems();
+            _status.Text = $"تم استيراد {imported:N0} صنف، وتجاوز {skipped:N0} سجل.";
+            MessageBox.Show(
+                this,
+                $"تم الاستيراد بنجاح.\r\nالمضاف: {imported:N0}\r\nالمتجاوز: {skipped:N0}",
+                "استيراد الأصناف",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                this,
+                ex.GetBaseException().Message,
+                "تعذر استيراد الأصناف",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
+    }
+
+    private static List<string> ParseCsvLine(string line)
+    {
+        var result = new List<string>();
+        var current = new StringBuilder();
+        var quoted = false;
+
+        for (var i = 0; i < line.Length; i++)
+        {
+            var ch = line[i];
+            if (ch == '"')
+            {
+                if (quoted && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    current.Append('"');
+                    i++;
+                }
+                else
+                    quoted = !quoted;
+            }
+            else if (ch == ',' && !quoted)
+            {
+                result.Add(current.ToString());
+                current.Clear();
+            }
+            else
+                current.Append(ch);
+        }
+
+        result.Add(current.ToString());
+        return result;
     }
 
     private void ExportItems()
@@ -581,13 +691,24 @@ public sealed class AdvancedItemsForm : Form
 
     private void PrintBarcode()
     {
-        if (!_selectedItemId.HasValue)
+        if (!_selectedItemId.HasValue || _itemsGrid.CurrentRow?.DataBoundItem is not DataRowView view)
         {
-            MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "يرجى اختيار صنف"
+            MessageBox.Show(
+                this,
+                "حدد صنفاً أولاً.",
+                "طباعة الباركود",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
             return;
         }
-        
-        MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "طباعة الباركود متاحة في النظام الكامل"
+
+        var table = new DataTable();
+        foreach (DataColumn sourceColumn in view.Row.Table.Columns)
+            table.Columns.Add(sourceColumn.ColumnName, sourceColumn.DataType);
+
+        table.Rows.Add(view.Row.ItemArray);
+        ScreenToolbox.ShowPrintPreview(this, $"بطاقة الصنف — {_nameText.Text.Trim()}", table);
+        _status.Text = "تم فتح معاينة طباعة بطاقة الصنف.";
     }
 
     private static string EscapeCsv(string value)
