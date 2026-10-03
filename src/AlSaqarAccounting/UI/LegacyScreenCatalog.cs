@@ -1,3 +1,4 @@
+using System.Windows.Forms;
 using System;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Services;
@@ -109,7 +110,7 @@ public static class LegacyScreenCatalog
                 form = new AlSaqarAccounting.Forms.CashierForm(
                     session,
                     access,
-                    new CashierService(new Core.DbExecutor(new Core.SqlConnectionFactory(connectionString))),
+                    new CashierService(new DbExecutor(new SqlConnectionFactory(connectionString))),
                     new ItemsService(new Core.DbExecutor(new Core.SqlConnectionFactory(connectionString))),
                     new CustomerService(new Core.DbExecutor(new Core.SqlConnectionFactory(connectionString))));
                 return true;
