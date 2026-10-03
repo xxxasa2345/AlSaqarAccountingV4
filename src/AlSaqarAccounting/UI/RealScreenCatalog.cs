@@ -34,8 +34,14 @@ public static class RealScreenCatalog
             // بدائل لأسماء شاشات التصميم القديمة: أي زر/سجل قديم يشير إلى
             // AccountingForm أو AdvancedItemsForm يُوجَّه إلى الشاشة التشغيلية المثبتة
             // المقابلة بدل فتح شاشة شكلية تحتوي عمليات غير منفذة.
-            ["AccountingForm"] = (cs, s, a) => new AccountsTreeForm(
-                s, a, new AccountsTreeService(CreateDb(cs))),
+            ["AccountingForm"] = (cs, s, a) => new AccountingForm(
+                s, a, new AccountingService(CreateDb(cs))),
+
+            ["النظام المحاسبي"] = (cs, s, a) => new AccountingForm(
+                s, a, new AccountingService(CreateDb(cs))),
+
+            ["FrmAccounting"] = (cs, s, a) => new AccountingForm(
+                s, a, new AccountingService(CreateDb(cs))),
 
             ["AdvancedItemsForm"] = (cs, s, a) => new AdvancedItemsForm(
                 s, a,
@@ -150,6 +156,15 @@ public static class RealScreenCatalog
                 new SalesService(CreateDb(cs)),
                 new StoresService(CreateDb(cs))),
 
+            ["SalesEntryForm"] = (cs, s, a) => new SalesEntryForm(
+                s, a, new SalesService(CreateDb(cs)), new StoresService(CreateDb(cs))),
+
+            ["FrmSalesEntry"] = (cs, s, a) => new SalesEntryForm(
+                s, a, new SalesService(CreateDb(cs)), new StoresService(CreateDb(cs))),
+
+            ["فاتورة مبيعات جديدة"] = (cs, s, a) => new SalesEntryForm(
+                s, a, new SalesService(CreateDb(cs)), new StoresService(CreateDb(cs))),
+
             ["المبيعات"] = (cs, s, a) => new OrdersForm(
                 s, a,
                 new SalesService(CreateDb(cs)),
@@ -168,6 +183,15 @@ public static class RealScreenCatalog
                 new PurchasesService(CreateDb(cs)),
                 new StoresService(CreateDb(cs)),
                 new CustSupService(CreateDb(cs))),
+
+            ["PurchasesEntryForm"] = (cs, s, a) => new PurchasesEntryForm(
+                s, a, new PurchasesService(CreateDb(cs)), new StoresService(CreateDb(cs)), new CustSupService(CreateDb(cs))),
+
+            ["FrmPurchasesEntry"] = (cs, s, a) => new PurchasesEntryForm(
+                s, a, new PurchasesService(CreateDb(cs)), new StoresService(CreateDb(cs)), new CustSupService(CreateDb(cs))),
+
+            ["فاتورة مشتريات جديدة"] = (cs, s, a) => new PurchasesEntryForm(
+                s, a, new PurchasesService(CreateDb(cs)), new StoresService(CreateDb(cs)), new CustSupService(CreateDb(cs))),
 
             // التحويلات والجرد والمرتجعات وعروض الأسعار والضمانات — شاشات حقيقية مرتبطة بإجراءات GTSdb2026,
 
@@ -260,6 +284,15 @@ public static class RealScreenCatalog
             ["السندات"] = (cs, s, a) => new ReceiptsForm(
                 s, a, new VouchersService(CreateDb(cs))),
 
+            ["VoucherEntryForm"] = (cs, s, a) => new VoucherEntryForm(
+                s, a, new VouchersService(CreateDb(cs))),
+
+            ["FrmVoucherEntry"] = (cs, s, a) => new VoucherEntryForm(
+                s, a, new VouchersService(CreateDb(cs))),
+
+            ["سند جديد"] = (cs, s, a) => new VoucherEntryForm(
+                s, a, new VouchersService(CreateDb(cs))),
+
             ["الأصناف"] = (cs, s, a) => new ItemsForm(s, a, new ItemsService(CreateDb(cs))),
 
             ["الوحدات"] = (cs, s, a) => new ItemUnitForm(s, a, new ItemUnitService(CreateDb(cs))),
@@ -281,6 +314,12 @@ public static class RealScreenCatalog
             ["المستودعات"] = (cs, s, a) => new StoresForm(s, a, new StoresService(CreateDb(cs))),
 
             ["الكاشير"] = (cs, s, a) => new CashierForm(s, a, new CashierService(CreateDb(cs)), new ItemsService(CreateDb(cs)), new CustomerService(CreateDb(cs))),
+
+            ["CashierForm"] = (cs, s, a) => new CashierForm(s, a, new CashierService(CreateDb(cs)), new ItemsService(CreateDb(cs)), new CustomerService(CreateDb(cs))),
+
+            ["FrmCashier"] = (cs, s, a) => new CashierForm(s, a, new CashierService(CreateDb(cs)), new ItemsService(CreateDb(cs)), new CustomerService(CreateDb(cs))),
+
+            ["نقطة البيع"] = (cs, s, a) => new CashierForm(s, a, new CashierService(CreateDb(cs)), new ItemsService(CreateDb(cs)), new CustomerService(CreateDb(cs))),
 
             ["طلب التحويل إلى فرع"] = (cs, s, a) => new TransferToBranchForm(s, a, new InventoryOperationsService(CreateDb(cs))),
 
