@@ -1,3 +1,4 @@
+using System.Data.SqlClient;
 using System.Data;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Models;
@@ -71,8 +72,8 @@ public sealed class OriginalSalesFlowService
                 AND BranchID = @BranchID;",
             p =>
             {
-                p.Add("@ID", System.Data.SqlClient.SqlDbType.Int).Value = incoming.ID;
-                p.Add("@BranchID", System.Data.SqlClient.SqlDbType.Int).Value = branchId;
+                p.Add("@ID", SqlDbType.Int).Value = incoming.ID;
+                p.Add("@BranchID", SqlDbType.Int).Value = branchId;
             },
             cancellationToken).ConfigureAwait(false);
 
@@ -90,8 +91,8 @@ public sealed class OriginalSalesFlowService
               ORDER BY d.SN;",
             p =>
             {
-                p.Add("@PurBranchID", System.Data.SqlClient.SqlDbType.Int).Value = purBranchId;
-                p.Add("@BranchID", System.Data.SqlClient.SqlDbType.Int).Value = branchId;
+                p.Add("@PurBranchID", SqlDbType.Int).Value = purBranchId;
+                p.Add("@BranchID", SqlDbType.Int).Value = branchId;
             },
             cancellationToken).ConfigureAwait(false);
 
@@ -139,8 +140,8 @@ public sealed class OriginalSalesFlowService
                 AND BranchID = @BranchID;",
             p =>
             {
-                p.Add("@InvoiceId", System.Data.SqlClient.SqlDbType.Int).Value = invoiceId;
-                p.Add("@BranchID", System.Data.SqlClient.SqlDbType.Int).Value = branchId;
+                p.Add("@InvoiceId", SqlDbType.Int).Value = invoiceId;
+                p.Add("@BranchID", SqlDbType.Int).Value = branchId;
             },
             cancellationToken).ConfigureAwait(false);
 
@@ -155,8 +156,8 @@ public sealed class OriginalSalesFlowService
             "dbo.Delete_Order_Orders",
             p =>
             {
-                p.Add("@PurBranchID", System.Data.SqlClient.SqlDbType.Int).Value = purBranchId;
-                p.Add("@BranchID", System.Data.SqlClient.SqlDbType.Int).Value = branchId;
+                p.Add("@PurBranchID", SqlDbType.Int).Value = purBranchId;
+                p.Add("@BranchID", SqlDbType.Int).Value = branchId;
             },
             cancellationToken).ConfigureAwait(false);
     }
