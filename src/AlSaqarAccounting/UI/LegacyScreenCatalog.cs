@@ -26,7 +26,7 @@ public static class LegacyScreenCatalog
 
         string? title = null;
         string? procedure = null;
-        var mode = LegacyOperationMode.Branch;
+        var mode = AlSaqarAccounting.Forms.LegacyOperationMode.Branch;
 
         switch (name)
         {
@@ -81,7 +81,7 @@ public static class LegacyScreenCatalog
             case "التحصيل":
             case "تحصيل الطلبات":
                 title = "تحصيل الطلبات";
-                mode = LegacyOperationMode.Checkout;
+                mode = AlSaqarAccounting.Forms.LegacyOperationMode.Checkout;
                 break;
 
             case "FrmEntryPermission":
@@ -100,7 +100,7 @@ public static class LegacyScreenCatalog
             case "التوصيل":
             case "طلبات التوصيل":
                 title = "التوصيل";
-                mode = LegacyOperationMode.RestaurantDelivery;
+                mode = AlSaqarAccounting.Forms.LegacyOperationMode.RestaurantDelivery;
                 break;
 
             case "FrmCashirPharm":
