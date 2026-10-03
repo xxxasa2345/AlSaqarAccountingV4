@@ -124,6 +124,28 @@ public sealed class DbExecutor
     }
 
     /// <summary>
+    /// Runs a stored procedure and returns its SQL RETURN value.
+    /// </summary>
+    public async Task<int> ExecuteStoredProcedureReturnValueAsync(
+        string procedureName,
+        Action<SqlParameterCollection>? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        using var cn = _factory.Create();
+        using var cmd = new SqlCommand(procedureName, cn)
+        {
+            CommandType = CommandType.StoredProcedure,
+            CommandTimeout = 120
+        };
+        parameters?.Invoke(cmd.Parameters);
+        var returnParameter = cmd.Parameters.Add("@RETURN_VALUE", SqlDbType.Int);
+        returnParameter.Direction = ParameterDirection.ReturnValue;
+        await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
+        await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        return returnParameter.Value == DBNull.Value ? 0 : Convert.ToInt32(returnParameter.Value);
+    }
+
+    /// <summary>
     /// Runs a stored procedure and returns the value of one OUTPUT parameter
     /// after execution (used by dbo.Insert_Tran_Tran which returns the new
     /// voucher serial through @Transn OUTPUT).
