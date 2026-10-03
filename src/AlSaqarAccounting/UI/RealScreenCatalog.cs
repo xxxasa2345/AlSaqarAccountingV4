@@ -37,8 +37,11 @@ public static class RealScreenCatalog
             ["AccountingForm"] = (cs, s, a) => new AccountsTreeForm(
                 s, a, new AccountsTreeService(CreateDb(cs))),
 
-            ["AdvancedItemsForm"] = (cs, s, a) => new ItemsForm(
-                s, a, new ItemsService(CreateDb(cs))),
+            ["AdvancedItemsForm"] = (cs, s, a) => new AdvancedItemsForm(
+                s, a,
+                new ItemsService(CreateDb(cs)),
+                new ItemUnitService(CreateDb(cs)),
+                new ItemMasterService(CreateDb(cs))),
 
             // الأمن والصلاحيات — شاشات إدارية حقيقية مرتبطة بجداول User_* الأصلية.
             ["FrmPassword"] = (cs, s, a) => new ChangePasswordForm(
