@@ -409,7 +409,7 @@ public sealed class PurchasesEntryForm : Form
         if (_paymentCombo.SelectedIndex == 2)
             _paid.Value = 0;
         else
-            _paid.Value = decimal.Round(Subtotal() - _discount.Value + decimal.Round(Subtotal() * VatRate, 2), 2);
+            _paid.Value = decimal.Round(Subtotal() - _discount.Value + (_vatEnabled ? decimal.Round(Subtotal() * _vatRate, 2) : 0m), 2);
     }
 
     private async Task SaveAsync()
