@@ -13,6 +13,7 @@ namespace AlSaqarAccounting.Forms;
 public sealed class ReceiptsForm : BrowseScreenBase
 {
     private readonly VouchersService _vouchers;
+    private readonly ScreenAccessResolver _accessResolver;
 
     public ReceiptsForm(
         AppSession session,
@@ -21,6 +22,8 @@ public sealed class ReceiptsForm : BrowseScreenBase
         : base(session, access)
     {
         _vouchers = vouchers;
+        _accessResolver = new ScreenAccessResolver(
+            new SqlConnectionFactory(_vouchers.ConnectionString));
     }
 
     protected override string ScreenTitle => "السندات";
@@ -47,10 +50,7 @@ public sealed class ReceiptsForm : BrowseScreenBase
         try
         {
             UseWaitCursor = true;
-            var security = new SecurityService(new SqlConnectionFactory(_vouchers.ConnectionString));
-            var screens = await security.GetAccessibleScreensAsync(Session);
-            var target = screens.FirstOrDefault(s =>
-                string.Equals(s.ScreenName?.Trim(), screenName, StringComparison.OrdinalIgnoreCase));
+            var target = await _accessResolver.GetAsync(Session, screenName);
 
             if (target is null)
             {
