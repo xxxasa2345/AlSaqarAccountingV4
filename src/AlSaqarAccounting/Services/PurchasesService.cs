@@ -28,6 +28,33 @@ public sealed class PurchasesService
     public Task<DataTable> ListItemsAsync(CancellationToken cancellationToken = default)
         => _db.ExecuteStoredProcedureAsync("dbo.Get_All_Items", cancellationToken: cancellationToken);
 
+    public async Task<PurchaseEntrySettings> GetEntrySettingsAsync(CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT TOP (1) IsVat, PerVat, StoreID
+            FROM dbo.TblSetting
+            ORDER BY ID DESC;";
+
+        using var cn = new SqlConnection(_db.ConnectionString);
+        using var cmd = new SqlCommand(sql, cn) { CommandTimeout = 60 };
+        await cn.OpenAsync(cancellationToken).ConfigureAwait(false);
+        using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            return new PurchaseEntrySettings();
+
+        var enabled = !reader.IsDBNull(0) && reader.GetBoolean(0);
+        var rate = reader.IsDBNull(1) ? 0m : Convert.ToDecimal(reader.GetValue(1));
+        if (rate > 1m)
+            rate /= 100m;
+
+        return new PurchaseEntrySettings
+        {
+            VatEnabled = enabled,
+            VatRate = enabled ? Math.Max(0m, rate) : 0m,
+            DefaultStoreId = reader.IsDBNull(2) ? null : Convert.ToInt32(reader.GetValue(2))
+        };
+    }
+
     public Task<DataTable> PrintAsync(
         int invoiceId,
         int? branchId,
@@ -307,6 +334,13 @@ public sealed class PurchasesService
 }
 
 /// <summary>In-memory purchase invoice submitted by an entry screen.</summary>
+public sealed class PurchaseEntrySettings
+{
+    public bool VatEnabled { get; init; }
+    public decimal VatRate { get; init; }
+    public int? DefaultStoreId { get; init; }
+}
+
 public sealed class PurchaseInvoice
 {
     public DateTime InvoiceDate { get; set; } = DateTime.Now;
