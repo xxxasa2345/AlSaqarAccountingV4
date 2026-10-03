@@ -149,8 +149,6 @@ public sealed class InvoiceService
 
     #endregion
 
-    #region Purchase Invoices    #endregion
-
     #region Purchase Invoices
 
     /// <summary>
