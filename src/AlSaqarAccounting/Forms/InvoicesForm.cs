@@ -435,16 +435,15 @@ public sealed class InvoicesForm : Form
             return;
         }
 
-        using var purchaseForm = new InvoiceEditForm(
+        using var purchaseForm = new PurchasesEntryForm(
             _session,
             _access,
-            _invoiceService,
-            _customerService,
-            _supplierService,
-            _itemsService,
-            false);
+            _purchasesService,
+            _storesService,
+            new CustSupService(new DbExecutor(new SqlConnectionFactory(_connectionString))));
 
-        if (purchaseForm.ShowDialog(this) == DialogResult.OK)
+        purchaseForm.ShowDialog(this);
+        if (purchaseForm.Saved)
             await LoadInvoices();
     }
 
