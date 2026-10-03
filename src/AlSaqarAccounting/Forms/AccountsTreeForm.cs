@@ -178,7 +178,7 @@ public sealed class AccountsTreeForm : Form
             Enabled = _access.AllowSave,
             FlatStyle = FlatStyle.Flat
         };
-        ErpTheme.ConfigureToolbarButton(button);
+        ErpTheme.ConfigureToolbarButton(add, true);
         add.Click += async (_, _) => await AddAccountAsync();
         var rename = new Button
         {
@@ -187,6 +187,7 @@ public sealed class AccountsTreeForm : Form
             Enabled = _access.AllowEdit,
             FlatStyle = FlatStyle.Flat
         };
+        ErpTheme.ConfigureToolbarButton(rename);
         rename.Click += async (_, _) => await RenameAccountAsync();
         var remove = new Button
         {
@@ -195,6 +196,7 @@ public sealed class AccountsTreeForm : Form
             Enabled = _access.AllowDelete,
             FlatStyle = FlatStyle.Flat
         };
+        ErpTheme.ConfigureToolbarButton(remove);
         remove.Click += async (_, _) => await DeleteAccountAsync();
 
         editor.Controls.Add(_selectedInfo, 0, 0);
