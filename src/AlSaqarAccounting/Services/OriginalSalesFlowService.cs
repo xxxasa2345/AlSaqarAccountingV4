@@ -220,7 +220,7 @@ public sealed class OriginalSalesFlowService
             .Set("@CashMoney", invoice.CashMoney ?? 0m)
             .Set("@CashBank", invoice.CashBank ?? 0m)
             .Set("@OrderCashierType", cashierType)
-            .Set("@ProjectID", GetInt(invoice, "ProjectID") ?? 0)
+            .Set("@ProjectID", GetInt(invoice, "ProjectId") ?? 0)
             .Set("@RoomNum", invoice.RoomNum ?? 0)
             .Set("@TableNum", invoice.TableNum ?? 0)
             .Set("@Sectoral", GetInt(invoice, "Sectoral") ?? 0)
