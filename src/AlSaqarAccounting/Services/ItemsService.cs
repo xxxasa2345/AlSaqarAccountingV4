@@ -24,6 +24,42 @@ public sealed class ItemsService
     public Task<DataTable> ListAsync(CancellationToken cancellationToken = default)
         => _db.ExecuteStoredProcedureAsync("dbo.Get_All_Items", cancellationToken: cancellationToken);
 
+    public Task<DataTable> ListStockAsync(
+        int itemId,
+        AppSession session,
+        CancellationToken cancellationToken = default)
+    {
+        if (itemId <= 0)
+            throw new ArgumentException("معرف الصنف غير صالح.", nameof(itemId));
+
+        var sql = @"
+SELECT
+    s.ID AS StoreID,
+    s.Store_Name AS StoreName,
+    s.BranchID,
+    ISNULL(q.OpeningBalance, 0) AS OpeningBalance,
+    ISNULL(q.CurrentBalance, 0) AS CurrentBalance,
+    ISNULL(q.BeginningInventory, 0) AS BeginningInventory,
+    ISNULL(q.BeginningInventoryPrice, 0) AS BeginningInventoryPrice,
+    ISNULL(q.UnitNumber, 0) AS UnitNumber
+FROM dbo.Account_Stores AS s
+LEFT JOIN dbo.ItemQuantity AS q
+    ON q.StoreID = s.ID
+   AND q.ItemID = @ItemId
+WHERE (@BranchID IS NULL OR s.BranchID = @BranchID OR s.BranchID IS NULL)
+ORDER BY s.Store_Name, s.ID;";
+
+        return _db.QueryAsync(
+            sql,
+            p =>
+            {
+                p.Add("@ItemId", SqlDbType.Int).Value = itemId;
+                p.Add("@BranchID", SqlDbType.Int).Value =
+                    (object?)session.BranchId ?? DBNull.Value;
+            },
+            cancellationToken);
+    }
+
     public async Task CreateAsync(
         Item_Items item,
         AppSession session,
