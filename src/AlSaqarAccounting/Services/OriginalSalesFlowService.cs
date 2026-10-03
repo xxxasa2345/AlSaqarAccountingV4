@@ -131,12 +131,32 @@ public sealed class OriginalSalesFlowService
             session, screenId, PermissionAction.Delete, cancellationToken)
             .ConfigureAwait(false);
 
+        var branchId = session.BranchId.Value;
+        var row = await _db.QueryAsync(
+            @"SELECT TOP (1) PurBranchID
+              FROM dbo.Order_Orders
+              WHERE (ID = @InvoiceId OR PurBranchID = @InvoiceId)
+                AND BranchID = @BranchID;",
+            p =>
+            {
+                p.Add("@InvoiceId", System.Data.SqlClient.SqlDbType.Int).Value = invoiceId;
+                p.Add("@BranchID", System.Data.SqlClient.SqlDbType.Int).Value = branchId;
+            },
+            cancellationToken).ConfigureAwait(false);
+
+        if (row.Rows.Count == 0)
+            throw new InvalidOperationException("الفاتورة المطلوب حذفها غير موجودة في الفرع الحالي.");
+
+        var purBranchId = row.Rows[0]["PurBranchID"] == DBNull.Value
+            ? invoiceId
+            : Convert.ToInt32(row.Rows[0]["PurBranchID"]);
+
         await _db.ExecuteStoredProcedureNonQueryAsync(
             "dbo.Delete_Order_Orders",
             p =>
             {
-                p.Add("@PurBranchID", System.Data.SqlClient.SqlDbType.Int).Value = invoiceId;
-                p.Add("@BranchID", System.Data.SqlClient.SqlDbType.Int).Value = session.BranchId.Value;
+                p.Add("@PurBranchID", System.Data.SqlClient.SqlDbType.Int).Value = purBranchId;
+                p.Add("@BranchID", System.Data.SqlClient.SqlDbType.Int).Value = branchId;
             },
             cancellationToken).ConfigureAwait(false);
     }
