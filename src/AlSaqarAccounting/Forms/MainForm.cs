@@ -244,6 +244,9 @@ public sealed class MainForm : Form
         actions.Controls.Add(CreateHeaderButton("↻  تحديث", async (_, _) => await LoadSecurityAsync()));
         actions.Controls.Add(CreateHeaderButton("×  إغلاق", (_, _) => CloseCurrentScreen()));
         actions.Controls.Add(CreateHeaderButton("◉  اتصال", async (_, _) => await CheckConnectionAsync()));
+        if (_session.GroupId == 1)
+            actions.Controls.Add(CreateHeaderButton("⚿  التراخيص", (_, _) => OpenLicenseManagement()));
+        actions.Controls.Add(CreateHeaderButton("↪  خروج", (_, _) => Close()));
         actions.Controls.Add(searchLabel);
         actions.Controls.Add(_search);
         actions.Controls.Add(title);
