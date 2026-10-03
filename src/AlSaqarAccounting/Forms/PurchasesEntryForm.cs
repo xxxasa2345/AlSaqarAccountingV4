@@ -14,7 +14,6 @@ namespace AlSaqarAccounting.Forms;
 /// </summary>
 public sealed class PurchasesEntryForm : Form
 {
-    private const decimal VatRate = 0.15m;
 
     private readonly AppSession _session;
     private readonly ScreenAccess _access;
@@ -60,6 +59,9 @@ public sealed class PurchasesEntryForm : Form
     };
 
     private DataTable? _items;
+    private bool _vatEnabled;
+    private decimal _vatRate;
+    private int? _defaultStoreId;
     private readonly DataTable _lines = new();
     private string? _itemsIdColumn;
     private string? _itemsNameColumn;
@@ -260,6 +262,11 @@ public sealed class PurchasesEntryForm : Form
             await Task.WhenAll(itemsTask, suppliersTask, storesTask);
 
             _items = itemsTask.Result;
+            var settings = await _purchases.GetEntrySettingsAsync();
+            _vatEnabled = settings.VatEnabled;
+            _vatRate = settings.VatRate;
+            _defaultStoreId = settings.DefaultStoreId;
+
             _itemsIdColumn = FindColumn(_items, "ItemId", "ItemID", "ID", "SN");
             _itemsNameColumn = FindColumn(_items, "item_Name", "ItemName", "Name", "Item_Name");
             _itemsPriceColumn = FindColumn(_items, "SellPriceSmall", "SellPrice", "Price", "UnitPrice");
@@ -278,7 +285,14 @@ public sealed class PurchasesEntryForm : Form
             var storeId = FindColumn(stores, "ID", "SN", "StoreID");
             var storeName = FindColumn(stores, "Store_Name", "Name", "StoreName");
             if (storeId is not null && storeName is not null)
+            {
                 BindCombo(_storeCombo, stores, storeId, storeName);
+                if (_defaultStoreId.HasValue)
+                {
+                    try { _storeCombo.SelectedValue = _defaultStoreId.Value; }
+                    catch { }
+                }
+            }
             else
                 _storeCombo.Items.Add("غير محدد");
         }
@@ -359,7 +373,7 @@ public sealed class PurchasesEntryForm : Form
 
         var name = _itemCombo.Text.Trim();
         var total = decimal.Round(quantity * price, 2);
-        var vat = decimal.Round(total * VatRate, 2);
+        var vat = _vatEnabled ? decimal.Round(total * _vatRate, 2) : 0m;
         _lines.Rows.Add(itemId, name, quantity, price, total, vat, total + vat, _sellPrice.Value);
         UpdateTotals();
         _quantity.Value = 1;
@@ -379,7 +393,7 @@ public sealed class PurchasesEntryForm : Form
     private void UpdateTotals()
     {
         var subtotal = Subtotal();
-        var vat = decimal.Round(subtotal * VatRate, 2);
+        var vat = _vatEnabled ? decimal.Round(subtotal * _vatRate, 2) : 0m;
         var discount = _discount.Value;
         var net = subtotal - discount + vat;
         var paid = _paid.Value;
@@ -395,7 +409,7 @@ public sealed class PurchasesEntryForm : Form
         if (_paymentCombo.SelectedIndex == 2)
             _paid.Value = 0;
         else
-            _paid.Value = decimal.Round(Subtotal() - _discount.Value + decimal.Round(Subtotal() * VatRate, 2), 2);
+            _paid.Value = decimal.Round(Subtotal() - _discount.Value + (_vatEnabled ? decimal.Round(Subtotal() * _vatRate, 2) : 0m), 2);
     }
 
     private async Task SaveAsync()
