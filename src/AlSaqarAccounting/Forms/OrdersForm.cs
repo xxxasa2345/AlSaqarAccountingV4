@@ -14,6 +14,7 @@ public sealed class OrdersForm : BrowseScreenBase
 {
     private readonly SalesService _sales;
     private readonly StoresService _stores;
+    private readonly ScreenAccessResolver _accessResolver;
 
     public OrdersForm(
         AppSession session,
@@ -24,6 +25,8 @@ public sealed class OrdersForm : BrowseScreenBase
     {
         _sales = sales;
         _stores = stores;
+        _accessResolver = new ScreenAccessResolver(
+            new SqlConnectionFactory(_sales.ConnectionString));
     }
 
     protected override string ScreenTitle => "فواتير المبيعات";
@@ -52,10 +55,7 @@ public sealed class OrdersForm : BrowseScreenBase
         try
         {
             UseWaitCursor = true;
-            var security = new SecurityService(new SqlConnectionFactory(_sales.ConnectionString));
-            var screens = await security.GetAccessibleScreensAsync(Session);
-            var target = screens.FirstOrDefault(s =>
-                string.Equals(s.ScreenName?.Trim(), screenName, StringComparison.OrdinalIgnoreCase));
+            var target = await _accessResolver.GetAsync(Session, screenName);
 
             if (target is null)
             {
