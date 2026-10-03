@@ -6,10 +6,8 @@ using AlSaqarAccounting.Models;
 namespace AlSaqarAccounting.Services;
 
 /// <summary>
-/// Operational purchases service. Invoice creation goes through the original
-/// dbo.Insert_Order_Purchases procedure (header + dbo.Items_Purches TVP in a
-/// single call), deletion through dbo.Delete_Order_Purchases, listing through
-/// dbo.Select_Order_Purchases — all from GTSdb2026.
+/// Operational purchase service backed by the original GTS ERP procedures.
+/// The database procedure remains responsible for stock and accounting side effects.
 /// </summary>
 public sealed class PurchasesService
 {
@@ -30,10 +28,6 @@ public sealed class PurchasesService
     public Task<DataTable> ListItemsAsync(CancellationToken cancellationToken = default)
         => _db.ExecuteStoredProcedureAsync("dbo.Get_All_Items", cancellationToken: cancellationToken);
 
-    /// <summary>
-    /// Loads the original purchase-print dataset through dbo.Print_Order_Purchases.
-    /// The catalog proves the contract is exactly @ID int + @BranchID int.
-    /// </summary>
     public Task<DataTable> PrintAsync(
         int invoiceId,
         int? branchId,
@@ -47,83 +41,110 @@ public sealed class PurchasesService
             },
             cancellationToken);
 
-    public async Task CreateAsync(
+    /// <summary>
+    /// Creates a purchase using dbo.Insert_Order_Purchases.
+    /// Cash/Bank are the actual paid amounts, not the invoice total.
+    /// The stored procedure then creates the purchase details, inventory movements,
+    /// and the corresponding accounting transaction.
+    /// </summary>
+    public async Task<int> CreateAsync(
         PurchaseInvoice invoice,
         AppSession session,
         CancellationToken cancellationToken = default)
     {
-        if (invoice is null)
-            throw new ArgumentNullException(nameof(invoice));
-        if (!invoice.Lines.Any())
-            throw new ArgumentException("لا يمكن حفظ فاتورة مشتريات بدون أصناف.");
-        if (!session.BranchId.HasValue)
-            throw new InvalidOperationException("حفظ الفواتير يتطلب فرعاً فعّالاً.");
+        Validate(invoice, session);
 
-        foreach (var line in invoice.Lines)
-        {
-            if (line.ItemID is null || line.ItemID <= 0)
-                throw new ArgumentException("كل سطر في الفاتورة يحتاج إلى صنف صحيح.");
-            if ((line.Quantity ?? 0) <= 0)
-                throw new ArgumentException("كمية الصنف يجب أن تكون أكبر من صفر.");
-            if ((line.UnitPrice ?? 0) < 0)
-                throw new ArgumentException("سعر الشراء لا يمكن أن يكون سالباً.");
-        }
-
-        var branchId = session.BranchId.Value;
-        var subtotal = invoice.Lines.Sum(l => l.TotalPrice ?? 0);
-        var vat = invoice.Lines.Sum(l => l.VAT ?? 0);
-        var discount = ClampToZero(invoice.DiscountAmount);
-        if (discount > subtotal)
-            throw new ArgumentException("قيمة الخصم أكبر من إجمالي الفاتورة.");
-        var net = subtotal - discount + vat;
-        var amountPaid = invoice.AmountPaid ?? (invoice.PaymentType == 3 ? 0 : net);
-        if (amountPaid < 0 || amountPaid > net)
-            throw new ArgumentException("المبلغ المدفوع يجب أن يكون بين صفر وإجمالي الفاتورة.");
-
+        var branchId = session.BranchId!.Value;
+        var totals = CalculateTotals(invoice);
         var items = await TvpTableBuilder.CreateAsync(
             _db, "Items_Purches", invoice.Lines.Cast<object>().ToArray(), cancellationToken)
             .ConfigureAwait(false);
 
-        await _db.ExecuteStoredProcedureNonQueryAsync(
+        var contract = await StoredProcedureContract.LoadAsync(
+            _db, "dbo.Insert_Order_Purchases", cancellationToken).ConfigureAwait(false);
+
+        ApplyHeader(
+            contract,
+            invoice,
+            branchId,
+            session,
+            totals,
+            items,
+            includePurBranchId: false);
+
+        return await _db.ExecuteStoredProcedureReturnValueAsync(
             "dbo.Insert_Order_Purchases",
-            p =>
-            {
-                p.Add("@BranchID", SqlDbType.Int).Value = branchId;
-                p.Add("@NoteNum", SqlDbType.NVarChar, 200).Value = (object?)NullIfEmpty(invoice.NoteNum) ?? DBNull.Value;
-                p.Add("@Tax", SqlDbType.Decimal).Value = vat;
-                p.Add("@TotalPrices", SqlDbType.Decimal).Value = subtotal;
-                p.Add("@Safy", SqlDbType.Decimal).Value = subtotal - discount;
-                p.Add("@DiscountNum", SqlDbType.Decimal).Value = discount;
-                p.Add("@DiscountPerantage", SqlDbType.Decimal).Value = 0m;
-                p.Add("@Tax_Discount", SqlDbType.Decimal).Value = 0m;
-                p.Add("@TotalPrices_Discount", SqlDbType.Decimal).Value = subtotal - discount;
-                p.Add("@Net", SqlDbType.Decimal).Value = net;
-                p.Add("@Cash", SqlDbType.Decimal).Value = invoice.PaymentType == 1 ? net : 0m;
-                p.Add("@SupplierID", SqlDbType.Int).Value = invoice.SupplierId ?? 0;
-                p.Add("@Bank", SqlDbType.Decimal).Value = invoice.PaymentType == 2 ? net : 0m;
-                p.Add("@Acc_Cash", SqlDbType.Int).Value = (object?)invoice.CashAccountId ?? DBNull.Value;
-                p.Add("@Acc_Bank", SqlDbType.Int).Value = (object?)invoice.BankAccountId ?? DBNull.Value;
-                p.Add("@UserID_Add", SqlDbType.Int).Value = session.UserId;
-                p.Add("@UserBranch_Add", SqlDbType.Int).Value = branchId;
-                p.Add("@UserMacAddress_Add", SqlDbType.NVarChar, 200).Value = Environment.MachineName;
-                p.Add("@SalesMan", SqlDbType.NVarChar, 200).Value = (object?)NullIfEmpty(invoice.SalesMan) ?? DBNull.Value;
-                p.Add("@Charge", SqlDbType.Decimal).Value = 0m;
-                p.Add("@ProjectId", SqlDbType.Int).Value = (object?)invoice.ProjectId ?? DBNull.Value;
-                var tvp = p.Add("@Items", SqlDbType.Structured);
-                tvp.TypeName = "dbo.Items_Purches";
-                tvp.Value = items;
-                p.Add("@SupplierName", SqlDbType.NVarChar, 300).Value = (object?)NullIfEmpty(invoice.SupplierName) ?? DBNull.Value;
-                p.Add("@SupplierPhone", SqlDbType.NVarChar, 100).Value = (object?)NullIfEmpty(invoice.SupplierPhone) ?? DBNull.Value;
-                p.Add("@SupplierVatNum", SqlDbType.NVarChar, 100).Value = (object?)NullIfEmpty(invoice.SupplierVat) ?? DBNull.Value;
-                p.Add("@Purchases_Date", SqlDbType.DateTime).Value = invoice.InvoiceDate;
-                p.Add("@Order_Paymant_Type", SqlDbType.Int).Value = invoice.PaymentType;
-                p.Add("@CostCentersID", SqlDbType.Int).Value = (object?)invoice.CostCenterId ?? DBNull.Value;
-                p.Add("@Note", SqlDbType.NVarChar, 400).Value = (object?)NullIfEmpty(invoice.Note) ?? DBNull.Value;
-            },
+            contract.BuildParameters(),
             cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>Deletes a purchase invoice through the original delete procedure.</summary>
+    /// <summary>
+    /// Updates a purchase using the original dbo.Update_Order_Purchases procedure.
+    /// That procedure deletes/rebuilds the purchase details and recreates the
+    /// accounting transaction, so the application must not duplicate those effects.
+    /// </summary>
+    public async Task<int> UpdateAsync(
+        int invoiceId,
+        PurchaseInvoice invoice,
+        AppSession session,
+        int screenId,
+        CancellationToken cancellationToken = default)
+    {
+        Validate(invoice, session);
+
+        await _authorization.RequireAsync(
+            session,
+            screenId,
+            PermissionAction.Edit,
+            cancellationToken).ConfigureAwait(false);
+
+        var branchId = session.BranchId!.Value;
+        var exists = await _db.QueryAsync(
+            @"SELECT TOP (1) PurBranchID
+              FROM dbo.Order_Purchases
+              WHERE PurBranchID = @PurBranchID
+                AND BranchID = @BranchID;",
+            p =>
+            {
+                p.Add("@PurBranchID", SqlDbType.Int).Value = invoiceId;
+                p.Add("@BranchID", SqlDbType.Int).Value = branchId;
+            },
+            cancellationToken).ConfigureAwait(false);
+
+        if (exists.Rows.Count == 0)
+            throw new InvalidOperationException("فاتورة المشتريات غير موجودة في الفرع الحالي.");
+
+        var totals = CalculateTotals(invoice);
+        var items = await TvpTableBuilder.CreateAsync(
+            _db, "Items_Purches", invoice.Lines.Cast<object>().ToArray(), cancellationToken)
+            .ConfigureAwait(false);
+
+        var contract = await StoredProcedureContract.LoadAsync(
+            _db, "dbo.Update_Order_Purchases", cancellationToken).ConfigureAwait(false);
+
+        ApplyHeader(
+            contract,
+            invoice,
+            branchId,
+            session,
+            totals,
+            items,
+            includePurBranchId: true);
+
+        contract.Set("@PurBranchID", invoiceId);
+
+        return await _db.ExecuteStoredProcedureReturnValueAsync(
+            "dbo.Update_Order_Purchases",
+            contract.BuildParameters(),
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Deletes the complete purchase document using the original ALL procedure.
+    /// Delete_Order_Purchases alone removes only the header; the original ERP uses
+    /// Delete_Order_Purchases_ALL so details, stock effects, and accounting are
+    /// rolled back together.
+    /// </summary>
     public async Task DeleteAsync(
         int invoiceId,
         AppSession session,
@@ -140,7 +161,7 @@ public sealed class PurchasesService
             cancellationToken).ConfigureAwait(false);
 
         await _db.ExecuteStoredProcedureNonQueryAsync(
-            "dbo.Delete_Order_Purchases",
+            "dbo.Delete_Order_Purchases_ALL",
             p =>
             {
                 p.Add("@PurBranchID", SqlDbType.Int).Value = invoiceId;
@@ -149,12 +170,102 @@ public sealed class PurchasesService
             cancellationToken).ConfigureAwait(false);
     }
 
+    private static void Validate(PurchaseInvoice invoice, AppSession session)
+    {
+        if (invoice is null)
+            throw new ArgumentNullException(nameof(invoice));
+        if (!session.BranchId.HasValue)
+            throw new InvalidOperationException("حفظ فواتير المشتريات يتطلب فرعاً فعّالاً.");
+        if (invoice.Lines.Count == 0)
+            throw new ArgumentException("لا يمكن حفظ فاتورة مشتريات بدون أصناف.");
+
+        foreach (var line in invoice.Lines)
+        {
+            if (!line.ItemID.HasValue || line.ItemID.Value <= 0)
+                throw new ArgumentException("كل سطر في الفاتورة يحتاج إلى صنف صحيح.");
+            if (!line.Quantity.HasValue || line.Quantity.Value <= 0)
+                throw new ArgumentException("كمية الصنف يجب أن تكون أكبر من صفر.");
+            if ((line.UnitPrice ?? 0m) < 0m)
+                throw new ArgumentException("سعر الشراء لا يمكن أن يكون سالباً.");
+        }
+    }
+
+    private static PurchaseTotals CalculateTotals(PurchaseInvoice invoice)
+    {
+        var subtotal = decimal.Round(
+            invoice.Lines.Sum(l => l.TotalPrice ?? 0m), 2);
+
+        var vat = decimal.Round(
+            invoice.Lines.Sum(l => l.VAT ?? 0m), 2);
+
+        var discount = Math.Max(0m, invoice.DiscountAmount);
+        if (discount > subtotal)
+            throw new ArgumentException("قيمة الخصم أكبر من إجمالي الفاتورة.");
+
+        var safy = decimal.Round(subtotal - discount, 2);
+        var net = decimal.Round(safy + vat, 2);
+
+        var paid = invoice.AmountPaid ?? (invoice.PaymentType == 3 ? 0m : net);
+        paid = decimal.Round(paid, 2);
+
+        if (paid < 0m || paid > net)
+            throw new ArgumentException("المبلغ المدفوع يجب أن يكون بين صفر وإجمالي الفاتورة.");
+
+        var cash = invoice.PaymentType == 1 ? paid : 0m;
+        var bank = invoice.PaymentType == 2 ? paid : 0m;
+
+        return new PurchaseTotals(subtotal, vat, discount, safy, net, paid, cash, bank);
+    }
+
+    private static void ApplyHeader(
+        StoredProcedureContract contract,
+        PurchaseInvoice invoice,
+        int branchId,
+        AppSession session,
+        PurchaseTotals totals,
+        DataTable items,
+        bool includePurBranchId)
+    {
+        if (includePurBranchId)
+            contract.Set("@PurBranchID", 0); // replaced by caller immediately
+
+        contract
+            .Set("@BranchID", branchId)
+            .Set("@SupplierID", invoice.SupplierId ?? 0)
+            .Set("@SupplierName", NullIfEmpty(invoice.SupplierName))
+            .Set("@SupplierPhone", NullIfEmpty(invoice.SupplierPhone))
+            .Set("@SupplierVatNum", NullIfEmpty(invoice.SupplierVat))
+            .Set("@Purchases_Date", invoice.InvoiceDate)
+            .Set("@Order_Paymant_Type", invoice.PaymentType)
+            .Set("@CostCentersID", invoice.CostCenterId ?? 0)
+            .Set("@Note", NullIfEmpty(invoice.Note))
+            .Set("@NoteNum", NullIfEmpty(invoice.NoteNum))
+            .Set("@Tax", totals.Vat)
+            .Set("@TotalPrices", totals.Subtotal)
+            .Set("@Safy", totals.Safy)
+            .Set("@DiscountNum", totals.Discount)
+            .Set("@DiscountPerantage", 0m)
+            .Set("@Tax_Discount", 0m)
+            .Set("@TotalPrices_Discount", totals.Safy)
+            .Set("@Net", totals.Net)
+            .Set("@Cash", totals.Cash)
+            .Set("@Bank", totals.Bank)
+            .Set("@Acc_Cash", invoice.CashAccountId)
+            .Set("@Acc_Bank", invoice.BankAccountId)
+            .Set("@UserID_Add", session.UserId)
+            .Set("@UserBranch_Add", branchId)
+            .Set("@UserMacAddress_Add", GetMachineAddress())
+            .Set("@SalesMan", NullIfEmpty(invoice.SalesMan) ?? session.UserName)
+            .Set("@Charge", 0m)
+            .Set("@ProjectId", invoice.ProjectId)
+            .Set("@Items", items);
+    }
+
     private Task<DataTable> ExecuteBranchProcedureAsync(
         string procedureName,
         int? branchId,
         CancellationToken cancellationToken)
-    {
-        return _db.ExecuteStoredProcedureAsync(
+        => _db.ExecuteStoredProcedureAsync(
             procedureName,
             p =>
             {
@@ -163,20 +274,42 @@ public sealed class PurchasesService
                 p.Add("@BranchID", SqlDbType.Int).Value = branchId.Value;
             },
             cancellationToken);
-    }
-
-    private static decimal ClampToZero(decimal value) => value < 0 ? 0 : value;
 
     private static string? NullIfEmpty(string? value)
         => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string GetMachineAddress()
+    {
+        try
+        {
+            return System.Net.NetworkInformation.NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(n => n.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up)
+                .Select(n => n.GetPhysicalAddress()?.ToString())
+                .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
+                ?? Environment.MachineName;
+        }
+        catch
+        {
+            return Environment.MachineName;
+        }
+    }
+
+    private readonly record struct PurchaseTotals(
+        decimal Subtotal,
+        decimal Vat,
+        decimal Discount,
+        decimal Safy,
+        decimal Net,
+        decimal Paid,
+        decimal Cash,
+        decimal Bank);
 }
 
-/// <summary>In-memory purchase invoice submitted by the entry screen.</summary>
+/// <summary>In-memory purchase invoice submitted by an entry screen.</summary>
 public sealed class PurchaseInvoice
 {
     public DateTime InvoiceDate { get; set; } = DateTime.Now;
-
-    /// <summary>1 نقدي، 2 بنك، 3 آجل — يطابق Order_Paymant_Type الأصلي.</summary>
     public int PaymentType { get; set; } = 1;
 
     public int? SupplierId { get; set; }
@@ -196,4 +329,3 @@ public sealed class PurchaseInvoice
 
     public List<Order_PurchasesDetails> Lines { get; } = new();
 }
-
