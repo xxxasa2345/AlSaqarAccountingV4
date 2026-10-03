@@ -88,6 +88,20 @@ public sealed class ScreenRouter
             using var form = new InvoicesForm(_session, access, new InvoiceService(db), new SalesService(db), new StoresService(db), new CustomerService(db), new SupplierService(db), new ItemsService(db), new PurchasesService(db), new CustSupService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
+        // Bind verified legacy ERP screens before the generic catalog/fallback.
+        // These mappings use the original GTSdb2026 SELECT procedures and therefore
+        // show real database data instead of DynamicErpScreenForm placeholders.
+        if (LegacyScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var legacyScreen)
+            && legacyScreen is not null)
+        {
+            using (legacyScreen)
+            {
+                legacyScreen.StartPosition = FormStartPosition.CenterParent;
+                legacyScreen.ShowDialog(owner);
+            }
+            return true;
+        }
+
         if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) && realScreen is not null)
         {
             using (realScreen) { realScreen.StartPosition = FormStartPosition.CenterParent; realScreen.ShowDialog(owner); }

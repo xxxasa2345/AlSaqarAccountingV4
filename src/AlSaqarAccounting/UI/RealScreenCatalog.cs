@@ -485,7 +485,9 @@ public static class RealScreenCatalog
                 new StoresService(db),
                 new CustomerService(db),
                 new SupplierService(db),
-                new ItemsService(db));
+                new ItemsService(db),
+                new PurchasesService(db),
+                new CustSupService(db));
             return true;
         }
 
