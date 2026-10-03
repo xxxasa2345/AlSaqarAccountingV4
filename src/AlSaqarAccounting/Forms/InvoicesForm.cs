@@ -21,6 +21,8 @@ public sealed class InvoicesForm : Form
     private readonly CustomerService _customerService;
     private readonly SupplierService _supplierService;
     private readonly ItemsService _itemsService;
+    private readonly PurchasesService _purchasesService;
+    private readonly CustSupService _custSupService;
     
     private readonly DataGridView _invoicesGrid = new();
     private readonly DataGridView _detailsGrid = new();
@@ -45,7 +47,9 @@ public sealed class InvoicesForm : Form
         StoresService storesService,
         CustomerService customerService,
         SupplierService supplierService,
-        ItemsService itemsService)
+        ItemsService itemsService,
+        PurchasesService purchasesService,
+        CustSupService custSupService)
     {
         _session = session;
         _access = access;
@@ -55,6 +59,8 @@ public sealed class InvoicesForm : Form
         _customerService = customerService;
         _supplierService = supplierService;
         _itemsService = itemsService;
+        _purchasesService = purchasesService;
+        _custSupService = custSupService;
         
         InitializeUi();
     }
@@ -440,7 +446,7 @@ public sealed class InvoicesForm : Form
             _access,
             _purchasesService,
             _storesService,
-            new CustSupService(new DbExecutor(new SqlConnectionFactory(_connectionString))));
+            _custSupService);
 
         purchaseForm.ShowDialog(this);
         if (purchaseForm.Saved)
