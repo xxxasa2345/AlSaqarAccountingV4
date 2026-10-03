@@ -60,7 +60,8 @@ public sealed class AdvancedItemsForm : Form
 
     private void InitializeUi()
     {
-        Text = "\u0001\u0001 - \u0001"; // "النظام المحاسبي - إدارة الاصناف"
+        ErpTheme.ApplyForm(this);
+        Text = "الصقر للمحاسبة — إدارة الأصناف المتقدمة";
         Width = 1400;
         Height = 900;
         MinimumSize = new Size(1200, 800);
@@ -133,6 +134,8 @@ public sealed class AdvancedItemsForm : Form
         _itemsGrid.RowHeadersVisible = false;
         _itemsGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         _itemsGrid.CellDoubleClick += (_, e) => { if (e.RowIndex >= 0) LoadItemDetails(); };
+        _itemsGrid.SelectionChanged += (_, _) => LoadItemDetails();
+        ErpTheme.ConfigureGrid(_itemsGrid);
         
         itemsPanel.Controls.Add(_itemsGrid);
         itemsPanel.Controls.Add(itemsTitle);
@@ -172,6 +175,7 @@ public sealed class AdvancedItemsForm : Form
         _stockGrid.AllowUserToDeleteRows = false;
         _stockGrid.AutoGenerateColumns = true;
         _stockGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+        ErpTheme.ConfigureGrid(_stockGrid);
         _stockGrid.RightToLeft = RightToLeft.Yes;
         _stockGrid.RowHeadersVisible = false;
 
@@ -215,8 +219,9 @@ public sealed class AdvancedItemsForm : Form
 
     private static void AddToolbarButton(FlowLayoutPanel panel, string text, bool enabled, Action action)
     {
-        var button = new Button { Text = text, Width = 100, Height = 36, Enabled = enabled, Margin = new Padding(4) };
+        var button = new Button { Text = text, Width = text.Length > 8 ? 120 : 100, Height = 36, Enabled = enabled, Margin = new Padding(4) };
         button.Click += (_, _) => action();
+        ErpTheme.ConfigureToolbarButton(button);
         panel.Controls.Add(button);
     }
 
@@ -319,6 +324,18 @@ public sealed class AdvancedItemsForm : Form
         if (_itemsGrid.Columns.Contains("Item_UnitId")) _itemsGrid.Columns["Item_UnitId"].HeaderText = "\u0001"; // "وحدة القياس"
     }
 
+    private Item_Items BuildItemFromRow()
+        => new()
+        {
+            Item_code = _barcodeText.Text.Trim(),
+            item_Name = _nameText.Text.Trim(),
+            item_Name_English = _englishNameText.Text.Trim(),
+            SellPriceSmall = TryDecimal(_sellPriceText.Text),
+            Is_Tax = _taxCheck.Checked,
+            Tax_Value = TryDecimal(_taxValueText.Text),
+            Note = _notesText.Text.Trim()
+        };
+
     private void ApplyFilter()
     {
         if (_itemsData == null) return;
@@ -381,40 +398,142 @@ public sealed class AdvancedItemsForm : Form
         LoadStockData();
     }
 
-    private void LoadStockData()
+    private async void LoadStockData()
     {
-        // This would be replaced with actual database query in production
-        var stockData = new DataTable();
-        stockData.Columns.Add("\u0001", typeof(string)); // "الفرع"
-        stockData.Columns.Add("\u0001", typeof(decimal)); // "الكمية"
-        stockData.Columns.Add("\u0001", typeof(decimal)); // "سعر التكلفة"
-        stockData.Columns.Add("\u0001", typeof(decimal)); // "سعر البيع"
-        
-        // Add sample data
-        stockData.Rows.Add("\u0001", 100, 50, 75); // "الفرع الرئيسي", 100, 50, 75
-        
-        _stockGrid.DataSource = stockData;
+        if (!_selectedItemId.HasValue)
+        {
+            _stockGrid.DataSource = null;
+            return;
+        }
+
+        try
+        {
+            var stockData = await _itemsService.ListStockAsync(_selectedItemId.Value, _session);
+            _stockGrid.DataSource = stockData;
+            _status.Text = $"مخزون الصنف: {stockData.Rows.Count:N0} مخزن";
+        }
+        catch (Exception ex)
+        {
+            _stockGrid.DataSource = null;
+            _status.Text = "تعذر تحميل المخزون: " + ex.GetBaseException().Message;
+        }
     }
 
-    private void SaveItem()
+    private async void SaveItem()
     {
         if (!_access.AllowSave) return;
-        
-        MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "حفظ الاصناف متاح في النظام الكامل"
+        try
+        {
+            var item = BuildItemFromEditor();
+            UseWaitCursor = true;
+
+            if (_selectedItemId.HasValue)
+                await _itemsService.UpdateAsync(_selectedItemId.Value, item, _session, _access.Id);
+            else
+            {
+                await _itemsService.CreateAsync(item, _session, _access.Id);
+                ClearItemEditor();
+            }
+
+            await LoadItems();
+            _status.Text = "تم حفظ الصنف في قاعدة البيانات.";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.GetBaseException().Message, "تعذر حفظ الصنف", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally { UseWaitCursor = false; }
     }
 
-    private void EditItem()
+    private async void EditItem()
     {
-        if (!_access.AllowEdit) return;
-        
-        MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "تعديل الاصناف متاح في النظام الكامل"
+        if (!_access.AllowEdit || !_selectedItemId.HasValue)
+        {
+            MessageBox.Show(this, "حدد الصنف المطلوب تعديله أولاً.", "الأصناف", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        await SaveItemCoreAsync();
     }
 
-    private void DeleteItem()
+    private async void DeleteItem()
     {
-        if (!_access.AllowDelete) return;
-        
-        MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "حذف الاصناف متاح في النظام الكامل"
+        if (!_access.AllowDelete || !_selectedItemId.HasValue)
+        {
+            MessageBox.Show(this, "حدد الصنف المطلوب حذفه أولاً.", "الأصناف", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (MessageBox.Show(
+                this,
+                $"هل تريد حذف الصنف «{_nameText.Text.Trim()}»؟",
+                "تأكيد الحذف",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning) != DialogResult.Yes)
+            return;
+
+        try
+        {
+            UseWaitCursor = true;
+            await _itemsService.DeleteAsync(_selectedItemId.Value, _session, _access.Id);
+            _selectedItemId = null;
+            ClearItemEditor();
+            await LoadItems();
+            _stockGrid.DataSource = null;
+            _status.Text = "تم حذف الصنف من قاعدة البيانات.";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.GetBaseException().Message, "تعذر حذف الصنف", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally { UseWaitCursor = false; }
+    }
+
+    private async Task SaveItemCoreAsync()
+    {
+        var item = BuildItemFromEditor();
+        UseWaitCursor = true;
+        try
+        {
+            await _itemsService.UpdateAsync(_selectedItemId!.Value, item, _session, _access.Id);
+            await LoadItems();
+            _status.Text = "تم تعديل الصنف في قاعدة البيانات.";
+        }
+        finally { UseWaitCursor = false; }
+    }
+
+    private Item_Items BuildItemFromEditor()
+        => new()
+        {
+            Item_code = _barcodeText.Text.Trim(),
+            item_Name = _nameText.Text.Trim(),
+            item_Name_English = _englishNameText.Text.Trim(),
+            SellPriceSmall = TryDecimal(_sellPriceText.Text),
+            Is_Tax = _taxCheck.Checked,
+            Tax_Value = TryDecimal(_taxValueText.Text),
+            Note = _notesText.Text.Trim()
+        };
+
+    private static decimal? TryDecimal(string value)
+        => decimal.TryParse(value, out var number) ? number : null;
+
+    private void ClearItemEditor()
+    {
+        _selectedItemId = null;
+        _nameText.Clear();
+        _englishNameText.Clear();
+        _barcodeText.Clear();
+        _costPriceText.Clear();
+        _sellPriceText.Clear();
+        _minStockText.Clear();
+        _currentStockText.Clear();
+        _taxCheck.Checked = false;
+        _taxValueText.Clear();
+        _notesText.Clear();
+        _categoryCombo.SelectedIndex = -1;
+        _unitCombo.SelectedIndex = -1;
+        _companyCombo.SelectedIndex = -1;
+        _stockGrid.DataSource = null;
     }
 
     private void ImportItems()
