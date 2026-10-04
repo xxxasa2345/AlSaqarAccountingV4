@@ -81,7 +81,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
         }, cancellationToken);
 
         if (result.Rows.Count == 0)
-            throw new InvalidOperationException(""); // "لم يتم إنشاء المخزن"
+            throw new InvalidOperationException("لم يتم إنشاء المخزن"); // "لم يتم إنشاء المخزن"
 
         return Convert.ToInt32(result.Rows[0][0]);
     }
@@ -130,7 +130,7 @@ WHERE ID = @ID;";
     private static void Validate(Account_Stores store)
     {
         if (string.IsNullOrWhiteSpace(store.Store_Name))
-            throw new ArgumentException(""); // "اسم المخزن مطلوب"
+            throw new ArgumentException("اسم المخزن مطلوب"); // "اسم المخزن مطلوب"
         if (store.Store_Name.Trim().Length > 200)
             throw new ArgumentException(" 200 "); // "اسم المخزن طويل جدا"
     }
