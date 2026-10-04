@@ -71,10 +71,10 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
         var result = await _db.QueryAsync(sql, p =>
         {
             p.Add("@Store_Name", SqlDbType.NVarChar, 200).Value = store.Store_Name.Trim();
-            p.Add("@BranchID", SqlDbType.Int).Value = (object)store.BranchID ?? DBNull.Value;
-            p.Add("@Address", SqlDbType.NVarChar, 500).Value = (object)store.Address ?? DBNull.Value;
-            p.Add("@Phone", SqlDbType.NVarChar, 100).Value = (object)store.Phone ?? DBNull.Value;
-            p.Add("@Fax", SqlDbType.NVarChar, 100).Value = (object)store.Fax ?? DBNull.Value;
+            p.Add("@BranchID", SqlDbType.Int).Value = (object?)store.BranchID ?? DBNull.Value;
+            p.Add("@Address", SqlDbType.NVarChar, 500).Value = (object?)store.Address ?? DBNull.Value;
+            p.Add("@Phone", SqlDbType.NVarChar, 100).Value = (object?)store.Phone ?? DBNull.Value;
+            p.Add("@Fax", SqlDbType.NVarChar, 100).Value = (object?)store.Fax ?? DBNull.Value;
             p.Add("@UserID_Add", SqlDbType.Int).Value = session.UserId;
             p.Add("@UserBranch_Add", SqlDbType.Int).Value = (object?)session.BranchId ?? DBNull.Value;
             p.Add("@UserMacAddress_Add", SqlDbType.NVarChar, 200).Value = GetMachineMac();
@@ -108,10 +108,10 @@ WHERE ID = @ID;";
         {
             p.Add("@ID", SqlDbType.Int).Value = store.ID;
             p.Add("@Store_Name", SqlDbType.NVarChar, 200).Value = store.Store_Name.Trim();
-            p.Add("@BranchID", SqlDbType.Int).Value = (object)store.BranchID ?? DBNull.Value;
-            p.Add("@Address", SqlDbType.NVarChar, 500).Value = (object)store.Address ?? DBNull.Value;
-            p.Add("@Phone", SqlDbType.NVarChar, 100).Value = (object)store.Phone ?? DBNull.Value;
-            p.Add("@Fax", SqlDbType.NVarChar, 100).Value = (object)store.Fax ?? DBNull.Value;
+            p.Add("@BranchID", SqlDbType.Int).Value = (object?)store.BranchID ?? DBNull.Value;
+            p.Add("@Address", SqlDbType.NVarChar, 500).Value = (object?)store.Address ?? DBNull.Value;
+            p.Add("@Phone", SqlDbType.NVarChar, 100).Value = (object?)store.Phone ?? DBNull.Value;
+            p.Add("@Fax", SqlDbType.NVarChar, 100).Value = (object?)store.Fax ?? DBNull.Value;
             p.Add("@UserID_Update", SqlDbType.Int).Value = session.UserId;
             p.Add("@UserBranch_Update", SqlDbType.Int).Value = (object?)session.BranchId ?? DBNull.Value;
             p.Add("@UserMacAddress_Update", SqlDbType.NVarChar, 200).Value = GetMachineMac();
