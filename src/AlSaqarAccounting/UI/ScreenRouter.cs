@@ -114,12 +114,11 @@ public sealed class ScreenRouter
             { using (form) { form.StartPosition = FormStartPosition.CenterParent; form.ShowDialog(owner); } return true; }
             message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
         }
-        try
-        {
-            using var dynamicScreen = new DynamicErpScreenForm(_session, access, new DynamicErpScreenService(db), access.ScreenName) { StartPosition = FormStartPosition.CenterParent };
-            dynamicScreen.ShowDialog(owner); return true;
-        }
-        catch (Exception ex) { message = ex.GetBaseException().Message; return false; }
+        // لا توجد شاشة تجريبية/شكلية كخيار أخير.
+        // أي شاشة لم تُربط بعد بشاشة ERP تشغيلية حقيقية تُرفض بوضوح
+        // بدل عرض DynamicErpScreenForm أو أي صفحة وهمية.
+        message = $"الشاشة «{access.ScreenName}» لم تُربط بعد بشاشة تشغيلية حقيقية.";
+        return false;
     }
 
     private static bool IsPasswordScreen(string? name)
