@@ -1,6 +1,7 @@
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Services;
 using AlSaqarAccounting.Forms;
+using System.Linq;
 
 namespace AlSaqarAccounting.UI;
 
@@ -69,23 +70,23 @@ public sealed class ScreenRouter
 
         if (string.Equals(access.ScreenName, "FrmUnit", StringComparison.OrdinalIgnoreCase))
         {
-            using var form = new ItemUnitForm(_session, access, new ItemUnitService(db)) { StartPosition = FormStartPosition.CenterParent };
-            form.ShowDialog(owner); return true;
+            var form = new ItemUnitForm(_session, access, new ItemUnitService(db));
+            return OpenMdi(owner, form);
         }
         if (TryResolveItemMaster(access.ScreenName, out var tableName, out var displayName))
         {
-            using var form = new ItemMasterForm(_session, access, new ItemMasterService(db), tableName, displayName) { StartPosition = FormStartPosition.CenterParent };
-            form.ShowDialog(owner); return true;
+            var form = new ItemMasterForm(_session, access, new ItemMasterService(db), tableName, displayName);
+            return OpenMdi(owner, form);
         }
         if (string.Equals(access.ScreenName, "FrmItems", StringComparison.OrdinalIgnoreCase))
         {
-            using var form = new ItemsForm(_session, access, new ItemsService(db)) { StartPosition = FormStartPosition.CenterParent };
-            form.ShowDialog(owner); return true;
+            var form = new ItemsForm(_session, access, new ItemsService(db));
+            return OpenMdi(owner, form);
         }
         if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) || string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
         {
-            using var form = new InvoicesForm(_session, access, new InvoiceService(db), new SalesService(db), new StoresService(db), new CustomerService(db), new SupplierService(db), new ItemsService(db), new PurchasesService(db), new CustSupService(db)) { StartPosition = FormStartPosition.CenterParent };
-            form.ShowDialog(owner); return true;
+            var form = new InvoicesForm(_session, access, new InvoiceService(db), new SalesService(db), new StoresService(db), new CustomerService(db), new SupplierService(db), new ItemsService(db), new PurchasesService(db), new CustSupService(db));
+            return OpenMdi(owner, form);
         }
         // Bind verified legacy ERP screens before the generic catalog/fallback.
         // These mappings use the original GTSdb2026 SELECT procedures and therefore
@@ -93,24 +94,46 @@ public sealed class ScreenRouter
         if (LegacyScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var legacyScreen)
             && legacyScreen is not null)
         {
-            using (legacyScreen)
-            {
-                legacyScreen.StartPosition = FormStartPosition.CenterParent;
-                legacyScreen.ShowDialog(owner);
-            }
-            return true;
+            return OpenMdi(owner, legacyScreen);
         }
 
         if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) && realScreen is not null)
         {
-            using (realScreen) { realScreen.StartPosition = FormStartPosition.CenterParent; realScreen.ShowDialog(owner); }
-            return true;
+            return OpenMdi(owner, realScreen);
         }
         // لا توجد شاشة تجريبية/شكلية كخيار أخير.
         // أي شاشة لم تُربط بعد بشاشة ERP تشغيلية حقيقية تُرفض بوضوح
         // بدل عرض DynamicErpScreenForm أو أي صفحة وهمية.
         message = $"الشاشة «{access.ScreenName}» لم تُربط بعد بشاشة تشغيلية حقيقية.";
         return false;
+    }
+
+    private static bool OpenMdi(Form owner, Form form)
+    {
+        if (!owner.IsMdiContainer)
+        {
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.Show(owner);
+            return true;
+        }
+
+        var existing = owner.MdiChildren.FirstOrDefault(x =>
+            string.Equals(x.GetType().FullName, form.GetType().FullName, StringComparison.Ordinal));
+
+        if (existing is not null)
+        {
+            form.Dispose();
+            existing.Activate();
+            existing.BringToFront();
+            return true;
+        }
+
+        form.MdiParent = owner;
+        form.StartPosition = FormStartPosition.CenterScreen;
+        form.WindowState = FormWindowState.Maximized;
+        form.Show();
+        form.BringToFront();
+        return true;
     }
 
     private static bool IsPasswordScreen(string? name)
