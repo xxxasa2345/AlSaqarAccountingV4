@@ -110,7 +110,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
         }, cancellationToken);
 
         if (result.Rows.Count == 0)
-            throw new InvalidOperationException("  "); // "لم يتم إنشاء المورد"
+            throw new InvalidOperationException("لم يتم إنشاء المورد"); // "لم يتم إنشاء المورد"
 
         return Convert.ToInt32(result.Rows[0][0]);
     }
@@ -198,9 +198,9 @@ WHERE ID = @ID;";
     private static void Validate(Account_CustSup supplier)
     {
         if (string.IsNullOrWhiteSpace(supplier.CustSuppName))
-            throw new ArgumentException(" "); // "اسم المورد مطلوب"
+            throw new ArgumentException("اسم المورد مطلوب"); // "اسم المورد مطلوب"
         if (supplier.CustSuppName.Trim().Length > 300)
-            throw new ArgumentException("  300 "); // "اسم المورد طويل جدا"
+            throw new ArgumentException("اسم المورد طويل جدا"); // "اسم المورد طويل جدا"
     }
 
     private static string GetMachineMac()
