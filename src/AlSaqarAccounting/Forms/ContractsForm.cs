@@ -62,7 +62,7 @@ public sealed class ContractsForm : Form
         };
         var info = new Label
         {
-            Text = $": {_session.UserName} | : {_session.BranchId?.ToString() ?? "-"}", // "المستخدم: ... | الفرع: ..."
+            Text = $"المستخدم: {_session.UserName} | الفرع: {_session.BranchId?.ToString() ?? "-"}", // "المستخدم: ... | الفرع: ..."
             Dock = DockStyle.Top,
             Height = 25,
             ForeColor = Color.DimGray,
@@ -183,11 +183,11 @@ public sealed class ContractsForm : Form
             _grid.DataSource = _data;
             FormatGrid();
             ApplyFilter();
-            _status.Text = $": {_data.Rows.Count:N0}"; // "عدد العقود: ..."
+            _status.Text = $"عدد العقود: {_data.Rows.Count:N0}"; // "عدد العقود: ..."
         }
         catch (Exception ex)
         {
-            _status.Text = ": " + ex.GetBaseException().Message; // "خطأ في تحميل البيانات: ..."
+            _status.Text = "خطأ في تحميل البيانات: " + ex.GetBaseException().Message; // "خطأ في تحميل البيانات: ..."
         }
         finally { UseWaitCursor = false; }
     }
@@ -236,7 +236,7 @@ public sealed class ContractsForm : Form
                                    $"CONVERT([SupplierPhone], 'System.String') LIKE '%{term}%' OR " +
                                    $"CONVERT([Note], 'System.String') LIKE '%{term}%';";
         }
-        _status.Text = $": {_data.DefaultView.Count:N0}  {_data.Rows.Count:N0}"; // "المعرض: ... من ..."
+        _status.Text = $"المعرض: {_data.DefaultView.Count:N0} من {_data.Rows.Count:N0}"; // "المعرض: ... من ..."
     }
 
     private async Task SaveAsync()
@@ -271,12 +271,12 @@ public sealed class ContractsForm : Form
             {
                 contract.ID = _editingId.Value;
                 await _service.UpdateAsync(contract, _session);
-                _status.Text = "  "; // "تم تعديل العقد بنجاح"
+                _status.Text = "تم تعديل العقد بنجاح"; // "تم تعديل العقد بنجاح"
             }
             else
             {
                 var id = await _service.CreateAsync(contract, _session);
-                _status.Text = $"   {id}"; // "تم حفظ العقد بنجاح رقم: ..."
+                _status.Text = $"تم حفظ العقد بنجاح رقم: {id}"; // "تم حفظ العقد بنجاح رقم: ..."
             }
             ClearEditor();
             await LoadAsync();
@@ -321,7 +321,7 @@ public sealed class ContractsForm : Form
             UseWaitCursor = true;
             await _service.DeleteAsync(id);
             await LoadAsync();
-            _status.Text = " "; // "تم حذف العقد"
+            _status.Text = "تم حذف العقد"; // "تم حذف العقد"
         }
         catch (Exception ex)
         {
@@ -351,7 +351,7 @@ using var dialog = new SaveFileDialog { Filter = "CSV UTF-8 (*.csv)|*.csv", File
         if (dialog.ShowDialog(this) != DialogResult.OK) return Task.CompletedTask;
 var sb = new System.Text.StringBuilder();
         // Header
-        var headers = new[] { "", "", "", "", "", "", "", "" }; 
+        var headers = new[] { "الرقم", "اسم المورد/العميل", "الهاتف", "رقم العقد", "التاريخ", "القيمة", "الحالة", "ملاحظات" }; 
         // "رقم العقد", "اسم المورد", "هاتف المورد", "تاريخ الشراء", "تكلفة الطلب", "الضريبة", "الإجمالي", "الصافي"
         sb.AppendLine(string.Join(",", headers));
         
@@ -373,7 +373,7 @@ var sb = new System.Text.StringBuilder();
         }
         
         File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
-        _status.Text = ": " + dialog.FileName; // "تم التصدير إلى: ..."
+        _status.Text = "تم التصدير إلى: " + dialog.FileName; // "تم التصدير إلى: ..."
     
         return Task.CompletedTask;
     }
