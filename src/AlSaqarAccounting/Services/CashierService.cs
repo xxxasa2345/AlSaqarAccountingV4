@@ -42,7 +42,6 @@ public sealed class CashierService
             if (!detail.Quantity.HasValue || detail.Quantity <= 0)
                 throw new ArgumentException("كمية الصنف يجب أن تكون أكبر من صفر.");
             detail.BranchID = session.BranchId;
-            detail.StoreID ??= order.BranchID;
         }
 
         order.OrderCashierType = true;
@@ -56,8 +55,8 @@ public sealed class CashierService
         var invoice = new SalesInvoice
         {
             InvoiceDate = order.Purchases_Date,
-            PaymentType = order.CashMoney.GetValueOrDefault() > 0m ? 1 : 2,
-            CustomerId = null,
+            PaymentType = order.Order_Paymant_Type.GetValueOrDefault(order.CashMoney.GetValueOrDefault() > 0m ? 1 : 2),
+            CustomerId = order.SupplierID,
             CustomerName = order.SupplierName,
             CustomerPhone = order.SupplierPhone,
             CustomerVat = order.SupplierVatNum,
@@ -74,29 +73,7 @@ public sealed class CashierService
             invoice.Lines.Add(detail);
 
         var sales = new SalesService(_db);
-        var before = await sales.ListAsync(session.BranchId, cancellationToken).ConfigureAwait(false);
-        await sales.CreateAsync(invoice, session, cancellationToken).ConfigureAwait(false);
-
-        // Return the newly created document id from the branch's latest record.
-        var after = await sales.ListAsync(session.BranchId, cancellationToken).ConfigureAwait(false);
-        if (after.Rows.Count == 0)
-            throw new InvalidOperationException("تم الحفظ دون العثور على رقم الفاتورة.");
-
-        foreach (DataRow row in after.Rows)
-        {
-            if (row.Table.Columns.Contains("PurBranchID") &&
-                row["PurBranchID"] is not DBNull &&
-                int.TryParse(row["PurBranchID"].ToString(), out var id))
-            {
-                if (before.Rows.Count == 0 || !before.AsEnumerable().Any(x =>
-                    x.Table.Columns.Contains("PurBranchID") &&
-                    x["PurBranchID"] is not DBNull &&
-                    Convert.ToInt32(x["PurBranchID"]) == id))
-                    return id;
-            }
-        }
-
-        return Convert.ToInt32(after.Rows[0]["PurBranchID"]);
+        return await sales.CreateAsync(invoice, session, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
