@@ -127,7 +127,7 @@ public sealed class PurchasesEntryForm : Form
         };
         var title = new Label
         {
-            Text = invoiceId.HasValue ? "تعديل فاتورة مشتريات" : "فاتورة مشتريات جديدة",
+            Text = _invoiceId.HasValue ? "تعديل فاتورة مشتريات" : "فاتورة مشتريات جديدة",
             Dock = DockStyle.Top,
             Height = 34,
             Font = new Font("Tahoma", 16, FontStyle.Bold),
@@ -298,6 +298,9 @@ public sealed class PurchasesEntryForm : Form
             }
             else
                 _storeCombo.Items.Add("غير محدد");
+
+            if (_invoiceId.HasValue)
+                await LoadExistingAsync();
         }
         catch (Exception ex)
         {
