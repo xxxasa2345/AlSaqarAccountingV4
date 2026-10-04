@@ -69,13 +69,13 @@ public sealed class AccountingService
     {
         const string sql = @"
 INSERT INTO dbo.Account_Accounts (
-    Account_No, Account_Name, E_Account_Name, Account_Type, Account_Nature,
-    Main_Account_No, Account_Level, BranchID,
+    Account_No, Suspended, Account_Level, Final_Account, Account_Type, Account_Nature,
+    Main_Account_No, BranchID, Account_Name, E_Account_Name, Priv_Debit, Priv_Credit,
     UserID_Add, UserBranch_Add, UserMacAddress_Add, UserDate_Add
 )
 VALUES (
-    @Account_No, @Account_Name, @E_Account_Name, @Account_Type, @Account_Nature,
-    @Main_Account_No, @Account_Level, @BranchID,
+    @Account_No, 0, ISNULL(@Account_Level, 1), 1, @Account_Type, @Account_Nature,
+    @Main_Account_No, @BranchID, @Account_Name, @E_Account_Name, 0, 0,
     @UserID_Add, @UserBranch_Add, @UserMacAddress_Add, GETDATE()
 );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
