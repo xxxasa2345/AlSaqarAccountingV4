@@ -64,7 +64,7 @@ public sealed class AccountingForm : Form
         };
         var info = new Label
         {
-            Text = $"المستخدم: ... | الفرع: ..."-"}", // "المستخدم: ... | الفرع: ..."
+            Text = $"المستخدم: {_session.UserName} | الفرع: {_session.BranchId?.ToString() ?? "-"}", // "المستخدم: ... | الفرع: ..."
             Dock = DockStyle.Top,
             Height = 25,
             ForeColor = Color.DimGray,
@@ -220,10 +220,10 @@ public sealed class AccountingForm : Form
     private void InitializeCombos()
     {
         _accountTypeCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-        _accountTypeCombo.Items.AddRange(new object[] { "\u0001", "\u0001", "\u0001", "\u0001" }); // "أصول", "خصوم", "إيرادات", "مصروفات"
+        _accountTypeCombo.Items.AddRange(new object[] { "أصول", "خصوم", "إيرادات", "مصروفات" }); // "أصول", "خصوم", "إيرادات", "مصروفات"
         
         _accountNatureCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-        _accountNatureCombo.Items.AddRange(new object[] { "\u0001", "\u0001" }); // "مدين", "دائن"
+        _accountNatureCombo.Items.AddRange(new object[] { "مدين", "دائن" }); // "مدين", "دائن"
     }
 
     private async Task LoadInitialDataAsync()
@@ -393,25 +393,56 @@ public sealed class AccountingForm : Form
         _accountNatureCombo.SelectedIndex = -1;
     }
 
-    private void SaveAccount()
+    private async void SaveAccount()
     {
         if (!_access.AllowSave) return;
-        
-        MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "حفظ الحسابات متاح في النظام الكامل"
+        if (!_accountsMode) { MessageBox.Show(this, "حفظ مراكز التكلفة من شاشة مستقلة.", "الحسابات", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+        try
+        {
+            if (!int.TryParse(_accountNoText.Text.Trim(), out var accountNo) || accountNo <= 0)
+                throw new InvalidOperationException("رقم الحساب غير صحيح.");
+            var name = _accountNameText.Text.Trim();
+            if (string.IsNullOrWhiteSpace(name)) throw new InvalidOperationException("اسم الحساب مطلوب.");
+            int? main = int.TryParse(_mainAccountText.Text.Trim(), out var mainNo) ? mainNo : null;
+            int? type = _accountTypeCombo.SelectedIndex >= 0 ? _accountTypeCombo.SelectedIndex + 1 : null;
+            int? nature = _accountNatureCombo.SelectedIndex >= 0 ? _accountNatureCombo.SelectedIndex + 1 : null;
+            await _service.CreateAccountAsync(accountNo, name, _englishNameText.Text.Trim(), type, nature, main, null, _session.BranchId, _session);
+            _status.Text = "تم حفظ الحساب.";
+            await LoadData();
+        }
+        catch (Exception ex) { _status.Text = "خطأ: " + ex.GetBaseException().Message; }
     }
 
-    private void EditAccount()
+    private async void EditAccount()
     {
-        if (!_access.AllowEdit) return;
-        
-        MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "تعديل الحسابات متاح في النظام الكامل"
+        if (!_access.AllowEdit || !_selectedAccountId.HasValue) return;
+        try
+        {
+            if (!int.TryParse(_accountNoText.Text.Trim(), out var accountNo) || accountNo <= 0)
+                throw new InvalidOperationException("رقم الحساب غير صحيح.");
+            var name = _accountNameText.Text.Trim();
+            if (string.IsNullOrWhiteSpace(name)) throw new InvalidOperationException("اسم الحساب مطلوب.");
+            int? main = int.TryParse(_mainAccountText.Text.Trim(), out var mainNo) ? mainNo : null;
+            int? type = _accountTypeCombo.SelectedIndex >= 0 ? _accountTypeCombo.SelectedIndex + 1 : null;
+            int? nature = _accountNatureCombo.SelectedIndex >= 0 ? _accountNatureCombo.SelectedIndex + 1 : null;
+            await _service.UpdateAccountAsync(_selectedAccountId.Value, accountNo, name, _englishNameText.Text.Trim(), type, nature, main, null, _session);
+            _status.Text = "تم تعديل الحساب.";
+            await LoadData();
+        }
+        catch (Exception ex) { _status.Text = "خطأ: " + ex.GetBaseException().Message; }
     }
 
-    private void DeleteAccount()
+    private async void DeleteAccount()
     {
-        if (!_access.AllowDelete) return;
-        
-        MessageBox.Show(this, "\u0001", "\u0001", MessageBoxButtons.OK, MessageBoxIcon.Information); // "حذف الحسابات متاح في النظام الكامل"
+        if (!_access.AllowDelete || !_selectedAccountId.HasValue) return;
+        if (MessageBox.Show(this, "هل تريد حذف الحساب المحدد؟", "تأكيد الحذف", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+        try
+        {
+            await _service.DeleteAccountAsync(_selectedAccountId.Value);
+            _status.Text = "تم حذف الحساب.";
+            await LoadData();
+        }
+        catch (Exception ex) { _status.Text = "خطأ: " + ex.GetBaseException().Message; }
     }
 
     private void ExportAccounts()
@@ -429,7 +460,7 @@ public sealed class AccountingForm : Form
         if (_accountsMode)
         {
             // Header for accounts
-            var headers = new[] { "\u0001", "\u0001", "\u0001", "\u0001", "\u0001" }; // "رقم الحساب", "اسم الحساب", "الاسم الانجليزي", "نوع الحساب", "طبيعة الحساب"
+            var headers = new[] { "رقم الحساب", "اسم الحساب", "الاسم الانجليزي", "نوع الحساب", "طبيعة الحساب" }; // "رقم الحساب", "اسم الحساب", "الاسم الانجليزي", "نوع الحساب", "طبيعة الحساب"
             sb.AppendLine(string.Join(",", headers));
             
             foreach (DataRowView view in data.DefaultView)
@@ -448,7 +479,7 @@ public sealed class AccountingForm : Form
         else
         {
             // Header for cost centers
-            var headers = new[] { "\u0001", "\u0001" }; // "رقم مركز التكلفة", "اسم مركز التكلفة"
+            var headers = new[] { "رقم مركز التكلفة", "اسم مركز التكلفة" }; // "رقم مركز التكلفة", "اسم مركز التكلفة"
             sb.AppendLine(string.Join(",", headers));
             
             foreach (DataRowView view in data.DefaultView)
@@ -463,7 +494,7 @@ public sealed class AccountingForm : Form
         }
         
         File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
-        _status.Text = "تم التصدير إلى: ..." + dialog.FileName; // "تم التصدير إلى: ..."
+        _status.Text = "تم التصدير إلى: " + dialog.FileName; // "تم التصدير إلى: ..."
     }
 
     private void ShowTrialBalance()
@@ -581,7 +612,7 @@ internal sealed class TrialBalanceForm : Form
             var data = await _service.GetTrialBalanceAsync(_fromDate.Value, _toDate.Value, _session.BranchId);
             _grid.DataSource = data;
             FormatGrid();
-            _status.Text = $"عدد الحسابات: ..."; // "عدد الحسابات: ..."
+            _status.Text = $"عدد الحسابات: {data.Rows.Count:N0}"; // "عدد الحسابات: ..."
         }
         catch (Exception ex)
         {
