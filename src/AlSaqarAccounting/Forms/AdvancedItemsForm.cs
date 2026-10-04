@@ -82,7 +82,7 @@ public sealed class AdvancedItemsForm : Form
         };
         var info = new Label
         {
-            Text = $"\u0001: {_session.UserName} | \u0001: {_session.BranchId?.ToString() ?? "-"}", // "المستخدم: ... | الفرع: ..."
+            Text = $"المستخدم: {_session.UserName} | الفرع: {_session.BranchId?.ToString() ?? "-"}", // "المستخدم: ... | الفرع: ..."
             Dock = DockStyle.Top,
             Height = 25,
             ForeColor = Color.DimGray,
@@ -104,7 +104,7 @@ public sealed class AdvancedItemsForm : Form
         _searchText.Dock = DockStyle.Fill;
         _searchText.RightToLeft = RightToLeft.Yes;
         
-        var barcodeLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "باركود:"
+        var barcodeLabel = new Label { Text = "باركود:", TextAlign = ContentAlignment.MiddleRight }; // "باركود:"
         _barcodeText.Dock = DockStyle.Fill;
         _barcodeText.RightToLeft = RightToLeft.Yes;
         _barcodeText.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) SearchByBarcode(); };
@@ -316,13 +316,13 @@ public sealed class AdvancedItemsForm : Form
         }
         
         // Rename columns
-        if (_itemsGrid.Columns.Contains("Item_code")) _itemsGrid.Columns["Item_code"].HeaderText = "\u0001"; // "الباركود"
-        if (_itemsGrid.Columns.Contains("item_Name")) _itemsGrid.Columns["item_Name"].HeaderText = "\u0001"; // "اسم الصنف"
-        if (_itemsGrid.Columns.Contains("item_Name_English")) _itemsGrid.Columns["item_Name_English"].HeaderText = "\u0001"; // "الاسم الانجليزي"
-        if (_itemsGrid.Columns.Contains("SellPriceSmall")) _itemsGrid.Columns["SellPriceSmall"].HeaderText = "\u0001"; // "سعر البيع"
-        if (_itemsGrid.Columns.Contains("Item_ClassId")) _itemsGrid.Columns["Item_ClassId"].HeaderText = "\u0001"; // "الفئة"
-        if (_itemsGrid.Columns.Contains("Item_CompanyId")) _itemsGrid.Columns["Item_CompanyId"].HeaderText = "\u0001"; // "الشركة"
-        if (_itemsGrid.Columns.Contains("Item_UnitId")) _itemsGrid.Columns["Item_UnitId"].HeaderText = "\u0001"; // "وحدة القياس"
+        if (_itemsGrid.Columns.Contains("Item_code")) _itemsGrid.Columns["Item_code"].HeaderText = "الباركود"; // "الباركود"
+        if (_itemsGrid.Columns.Contains("item_Name")) _itemsGrid.Columns["item_Name"].HeaderText = "اسم الصنف"; // "اسم الصنف"
+        if (_itemsGrid.Columns.Contains("item_Name_English")) _itemsGrid.Columns["item_Name_English"].HeaderText = "الاسم الانجليزي"; // "الاسم الانجليزي"
+        if (_itemsGrid.Columns.Contains("SellPriceSmall")) _itemsGrid.Columns["SellPriceSmall"].HeaderText = "سعر البيع"; // "سعر البيع"
+        if (_itemsGrid.Columns.Contains("Item_ClassId")) _itemsGrid.Columns["Item_ClassId"].HeaderText = "الفئة"; // "الفئة"
+        if (_itemsGrid.Columns.Contains("Item_CompanyId")) _itemsGrid.Columns["Item_CompanyId"].HeaderText = "الشركة"; // "الشركة"
+        if (_itemsGrid.Columns.Contains("Item_UnitId")) _itemsGrid.Columns["Item_UnitId"].HeaderText = "وحدة القياس"; // "وحدة القياس"
     }
 
     private Item_Items BuildItemFromRow()
@@ -665,7 +665,7 @@ public sealed class AdvancedItemsForm : Form
         var sb = new System.Text.StringBuilder();
         
         // Header
-        var headers = new[] { "\u0001", "\u0001", "\u0001", "\u0001", "\u0001", "\u0001", "\u0001" }; 
+        var headers = new[] { "الباركود", "اسم الصنف", "الاسم الانجليزي", "سعر البيع", "الفئة", "الشركة", "وحدة القياس" }; 
         // "الباركود", "اسم الصنف", "الاسم الانجليزي", "الفئة", "سعر التكلفة", "سعر البيع", "المخزون"
         sb.AppendLine(string.Join(",", headers));
         
