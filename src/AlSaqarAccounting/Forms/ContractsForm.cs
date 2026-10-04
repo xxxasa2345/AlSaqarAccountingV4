@@ -42,7 +42,7 @@ public sealed class ContractsForm : Form
 
     private void InitializeUi()
     {
-        Text = " "; // "العقود - إدارة العقود"
+        Text = "العقود - إدارة العقود"; // "العقود - إدارة العقود"
         Width = 1400;
         Height = 850;
         MinimumSize = new Size(1200, 750);
