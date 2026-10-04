@@ -44,7 +44,7 @@ public sealed class AccountingForm : Form
 
     private void InitializeUi()
     {
-        Text = "\u0001\u0001 - \u0001"; // "النظام المحاسبي - شجرة الحسابات"
+        Text = "النظام المحاسبي - شجرة الحسابات"; // "النظام المحاسبي - شجرة الحسابات"
         Width = 1400;
         Height = 900;
         MinimumSize = new Size(1200, 800);
@@ -56,7 +56,7 @@ public sealed class AccountingForm : Form
         var header = new Panel { Dock = DockStyle.Top, Height = 120, Padding = new Padding(12), BackColor = Color.FromArgb(245, 247, 250) };
         var title = new Label
         {
-            Text = "\u0001", // "شجرة الحسابات"
+            Text = "شجرة الحسابات", // "شجرة الحسابات"
             Dock = DockStyle.Top,
             Height = 38,
             Font = new Font("Tahoma", 18, FontStyle.Bold),
@@ -64,7 +64,7 @@ public sealed class AccountingForm : Form
         };
         var info = new Label
         {
-            Text = $"\u0001: {_session.UserName} | \u0001: {_session.BranchId?.ToString() ?? "-"}", // "المستخدم: ... | الفرع: ..."
+            Text = $"المستخدم: ... | الفرع: ..."-"}", // "المستخدم: ... | الفرع: ..."
             Dock = DockStyle.Top,
             Height = 25,
             ForeColor = Color.DimGray,
@@ -77,10 +77,10 @@ public sealed class AccountingForm : Form
         var modePanel = new Panel { Dock = DockStyle.Top, Height = 50, Padding = new Padding(8), BackColor = Color.FromArgb(240, 248, 255) };
         var modeLayout = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, WrapContents = false };
         
-        var accountsBtn = new RadioButton { Text = "\u0001", Width = 120, Checked = true }; // "الحسابات"
+        var accountsBtn = new RadioButton { Text = "الحسابات", Width = 120, Checked = true }; // "الحسابات"
         accountsBtn.CheckedChanged += (_, _) => { _accountsMode = true; LoadData(); };
         
-        var costCentersBtn = new RadioButton { Text = "\u0001", Width = 120 }; // "مراكز التكلفة"
+        var costCentersBtn = new RadioButton { Text = "مراكز التكلفة", Width = 120 }; // "مراكز التكلفة"
         costCentersBtn.CheckedChanged += (_, _) => { _accountsMode = false; LoadData(); };
         
         modeLayout.Controls.Add(accountsBtn);
@@ -95,11 +95,11 @@ public sealed class AccountingForm : Form
         filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
         
-        var searchLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "بحث:"
+        var searchLabel = new Label { Text = "بحث:", TextAlign = ContentAlignment.MiddleRight }; // "بحث:"
         _searchText.Dock = DockStyle.Fill;
         _searchText.RightToLeft = RightToLeft.Yes;
         
-        var refreshBtn = new Button { Text = "\u0001", Width = 80, Height = 30 }; // "تحديث"
+        var refreshBtn = new Button { Text = "تحديث", Width = 80, Height = 30 }; // "تحديث"
         refreshBtn.Click += (_, _) => LoadData();
         
         filterLayout.Controls.Add(searchLabel, 0, 0);
@@ -109,7 +109,7 @@ public sealed class AccountingForm : Form
 
         // Main Grid
         var gridPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(8) };
-        var gridTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "قائمة الحسابات"
+        var gridTitle = new Label { Text = "قائمة الحسابات", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "قائمة الحسابات"
         
         _accountsGrid.Dock = DockStyle.Fill;
         _accountsGrid.ReadOnly = true;
@@ -139,7 +139,7 @@ public sealed class AccountingForm : Form
 
         // Details Panel
         var detailsPanel = new Panel { Dock = DockStyle.Bottom, Height = 250, Padding = new Padding(8), BackColor = Color.FromArgb(240, 248, 255) };
-        var detailsTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "تفاصيل الحساب"
+        var detailsTitle = new Label { Text = "تفاصيل الحساب", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "تفاصيل الحساب"
         
         var detailsLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 3, Padding = new Padding(4) };
         detailsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
@@ -147,15 +147,15 @@ public sealed class AccountingForm : Form
         detailsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
         detailsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
 
-        AddField(detailsLayout, "\u0001", _accountNoText, 0, 0); // "رقم الحساب"
-        AddField(detailsLayout, "\u0001", _accountNameText, 1, 0); // "اسم الحساب"
-        AddField(detailsLayout, "\u0001", _englishNameText, 2, 0); // "الاسم الانجليزي"
-        AddField(detailsLayout, "\u0001", _mainAccountText, 3, 0); // "الحساب الرئيسي"
-        AddField(detailsLayout, "\u0001", _accountTypeCombo, 0, 1); // "نوع الحساب"
-        AddField(detailsLayout, "\u0001", _accountNatureCombo, 1, 1); // "طبيعة الحساب"
-        AddField(detailsLayout, "\u0001", _phoneText, 2, 1); // "الهاتف"
-        AddField(detailsLayout, "\u0001", _addressText, 3, 1); // "العنوان"
-        AddField(detailsLayout, "\u0001", _notesText, 0, 2, true); // "ملاحظات"
+        AddField(detailsLayout, "رقم الحساب", _accountNoText, 0, 0); // "رقم الحساب"
+        AddField(detailsLayout, "اسم الحساب", _accountNameText, 1, 0); // "اسم الحساب"
+        AddField(detailsLayout, "الاسم الانجليزي", _englishNameText, 2, 0); // "الاسم الانجليزي"
+        AddField(detailsLayout, "الحساب الرئيسي", _mainAccountText, 3, 0); // "الحساب الرئيسي"
+        AddField(detailsLayout, "نوع الحساب", _accountTypeCombo, 0, 1); // "نوع الحساب"
+        AddField(detailsLayout, "طبيعة الحساب", _accountNatureCombo, 1, 1); // "طبيعة الحساب"
+        AddField(detailsLayout, "الهاتف", _phoneText, 2, 1); // "الهاتف"
+        AddField(detailsLayout, "العنوان", _addressText, 3, 1); // "العنوان"
+        AddField(detailsLayout, "ملاحظات", _notesText, 0, 2, true); // "ملاحظات"
         detailsLayout.SetColumnSpan(_notesText, 3);
 
         detailsPanel.Controls.Add(detailsLayout);
@@ -164,11 +164,11 @@ public sealed class AccountingForm : Form
         // Toolbar Panel
         var toolbar = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 50, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(6), WrapContents = false, BackColor = Color.FromArgb(240, 248, 255) };
         
-        AddToolbarButton(toolbar, "\u0001", _access.AllowSave, SaveAccount); // "حفظ"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowEdit, EditAccount); // "تعديل"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowDelete, DeleteAccount); // "حذف"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowExport, ExportAccounts); // "تصدير"
-        AddToolbarButton(toolbar, "\u0001", true, ShowTrialBalance); // "ميزان المراجعة"
+        AddToolbarButton(toolbar, "حفظ", _access.AllowSave, SaveAccount); // "حفظ"
+        AddToolbarButton(toolbar, "تعديل", _access.AllowEdit, EditAccount); // "تعديل"
+        AddToolbarButton(toolbar, "حذف", _access.AllowDelete, DeleteAccount); // "حذف"
+        AddToolbarButton(toolbar, "تصدير", _access.AllowExport, ExportAccounts); // "تصدير"
+        AddToolbarButton(toolbar, "ميزان المراجعة", true, ShowTrialBalance); // "ميزان المراجعة"
 
         // Status Bar
         _status.Dock = DockStyle.Bottom;
@@ -232,11 +232,11 @@ public sealed class AccountingForm : Form
         {
             UseWaitCursor = true;
             await LoadData();
-            _status.Text = "\u0001"; // "النظام جاهز"
+            _status.Text = "النظام جاهز"; // "النظام جاهز"
         }
         catch (Exception ex)
         {
-            _status.Text = "\u0001: " + ex.GetBaseException().Message; // "خطأ: "
+            _status.Text = "خطأ: " + ex.GetBaseException().Message; // "خطأ: "
         }
         finally { UseWaitCursor = false; }
     }
@@ -269,7 +269,7 @@ public sealed class AccountingForm : Form
         }
         catch (Exception ex)
         {
-            _status.Text = "\u0001: " + ex.GetBaseException().Message; // "خطأ في التحميل: "
+            _status.Text = "خطأ في التحميل: " + ex.GetBaseException().Message; // "خطأ في التحميل: "
         }
         finally { UseWaitCursor = false; }
     }
@@ -291,11 +291,11 @@ public sealed class AccountingForm : Form
         }
         
         // Rename columns
-        if (_accountsGrid.Columns.Contains("Account_No")) _accountsGrid.Columns["Account_No"].HeaderText = "\u0001"; // "رقم الحساب"
-        if (_accountsGrid.Columns.Contains("Account_Name")) _accountsGrid.Columns["Account_Name"].HeaderText = "\u0001"; // "اسم الحساب"
-        if (_accountsGrid.Columns.Contains("E_Account_Name")) _accountsGrid.Columns["E_Account_Name"].HeaderText = "\u0001"; // "الاسم الانجليزي"
-        if (_accountsGrid.Columns.Contains("Account_Type")) _accountsGrid.Columns["Account_Type"].HeaderText = "\u0001"; // "نوع الحساب"
-        if (_accountsGrid.Columns.Contains("Account_Nature")) _accountsGrid.Columns["Account_Nature"].HeaderText = "\u0001"; // "طبيعة الحساب"
+        if (_accountsGrid.Columns.Contains("Account_No")) _accountsGrid.Columns["Account_No"].HeaderText = "رقم الحساب"; // "رقم الحساب"
+        if (_accountsGrid.Columns.Contains("Account_Name")) _accountsGrid.Columns["Account_Name"].HeaderText = "اسم الحساب"; // "اسم الحساب"
+        if (_accountsGrid.Columns.Contains("E_Account_Name")) _accountsGrid.Columns["E_Account_Name"].HeaderText = "الاسم الانجليزي"; // "الاسم الانجليزي"
+        if (_accountsGrid.Columns.Contains("Account_Type")) _accountsGrid.Columns["Account_Type"].HeaderText = "نوع الحساب"; // "نوع الحساب"
+        if (_accountsGrid.Columns.Contains("Account_Nature")) _accountsGrid.Columns["Account_Nature"].HeaderText = "طبيعة الحساب"; // "طبيعة الحساب"
     }
 
     private void FormatCostCentersGrid()
@@ -314,8 +314,8 @@ public sealed class AccountingForm : Form
         }
         
         // Rename columns
-        if (_costCentersGrid.Columns.Contains("CostCentersNo")) _costCentersGrid.Columns["CostCentersNo"].HeaderText = "\u0001"; // "رقم مركز التكلفة"
-        if (_costCentersGrid.Columns.Contains("CostCentersName")) _costCentersGrid.Columns["CostCentersName"].HeaderText = "\u0001"; // "اسم مركز التكلفة"
+        if (_costCentersGrid.Columns.Contains("CostCentersNo")) _costCentersGrid.Columns["CostCentersNo"].HeaderText = "رقم مركز التكلفة"; // "رقم مركز التكلفة"
+        if (_costCentersGrid.Columns.Contains("CostCentersName")) _costCentersGrid.Columns["CostCentersName"].HeaderText = "اسم مركز التكلفة"; // "اسم مركز التكلفة"
     }
 
     private void ApplyFilter()
@@ -463,7 +463,7 @@ public sealed class AccountingForm : Form
         }
         
         File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
-        _status.Text = "\u0001: " + dialog.FileName; // "تم التصدير إلى: ..."
+        _status.Text = "تم التصدير إلى: ..." + dialog.FileName; // "تم التصدير إلى: ..."
     }
 
     private void ShowTrialBalance()
@@ -501,7 +501,7 @@ internal sealed class TrialBalanceForm : Form
         _access = access;
         _service = service;
         
-        Text = "\u0001"; // "ميزان المراجعة"
+        Text = "ميزان المراجعة"; // "ميزان المراجعة"
         Width = 1000;
         Height = 700;
         StartPosition = FormStartPosition.CenterParent;
@@ -512,7 +512,7 @@ internal sealed class TrialBalanceForm : Form
         var header = new Panel { Dock = DockStyle.Top, Height = 80, Padding = new Padding(12), BackColor = Color.FromArgb(245, 247, 250) };
         var title = new Label
         {
-            Text = "\u0001", // "ميزان المراجعة"
+            Text = "ميزان المراجعة", // "ميزان المراجعة"
             Dock = DockStyle.Top,
             Height = 38,
             Font = new Font("Tahoma", 16, FontStyle.Bold),
@@ -526,17 +526,17 @@ internal sealed class TrialBalanceForm : Form
         dateLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
         dateLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         
-        var fromLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "من:"
+        var fromLabel = new Label { Text = "من:", TextAlign = ContentAlignment.MiddleRight }; // "من:"
         _fromDate.Format = DateTimePickerFormat.Short;
         _fromDate.Value = DateTime.Today.AddDays(-30);
         _fromDate.RightToLeft = RightToLeft.Yes;
         
-        var toLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "إلى:"
+        var toLabel = new Label { Text = "إلى:", TextAlign = ContentAlignment.MiddleRight }; // "إلى:"
         _toDate.Format = DateTimePickerFormat.Short;
         _toDate.Value = DateTime.Today;
         _toDate.RightToLeft = RightToLeft.Yes;
         
-        var refreshBtn = new Button { Text = "\u0001", Width = 80, Height = 30 }; // "تحديث"
+        var refreshBtn = new Button { Text = "تحديث", Width = 80, Height = 30 }; // "تحديث"
         refreshBtn.Click += async (_, _) => await LoadDataAsync();
         
         dateLayout.Controls.Add(fromLabel, 0, 0);
@@ -581,11 +581,11 @@ internal sealed class TrialBalanceForm : Form
             var data = await _service.GetTrialBalanceAsync(_fromDate.Value, _toDate.Value, _session.BranchId);
             _grid.DataSource = data;
             FormatGrid();
-            _status.Text = $"\u0001: {data.Rows.Count:N0}"; // "عدد الحسابات: ..."
+            _status.Text = $"عدد الحسابات: ..."; // "عدد الحسابات: ..."
         }
         catch (Exception ex)
         {
-            _status.Text = "\u0001: " + ex.GetBaseException().Message; // "خطأ: "
+            _status.Text = "خطأ: " + ex.GetBaseException().Message; // "خطأ: "
         }
         finally { UseWaitCursor = false; }
     }
@@ -595,10 +595,10 @@ internal sealed class TrialBalanceForm : Form
         if (_grid.Columns.Count == 0) return;
         
         // Rename columns
-        if (_grid.Columns.Contains("Account_No")) _grid.Columns["Account_No"].HeaderText = "\u0001"; // "رقم الحساب"
-        if (_grid.Columns.Contains("Account_Name")) _grid.Columns["Account_Name"].HeaderText = "\u0001"; // "اسم الحساب"
-        if (_grid.Columns.Contains("TotalDebit")) _grid.Columns["TotalDebit"].HeaderText = "\u0001"; // "مدين"
-        if (_grid.Columns.Contains("TotalCredit")) _grid.Columns["TotalCredit"].HeaderText = "\u0001"; // "دائن"
-        if (_grid.Columns.Contains("Balance")) _grid.Columns["Balance"].HeaderText = "\u0001"; // "الرصيد"
+        if (_grid.Columns.Contains("Account_No")) _grid.Columns["Account_No"].HeaderText = "رقم الحساب"; // "رقم الحساب"
+        if (_grid.Columns.Contains("Account_Name")) _grid.Columns["Account_Name"].HeaderText = "اسم الحساب"; // "اسم الحساب"
+        if (_grid.Columns.Contains("TotalDebit")) _grid.Columns["TotalDebit"].HeaderText = "مدين"; // "مدين"
+        if (_grid.Columns.Contains("TotalCredit")) _grid.Columns["TotalCredit"].HeaderText = "دائن"; // "دائن"
+        if (_grid.Columns.Contains("Balance")) _grid.Columns["Balance"].HeaderText = "الرصيد"; // "الرصيد"
     }
 }
