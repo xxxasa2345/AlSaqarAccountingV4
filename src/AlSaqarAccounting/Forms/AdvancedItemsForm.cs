@@ -74,7 +74,7 @@ public sealed class AdvancedItemsForm : Form
         var header = new Panel { Dock = DockStyle.Top, Height = 120, Padding = new Padding(12), BackColor = Color.FromArgb(245, 247, 250) };
         var title = new Label
         {
-            Text = "\u0001", // "إدارة الاصناف المتقدمة"
+            Text = "إدارة الاصناف المتقدمة",
             Dock = DockStyle.Top,
             Height = 38,
             Font = new Font("Tahoma", 18, FontStyle.Bold),
@@ -100,7 +100,7 @@ public sealed class AdvancedItemsForm : Form
         filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
         filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
         
-        var searchLabel = new Label { Text = "\u0001", TextAlign = ContentAlignment.MiddleRight }; // "بحث:"
+        var searchLabel = new Label { Text = "بحث:", TextAlign = ContentAlignment.MiddleRight }; // "بحث:"
         _searchText.Dock = DockStyle.Fill;
         _searchText.RightToLeft = RightToLeft.Yes;
         
@@ -109,7 +109,7 @@ public sealed class AdvancedItemsForm : Form
         _barcodeText.RightToLeft = RightToLeft.Yes;
         _barcodeText.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) SearchByBarcode(); };
         
-        var refreshBtn = new Button { Text = "\u0001", Width = 80, Height = 30 }; // "تحديث"
+        var refreshBtn = new Button { Text = "تحديث", Width = 80, Height = 30 }; // "تحديث"
         refreshBtn.Click += async (_, _) => await LoadItems();
         
         filterLayout.Controls.Add(searchLabel, 0, 0);
@@ -123,7 +123,7 @@ public sealed class AdvancedItemsForm : Form
         
         // Top Panel - Items List
         var itemsPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(8) };
-        var itemsTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "قائمة الاصناف"
+        var itemsTitle = new Label { Text = "قائمة الاصناف", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "قائمة الاصناف"
         
         _itemsGrid.Dock = DockStyle.Fill;
         _itemsGrid.ReadOnly = true;
@@ -144,7 +144,7 @@ public sealed class AdvancedItemsForm : Form
 
         // Bottom Panel - Item Details
         var detailsPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(8) };
-        var detailsTitle = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "تفاصيل الصنف"
+        var detailsTitle = new Label { Text = "تفاصيل الصنف", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 14, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "تفاصيل الصنف"
         
         var detailsLayout = new TableLayoutPanel { Dock = DockStyle.Top, Height = 200, ColumnCount = 4, RowCount = 4, Padding = new Padding(4) };
         detailsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
@@ -152,23 +152,23 @@ public sealed class AdvancedItemsForm : Form
         detailsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
         detailsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
 
-        AddField(detailsLayout, "\u0001", _nameText, 0, 0); // "اسم الصنف"
-        AddField(detailsLayout, "\u0001", _englishNameText, 1, 0); // "الاسم الانجليزي"
-        AddField(detailsLayout, "\u0001", _categoryCombo, 2, 0); // "الفئة"
-        AddField(detailsLayout, "\u0001", _companyCombo, 3, 0); // "الشركة"
-        AddField(detailsLayout, "\u0001", _unitCombo, 0, 1); // "وحدة القياس"
-        AddField(detailsLayout, "\u0001", _barcodeText, 1, 1); // "الباركود"
-        AddField(detailsLayout, "\u0001", _costPriceText, 2, 1); // "سعر التكلفة"
-        AddField(detailsLayout, "\u0001", _sellPriceText, 3, 1); // "سعر البيع"
-        AddField(detailsLayout, "\u0001", _minStockText, 0, 2); // "الحد الأدنى للمخزون"
-        AddField(detailsLayout, "\u0001", _currentStockText, 1, 2); // "المخزون الحالي"
+        AddField(detailsLayout, "اسم الصنف", _nameText, 0, 0); // "اسم الصنف"
+        AddField(detailsLayout, "الاسم الانجليزي", _englishNameText, 1, 0); // "الاسم الانجليزي"
+        AddField(detailsLayout, "الفئة", _categoryCombo, 2, 0); // "الفئة"
+        AddField(detailsLayout, "الشركة", _companyCombo, 3, 0); // "الشركة"
+        AddField(detailsLayout, "وحدة القياس", _unitCombo, 0, 1); // "وحدة القياس"
+        AddField(detailsLayout, "الباركود", _barcodeText, 1, 1); // "الباركود"
+        AddField(detailsLayout, "سعر التكلفة", _costPriceText, 2, 1); // "سعر التكلفة"
+        AddField(detailsLayout, "سعر البيع", _sellPriceText, 3, 1); // "سعر البيع"
+        AddField(detailsLayout, "الحد الأدنى للمخزون", _minStockText, 0, 2); // "الحد الأدنى للمخزون"
+        AddField(detailsLayout, "المخزون الحالي", _currentStockText, 1, 2); // "المخزون الحالي"
         AddField(detailsLayout, "خاضع للضريبة", _taxCheck, 2, 2); // "خاضع للضريبة"
-        AddField(detailsLayout, "\u0001", _taxValueText, 3, 2); // "قيمة الضريبة %"
-        AddField(detailsLayout, "\u0001", _notesText, 0, 3, true); // "ملاحظات"
+        AddField(detailsLayout, "قيمة الضريبة %", _taxValueText, 3, 2); // "قيمة الضريبة %"
+        AddField(detailsLayout, "ملاحظات", _notesText, 0, 3, true); // "ملاحظات"
         detailsLayout.SetColumnSpan(_notesText, 3);
 
         // Stock Grid
-        var stockLabel = new Label { Text = "\u0001", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 12, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "المخزون في الفروع"
+        var stockLabel = new Label { Text = "المخزون في الفروع", Dock = DockStyle.Top, Height = 30, Font = new Font("Tahoma", 12, FontStyle.Bold), TextAlign = ContentAlignment.MiddleRight }; // "المخزون في الفروع"
         
         _stockGrid.Dock = DockStyle.Fill;
         _stockGrid.ReadOnly = true;
@@ -192,12 +192,12 @@ public sealed class AdvancedItemsForm : Form
         // Toolbar Panel
         var toolbar = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 50, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(6), WrapContents = false, BackColor = Color.FromArgb(240, 248, 255) };
         
-        AddToolbarButton(toolbar, "\u0001", _access.AllowSave, SaveItem); // "حفظ"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowEdit, EditItem); // "تعديل"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowDelete, DeleteItem); // "حذف"
-        AddToolbarButton(toolbar, "\u0001", true, ImportItems); // "استيراد"
-        AddToolbarButton(toolbar, "\u0001", _access.AllowExport, ExportItems); // "تصدير"
-        AddToolbarButton(toolbar, "\u0001", true, PrintBarcode); // "طباعة باركود"
+        AddToolbarButton(toolbar, "حفظ", _access.AllowSave, SaveItem); // "حفظ"
+        AddToolbarButton(toolbar, "تعديل", _access.AllowEdit, EditItem); // "تعديل"
+        AddToolbarButton(toolbar, "حذف", _access.AllowDelete, DeleteItem); // "حذف"
+        AddToolbarButton(toolbar, "استيراد", true, ImportItems); // "استيراد"
+        AddToolbarButton(toolbar, "تصدير", _access.AllowExport, ExportItems); // "تصدير"
+        AddToolbarButton(toolbar, "طباعة باركود", true, PrintBarcode); // "طباعة باركود"
 
         // Status Bar
         _status.Dock = DockStyle.Bottom;
@@ -267,11 +267,11 @@ public sealed class AdvancedItemsForm : Form
             _itemsGrid.DataSource = _itemsData;
             FormatItemsGrid();
             
-            _status.Text = "\u0001"; // "النظام جاهز"
+            _status.Text = "النظام جاهز"; // "النظام جاهز"
         }
         catch (Exception ex)
         {
-            _status.Text = "\u0001: " + ex.GetBaseException().Message; // "خطأ: "
+            _status.Text = "خطأ: " + ex.GetBaseException().Message; // "خطأ: "
         }
         finally { UseWaitCursor = false; }
     }
@@ -296,7 +296,7 @@ public sealed class AdvancedItemsForm : Form
         }
         catch (Exception ex)
         {
-            _status.Text = "\u0001: " + ex.GetBaseException().Message; // "خطأ في تحميل الاصناف: "
+            _status.Text = "خطأ في تحميل الاصناف: " + ex.GetBaseException().Message; // "خطأ في تحميل الاصناف: "
         }
         finally { UseWaitCursor = false; }
     }
@@ -686,7 +686,7 @@ public sealed class AdvancedItemsForm : Form
         }
         
         File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
-        _status.Text = "\u0001: " + dialog.FileName; // "تم التصدير إلى: ..."
+        _status.Text = "تم التصدير إلى: " + dialog.FileName; // "تم التصدير إلى: ..."
     }
 
     private void PrintBarcode()
