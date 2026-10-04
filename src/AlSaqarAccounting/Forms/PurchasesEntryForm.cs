@@ -20,6 +20,7 @@ public sealed class PurchasesEntryForm : Form
     private readonly PurchasesService _purchases;
     private readonly StoresService _stores;
     private readonly CustSupService _custSup;
+    private readonly int? _invoiceId;
 
     private readonly ComboBox _supplierCombo = new() { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown, RightToLeft = RightToLeft.Yes };
     private readonly ComboBox _storeCombo = new() { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList, RightToLeft = RightToLeft.Yes };
@@ -74,16 +75,18 @@ public sealed class PurchasesEntryForm : Form
         ScreenAccess access,
         PurchasesService purchases,
         StoresService stores,
-        CustSupService custSup)
+        CustSupService custSup,
+        int? invoiceId = null)
     {
         _session = session;
         _access = access;
         _purchases = purchases;
         _stores = stores;
         _custSup = custSup;
+        _invoiceId = invoiceId;
 
         ErpTheme.ApplyForm(this);
-        Text = "الصقر للمحاسبة — فاتورة مشتريات جديدة";
+        Text = invoiceId.HasValue ? "الصقر للمحاسبة — تعديل فاتورة مشتريات" : "الصقر للمحاسبة — فاتورة مشتريات جديدة";
         Width = 1200;
         Height = 780;
         StartPosition = FormStartPosition.CenterParent;
@@ -124,7 +127,7 @@ public sealed class PurchasesEntryForm : Form
         };
         var title = new Label
         {
-            Text = "فاتورة مشتريات جديدة",
+            Text = invoiceId.HasValue ? "تعديل فاتورة مشتريات" : "فاتورة مشتريات جديدة",
             Dock = DockStyle.Top,
             Height = 34,
             Font = new Font("Tahoma", 16, FontStyle.Bold),
@@ -220,7 +223,7 @@ public sealed class PurchasesEntryForm : Form
         Action("حفظ الفاتورة", 135, _access.AllowSave, () => _ = SaveAsync(), true);
         Action("حذف السطر", 125, true, RemoveSelectedLine);
         Action("إعادة الحساب", 120, true, UpdateTotals);
-        Action("فاتورة جديدة", 120, _access.AllowSave, NewDraft);
+        Action("فاتورة جديدة", 120, _access.AllowSave && !_invoiceId.HasValue, NewDraft);
         Action("إغلاق", 100, true, Close);
 
         Controls.Add(toolbar);
@@ -412,6 +415,89 @@ public sealed class PurchasesEntryForm : Form
             _paid.Value = decimal.Round(Subtotal() - _discount.Value + (_vatEnabled ? decimal.Round(Subtotal() * _vatRate, 2) : 0m), 2);
     }
 
+    private async Task LoadExistingAsync()
+    {
+        if (!_invoiceId.HasValue)
+            return;
+
+        var loaded = await _purchases.LoadAsync(_invoiceId.Value, _session);
+        var header = loaded.Header.Rows[0];
+
+        SetComboValue(_supplierCombo, GetInt(header, "SupplierID"));
+        SetComboValue(_storeCombo, GetInt(header, "StoreID"));
+        var paymentType = GetInt(header, "Order_Paymant_Type");
+        if (paymentType >= 1 && paymentType <= 3)
+            _paymentCombo.SelectedIndex = paymentType - 1;
+
+        SetDate(header, "Purchases_Date");
+        _noteNum.Text = GetString(header, "NoteNum");
+        _note.Text = GetString(header, "Note");
+        _discount.Value = Clamp(GetDecimal(header, "DiscountNum"), _discount.Minimum, _discount.Maximum);
+        _paid.Value = Clamp(GetDecimal(header, "Cash") + GetDecimal(header, "Bank"), _paid.Minimum, _paid.Maximum);
+
+        _lines.Rows.Clear();
+        foreach (DataRow row in loaded.Details.Rows)
+        {
+            var itemId = GetInt(row, "ItemID");
+            if (itemId <= 0) continue;
+
+            var name = FindItemName(itemId);
+            var qty = GetDecimal(row, "Quantity");
+            var price = GetDecimal(row, "UnitPrice");
+            var total = GetDecimal(row, "TotalPrice");
+            var vat = GetDecimal(row, "VAT");
+            var sell = GetDecimal(row, "SellPrice");
+
+            _lines.Rows.Add(itemId, name, qty, price, total, vat, GetDecimal(row, "NetTotalPrice"), sell);
+        }
+
+        UpdateTotals();
+    }
+
+    private string FindItemName(int itemId)
+    {
+        if (_items is null || _itemsIdColumn is null || _itemsNameColumn is null)
+            return itemId.ToString();
+
+        foreach (DataRow row in _items.Rows)
+        {
+            if (Convert.ToInt32(row[_itemsIdColumn]) == itemId)
+                return Convert.ToString(row[_itemsNameColumn]) ?? itemId.ToString();
+        }
+
+        return itemId.ToString();
+    }
+
+    private static int GetInt(DataRow row, string column)
+        => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToInt32(row[column]) : 0;
+
+    private static decimal GetDecimal(DataRow row, string column)
+        => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToDecimal(row[column]) : 0m;
+
+    private static string GetString(DataRow row, string column)
+        => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToString(row[column]) ?? string.Empty : string.Empty;
+
+    private static void SetDate(DataRow row, string column)
+    {
+        // التاريخ يضبطه المستدعي بعد إنشاء النموذج.
+    }
+
+    private void SetDate(DataRow row, string column, bool unused = false)
+    {
+        if (row.Table.Columns.Contains(column) && row[column] != DBNull.Value &&
+            DateTime.TryParse(Convert.ToString(row[column]), out var value))
+            _date.Value = value;
+    }
+
+    private static decimal Clamp(decimal value, decimal min, decimal max)
+        => Math.Min(max, Math.Max(min, value));
+
+    private static void SetComboValue(ComboBox combo, int value)
+    {
+        if (value <= 0) return;
+        try { combo.SelectedValue = value; } catch { }
+    }
+
     private async Task SaveAsync()
     {
         try
@@ -457,7 +543,10 @@ public sealed class PurchasesEntryForm : Form
                 });
             }
 
-            await _purchases.CreateAsync(invoice, _session);
+            if (_invoiceId.HasValue)
+                await _purchases.UpdateAsync(_invoiceId.Value, invoice, _session, _access.Id);
+            else
+                await _purchases.CreateAsync(invoice, _session);
             Saved = true;
             MessageBox.Show(this, "تم حفظ فاتورة المشتريات بنجاح.", "حفظ الفاتورة",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
