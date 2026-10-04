@@ -418,6 +418,11 @@ public static class RealScreenCatalog
             return form is not null;
         }
 
+        // Explicit aliases verified from the original GTS ERP wiring report.
+        // These are real V4 operational forms; no dynamic/demo screen is used.
+        if (TryCreateVerifiedAlias(raw, connectionString, session, access, out form))
+            return true;
+
         var normalized = NormalizeScreenName(raw);
 
         // The original database can contain hidden Unicode formatting characters or minor
@@ -559,6 +564,70 @@ public static class RealScreenCatalog
         }
 
         return false;
+    }
+
+    private static bool TryCreateVerifiedAlias(
+        string raw,
+        string connectionString,
+        AppSession session,
+        ScreenAccess access,
+        out Form? form)
+    {
+        form = null;
+        var db = CreateDb(connectionString);
+        switch (raw)
+        {
+            // Account/card screens in the source are opened from the account tree
+            // and are backed by Account_Accounts / Class_AccountCard.
+            case "FrmCardAccount":
+                form = new AccountsTreeForm(session, access, new AccountsTreeService(db));
+                return true;
+            case "FrmDefualtAccount":
+                form = new AccountsTreeForm(session, access, new AccountsTreeService(db));
+                return true;
+            case "FrmDefualtCustomer":
+                form = new CustomersForm(session, access, new CustSupService(db), new AccountsTreeService(db));
+                return true;
+            case "FrmGuarantee":
+                form = new GuaranteesForm(session, access, new InventoryOperationsService(db));
+                return true;
+
+            // Search dialogs verified in the source as real selectors for the
+            // corresponding operational modules.
+            case "FrmSearchBranch":
+                form = new BranchesForm(session, access, new BranchService(db));
+                return true;
+            case "FrmSearchCustomer":
+                form = new CustomersForm(session, access, new CustSupService(db), new AccountsTreeService(db));
+                return true;
+            case "FrmSearchUnit":
+                form = new ItemUnitForm(session, access, new ItemUnitService(db));
+                return true;
+            case "FrmSearchCostCenter":
+                form = new CostCentersForm(session, access, new DocumentsService(db));
+                return true;
+            case "FrmSearchSalesMan":
+                form = new SalesMenForm(session, access, new SalesManService(db));
+                return true;
+            case "FrmSearchPlace":
+                form = new PlacesForm(session, access, new PlacesService(db));
+                return true;
+            case "FrmSearchStore":
+            case "FrmSearchStores":
+                form = new StoresForm(session, access, new StoresService(db));
+                return true;
+            case "FrmSearchCompany":
+                form = new ItemMasterForm(session, access, new ItemMasterService(db), "Item_Company", "الشركات");
+                return true;
+            case "FrmSearchClass":
+                form = new ItemMasterForm(session, access, new ItemMasterService(db), "Item_Class", "الفئات");
+                return true;
+            case "FrmSearchGroups":
+                form = new ItemMasterForm(session, access, new ItemMasterService(db), "Item_Groups", "المجموعات");
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static bool IsItemScreen(string normalized)
