@@ -151,6 +151,27 @@ public static class RealScreenCatalog
 
             // المبيعات — فاتورة جديدة/حذف تشغيلية عبر Insert_Order_Order_ALL,
 
+            // أسماء شاشات مثبتة من تقرير الربط الحقيقي للمشروع الأصلي.
+            ["FrmSearchItems1"] = (cs, s, a) => new ItemsForm(
+                s, a, new ItemsService(CreateDb(cs))),
+
+            ["FrmSearchOrders"] = (cs, s, a) => new OrdersForm(
+                s, a,
+                new SalesService(CreateDb(cs)),
+                new StoresService(CreateDb(cs))),
+
+            ["FrmSearchAccount"] = (cs, s, a) => new AccountsTreeForm(
+                s, a, new AccountsTreeService(CreateDb(cs))),
+
+            ["FrmUnit"] = (cs, s, a) => new ItemUnitForm(
+                s, a, new ItemUnitService(CreateDb(cs))),
+
+            ["FrmPaymentBig"] = (cs, s, a) => new ReceiptsForm(
+                s, a, new VouchersService(CreateDb(cs))),
+
+            ["FrmReceiptsBig"] = (cs, s, a) => new ReceiptsForm(
+                s, a, new VouchersService(CreateDb(cs))),
+
             ["FrmOrders"] = (cs, s, a) => new OrdersForm(
                 s, a,
                 new SalesService(CreateDb(cs)),
