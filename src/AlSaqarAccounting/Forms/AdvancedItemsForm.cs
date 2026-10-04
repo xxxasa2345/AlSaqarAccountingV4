@@ -162,7 +162,7 @@ public sealed class AdvancedItemsForm : Form
         AddField(detailsLayout, "\u0001", _sellPriceText, 3, 1); // "سعر البيع"
         AddField(detailsLayout, "\u0001", _minStockText, 0, 2); // "الحد الأدنى للمخزون"
         AddField(detailsLayout, "\u0001", _currentStockText, 1, 2); // "المخزون الحالي"
-        AddField(detailsLayout, "", _taxCheck, 2, 2); // "خاضع للضريبة"
+        AddField(detailsLayout, "خاضع للضريبة", _taxCheck, 2, 2); // "خاضع للضريبة"
         AddField(detailsLayout, "\u0001", _taxValueText, 3, 2); // "قيمة الضريبة %"
         AddField(detailsLayout, "\u0001", _notesText, 0, 3, true); // "ملاحظات"
         detailsLayout.SetColumnSpan(_notesText, 3);
