@@ -54,7 +54,7 @@ public sealed class CashierService
 
         var invoice = new SalesInvoice
         {
-            InvoiceDate = order.Purchases_Date,
+            InvoiceDate = order.Purchases_Date.GetValueOrDefault(DateTime.Now),
             PaymentType = order.Order_Paymant_Type.GetValueOrDefault(order.CashMoney.GetValueOrDefault() > 0m ? 1 : 2),
             CustomerId = order.SupplierID,
             CustomerName = order.SupplierName,
