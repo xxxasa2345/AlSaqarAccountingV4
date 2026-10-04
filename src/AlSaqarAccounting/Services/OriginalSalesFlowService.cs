@@ -320,7 +320,7 @@ public sealed class OriginalSalesFlowService
     }
 
     private static string? NullIfEmpty(string? value)
-        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        => string.IsNullOrWhiteSpace(value) ? null : value!.Trim();
 
     private static string? GetString(object value, string property)
         => value.GetType().GetProperty(property)?.GetValue(value)?.ToString();
