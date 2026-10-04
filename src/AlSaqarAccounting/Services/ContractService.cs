@@ -186,7 +186,7 @@ WHERE ID = @ID;";
         if (string.IsNullOrWhiteSpace(contract.SupplierName))
             throw new ArgumentException("اسم المورد/العميل مطلوب"); // "اسم المورد/العميل مطلوب"
         if (contract.SupplierName.Trim().Length > 300)
-            throw new ArgumentException(" 300 "); // "اسم المورد/العميل طويل جدا"
+            throw new ArgumentException("اسم المورد/العميل طويل جدا"); // "اسم المورد/العميل طويل جدا"
     }
 
     private static string GetMachineMac()
