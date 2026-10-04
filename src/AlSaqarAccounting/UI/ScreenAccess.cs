@@ -2,6 +2,35 @@ namespace AlSaqarAccounting.UI;
 
 public sealed class ScreenAccess
 {
+    /// <summary>
+    /// Removes display-only prefixes accidentally stored with legacy screen labels.
+    /// Examples: "+ الكاشير" -> "الكاشير", "» المبيعات" -> "المبيعات".
+    /// The security row itself remains unchanged; this is only the canonical runtime name.
+    /// </summary>
+    public static string CleanScreenName(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var name = value.Trim();
+        while (name.Length > 0)
+        {
+            name = name.TrimStart();
+            if (name.StartsWith("+", StringComparison.Ordinal) ||
+                name.StartsWith("»", StringComparison.Ordinal) ||
+                name.StartsWith(">", StringComparison.Ordinal) ||
+                name.StartsWith("•", StringComparison.Ordinal) ||
+                name.StartsWith("-", StringComparison.Ordinal))
+            {
+                name = name.Substring(1).TrimStart();
+                continue;
+            }
+            break;
+        }
+
+        return name.Trim();
+    }
+
     public int Id { get; init; }
     public string ScreenName { get; init; } = string.Empty;
     public int? ScreenTypeId { get; init; }
