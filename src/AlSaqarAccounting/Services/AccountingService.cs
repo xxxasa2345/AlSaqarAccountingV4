@@ -142,6 +142,22 @@ WHERE ID = @ID;";
         }, cancellationToken);
     }
 
+    public async Task<int> DeleteAccountAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var children = await _db.QueryAsync(
+            "SELECT COUNT(*) FROM dbo.Account_Accounts WHERE Main_Account_No = @ID;",
+            p => p.Add("@ID", SqlDbType.Int).Value = id,
+            cancellationToken).ConfigureAwait(false);
+
+        if (Convert.ToInt32(children.Rows[0][0]) > 0)
+            throw new InvalidOperationException("لا يمكن حذف حساب له حسابات فرعية.");
+
+        return await _db.ExecuteAsync(
+            "DELETE FROM dbo.Account_Accounts WHERE ID = @ID;",
+            p => p.Add("@ID", SqlDbType.Int).Value = id,
+            cancellationToken).ConfigureAwait(false);
+    }
+
     #endregion
 
     #region Cost Centers
@@ -197,36 +213,32 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
     public Task<DataTable> GetAccountBalanceAsync(int accountId, DateTime? fromDate = null, DateTime? toDate = null, CancellationToken cancellationToken = default)
     {
         var sql = @"
-SELECT 
+SELECT
+    a.ID,
     a.Account_No,
     a.Account_Name,
-    ISNULL(SUM(CASE WHEN t.Account_Nature = 1 THEN t.Priv_Debit ELSE 0 END), 0) AS TotalDebit,
-    ISNULL(SUM(CASE WHEN t.Account_Nature = 2 THEN t.Priv_Credit ELSE 0 END), 0) AS TotalCredit,
-    ISNULL(SUM(CASE WHEN t.Account_Nature = 1 THEN t.Priv_Debit ELSE 0 END), 0) - 
-    ISNULL(SUM(CASE WHEN t.Account_Nature = 2 THEN t.Priv_Credit ELSE 0 END), 0) AS Balance
+    ISNULL(SUM(d.Debit), 0) AS TotalDebit,
+    ISNULL(SUM(d.Credit), 0) AS TotalCredit,
+    ISNULL(SUM(d.Debit), 0) - ISNULL(SUM(d.Credit), 0) AS Balance
 FROM dbo.Account_Accounts a
-LEFT JOIN dbo.Account_Accounts t ON a.ID = t.Main_Account_No
+LEFT JOIN dbo.Tran_TranDetails d ON d.Account_Sn = a.ID
+LEFT JOIN dbo.Tran_Tran h ON h.ID = d.TranSn AND h.BranchID = d.BranchID
 WHERE a.ID = @AccountId";
 
-        if (fromDate.HasValue || toDate.HasValue)
-        {
-            sql += " AND (t.UserDate_Add BETWEEN @FromDate AND @ToDate)";
-        }
-        
-        sql += " GROUP BY a.Account_No, a.Account_Name";
+        if (fromDate.HasValue)
+            sql += " AND h.TranDate >= @FromDate";
+        if (toDate.HasValue)
+            sql += " AND h.TranDate < DATEADD(DAY, 1, @ToDate)";
+
+        sql += " GROUP BY a.ID, a.Account_No, a.Account_Name";
 
         return _db.QueryAsync(sql, p =>
         {
             p.Add("@AccountId", SqlDbType.Int).Value = accountId;
             if (fromDate.HasValue)
-                p.Add("@FromDate", SqlDbType.Date).Value = fromDate.Value;
-            else
-                p.Add("@FromDate", SqlDbType.Date).Value = DBNull.Value;
-            
+                p.Add("@FromDate", SqlDbType.DateTime).Value = fromDate.Value;
             if (toDate.HasValue)
-                p.Add("@ToDate", SqlDbType.Date).Value = toDate.Value;
-            else
-                p.Add("@ToDate", SqlDbType.Date).Value = DBNull.Value;
+                p.Add("@ToDate", SqlDbType.DateTime).Value = toDate.Value;
         }, cancellationToken);
     }
 
@@ -269,39 +281,35 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
     public Task<DataTable> GetTrialBalanceAsync(DateTime? fromDate = null, DateTime? toDate = null, int? branchId = null, CancellationToken cancellationToken = default)
     {
         var sql = @"
-SELECT 
+SELECT
     a.ID,
     a.Account_No,
     a.Account_Name,
-    ISNULL(SUM(a.Priv_Debit), 0) AS TotalDebit,
-    ISNULL(SUM(a.Priv_Credit), 0) AS TotalCredit
+    ISNULL(SUM(d.Debit), 0) AS TotalDebit,
+    ISNULL(SUM(d.Credit), 0) AS TotalCredit,
+    ISNULL(SUM(d.Debit), 0) - ISNULL(SUM(d.Credit), 0) AS Balance
 FROM dbo.Account_Accounts a
+LEFT JOIN dbo.Tran_TranDetails d ON d.Account_Sn = a.ID
+LEFT JOIN dbo.Tran_Tran h ON h.ID = d.TranSn AND h.BranchID = d.BranchID
 WHERE a.Account_No IS NOT NULL";
 
         if (branchId.HasValue)
-            sql += " AND (a.BranchID = @BranchID OR a.BranchID IS NULL)";
-        
-        if (fromDate.HasValue || toDate.HasValue)
-        {
-            sql += " AND (a.UserDate_Add BETWEEN @FromDate AND @ToDate)";
-        }
-        
+            sql += " AND (d.BranchID = @BranchID OR d.BranchID IS NULL)";
+        if (fromDate.HasValue)
+            sql += " AND h.TranDate >= @FromDate";
+        if (toDate.HasValue)
+            sql += " AND h.TranDate < DATEADD(DAY, 1, @ToDate)";
+
         sql += " GROUP BY a.ID, a.Account_No, a.Account_Name ORDER BY a.Account_No";
 
         return _db.QueryAsync(sql, p =>
         {
             if (branchId.HasValue)
                 p.Add("@BranchID", SqlDbType.Int).Value = branchId.Value;
-            
             if (fromDate.HasValue)
-                p.Add("@FromDate", SqlDbType.Date).Value = fromDate.Value;
-            else
-                p.Add("@FromDate", SqlDbType.Date).Value = DBNull.Value;
-            
+                p.Add("@FromDate", SqlDbType.DateTime).Value = fromDate.Value;
             if (toDate.HasValue)
-                p.Add("@ToDate", SqlDbType.Date).Value = toDate.Value;
-            else
-                p.Add("@ToDate", SqlDbType.Date).Value = DBNull.Value;
+                p.Add("@ToDate", SqlDbType.DateTime).Value = toDate.Value;
         }, cancellationToken);
     }
 
