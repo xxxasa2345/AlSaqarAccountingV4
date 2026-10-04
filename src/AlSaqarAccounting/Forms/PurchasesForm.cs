@@ -51,6 +51,8 @@ public sealed class PurchasesForm : BrowseScreenBase
         AddButton(toolbar, "مورد جديد", Access.AllowEnter, async () => await OpenRelatedAsync("الموردون"));
 
         AddButton(toolbar, "طباعة", Access.AllowPrint, async () => await PrintSelectedInvoiceAsync());
+        AddButton(toolbar, "تعديل الفاتورة", Access.AllowSave, async () => await EditSelectedInvoiceAsync());
+
 
         AddButton(toolbar, "مرتجع مشتريات", Access.AllowEnter, async () => await OpenRelatedAsync("مرتجعات المشتريات بفاتورة"));
         AddButton(toolbar, "فتح المبيعات", Access.AllowEnter, async () => await OpenRelatedAsync("المبيعات"));
@@ -92,6 +94,43 @@ public sealed class PurchasesForm : BrowseScreenBase
         {
             MessageBox.Show(this, "تعذر فتح العملية المرتبطة:\r\n" + ex.GetBaseException().Message,
                 "المشتريات", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            UseWaitCursor = false;
+        }
+    }
+
+    private async Task EditSelectedInvoiceAsync()
+    {
+        var row = CurrentRow;
+        if (!TryRowId(row, out var invoiceId))
+        {
+            Status.Text = "حدد فاتورة مشتريات أولاً.";
+            return;
+        }
+
+        try
+        {
+            UseWaitCursor = true;
+            using var form = new PurchasesEntryForm(
+                Session,
+                Access,
+                _purchases,
+                _stores,
+                _custSup,
+                invoiceId);
+            form.ShowDialog(this);
+            if (form.Saved)
+                await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this,
+                "تعذر فتح تعديل الفاتورة:\r\n" + ex.GetBaseException().Message,
+                "تعديل المشتريات",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
         finally
         {
