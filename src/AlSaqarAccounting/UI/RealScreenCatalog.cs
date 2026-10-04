@@ -152,6 +152,33 @@ public static class RealScreenCatalog
             // المبيعات — فاتورة جديدة/حذف تشغيلية عبر Insert_Order_Order_ALL,
 
             // أسماء شاشات مثبتة من تقرير الربط الحقيقي للمشروع الأصلي.
+            // شاشات البحث التي ثبت التقرير أنها أجزاء مساندة لشاشات تشغيلية موجودة في V4.
+            ["FrmSearchItem"] = (cs, s, a) => new ItemsForm(
+                s, a, new ItemsService(CreateDb(cs))),
+
+            ["FrmItemReader"] = (cs, s, a) => new ItemsForm(
+                s, a, new ItemsService(CreateDb(cs))),
+
+            ["FrmSearchCustomerAll"] = (cs, s, a) => new CustomersForm(
+                s, a,
+                new CustSupService(CreateDb(cs)),
+                new AccountsTreeService(CreateDb(cs))),
+
+            ["FrmSearchDefualtAccount"] = (cs, s, a) => new AccountsTreeForm(
+                s, a, new AccountsTreeService(CreateDb(cs))),
+
+            ["FrmSearchAccountReceipts"] = (cs, s, a) => new AccountsTreeForm(
+                s, a, new AccountsTreeService(CreateDb(cs))),
+
+            ["FrmSearchReceiptsBig"] = (cs, s, a) => new ReceiptsForm(
+                s, a, new VouchersService(CreateDb(cs))),
+
+            ["FrmSearchTransferToBranch"] = (cs, s, a) => new TransferToBranchForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+
+            ["FrmSearchStoreTransfer"] = (cs, s, a) => new StoreTransfersForm(
+                s, a, new InventoryOperationsService(CreateDb(cs))),
+
             ["FrmSearchItems1"] = (cs, s, a) => new ItemsForm(
                 s, a, new ItemsService(CreateDb(cs))),
 
