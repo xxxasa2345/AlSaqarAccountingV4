@@ -103,7 +103,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
         }, cancellationToken);
 
         if (result.Rows.Count == 0)
-            throw new InvalidOperationException(""); // "لم يتم إنشاء العقد"
+            throw new InvalidOperationException("لم يتم إنشاء العقد"); // "لم يتم إنشاء العقد"
 
         return Convert.ToInt32(result.Rows[0][0]);
     }
@@ -184,7 +184,7 @@ WHERE ID = @ID;";
     private static void Validate(Contract_Contract contract)
     {
         if (string.IsNullOrWhiteSpace(contract.SupplierName))
-            throw new ArgumentException(""); // "اسم المورد/العميل مطلوب"
+            throw new ArgumentException("اسم المورد/العميل مطلوب"); // "اسم المورد/العميل مطلوب"
         if (contract.SupplierName.Trim().Length > 300)
             throw new ArgumentException(" 300 "); // "اسم المورد/العميل طويل جدا"
     }
