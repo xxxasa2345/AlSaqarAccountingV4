@@ -55,6 +55,41 @@ public sealed class PurchasesService
         };
     }
 
+    public async Task<(DataTable Header, DataTable Details)> LoadAsync(
+        int invoiceId,
+        AppSession session,
+        CancellationToken cancellationToken = default)
+    {
+        if (!session.BranchId.HasValue)
+            throw new InvalidOperationException("تحميل فاتورة المشتريات يتطلب فرعاً فعّالاً.");
+
+        var header = await _db.QueryAsync(
+            @"SELECT TOP (1) *
+              FROM dbo.Order_Purchases
+              WHERE PurBranchID = @PurBranchID AND BranchID = @BranchID;",
+            p =>
+            {
+                p.Add("@PurBranchID", SqlDbType.Int).Value = invoiceId;
+                p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
+            }, cancellationToken).ConfigureAwait(false);
+
+        if (header.Rows.Count == 0)
+            throw new InvalidOperationException("فاتورة المشتريات غير موجودة في الفرع الحالي.");
+
+        var details = await _db.QueryAsync(
+            @"SELECT *
+              FROM dbo.Order_PurchasesDetails
+              WHERE Purchese_ID = @Purchese_ID AND BranchID = @BranchID
+              ORDER BY SN;",
+            p =>
+            {
+                p.Add("@Purchese_ID", SqlDbType.Int).Value = invoiceId;
+                p.Add("@BranchID", SqlDbType.Int).Value = session.BranchId.Value;
+            }, cancellationToken).ConfigureAwait(false);
+
+        return (header, details);
+    }
+
     public Task<DataTable> PrintAsync(
         int invoiceId,
         int? branchId,
