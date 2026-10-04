@@ -19,9 +19,6 @@ if (-not (Test-Path $SourceRoot)) {
 $routerFile = Get-ChildItem $SourceRoot -Recurse -Filter "ScreenRouter.cs" -File |
     Select-Object -First 1
 
-$mapFile = Get-ChildItem $SourceRoot -Recurse -Filter "ScreenEntityMap.cs" -File |
-    Select-Object -First 1
-
 $mainFile = Get-ChildItem $SourceRoot -Recurse -Filter "MainForm.cs" -File |
     Select-Object -First 1
 
@@ -29,15 +26,8 @@ if (-not $routerFile) {
     throw "لم يتم العثور على ScreenRouter.cs"
 }
 
-if (-not $mapFile) {
-    throw "لم يتم العثور على ScreenEntityMap.cs"
-}
-
 Write-Host "[OK] ScreenRouter:" -ForegroundColor Green
 Write-Host "     $($routerFile.FullName)"
-
-Write-Host "[OK] ScreenEntityMap:" -ForegroundColor Green
-Write-Host "     $($mapFile.FullName)"
 
 if ($mainFile) {
     Write-Host "[OK] MainForm:" -ForegroundColor Green
@@ -48,7 +38,6 @@ else {
 }
 
 $routerText = Get-Content $routerFile.FullName -Raw
-$mapText    = Get-Content $mapFile.FullName -Raw
 
 if ($mainFile) {
     $mainText = Get-Content $mainFile.FullName -Raw
@@ -85,28 +74,28 @@ else {
 }
 
 # ------------------------------------------------------------
-# Entity Map
+# Real catalog
 # ------------------------------------------------------------
 
 Write-Host ""
-Write-Host "=== ENTITY MAP ===" -ForegroundColor Yellow
+Write-Host "=== REAL SCREEN CATALOG ===" -ForegroundColor Yellow
 
-$mapMatches = [regex]::Matches(
-    $mapText,
-    '\["([^"]+)"\]\s*=\s*"([^"]+)"'
-)
+$catalogFile = Get-ChildItem $SourceRoot -Recurse -Filter "RealScreenCatalog.cs" -File |
+    Select-Object -First 1
 
-$mapEntries = @()
-
-foreach ($m in $mapMatches) {
-    $mapEntries += [PSCustomObject]@{
-        Screen = $m.Groups[1].Value
-        Entity = $m.Groups[2].Value
-    }
+if (-not $catalogFile) {
+    throw "لم يتم العثور على RealScreenCatalog.cs"
 }
 
-foreach ($entry in ($mapEntries | Sort-Object Screen)) {
-    Write-Host ("  {0} -> {1}" -f $entry.Screen,$entry.Entity)
+$catalogText = Get-Content $catalogFile.FullName -Raw
+$catalogScreens = @(
+    [regex]::Matches($catalogText, '\["([^"]+)"\]\s*=\s*\(cs,\s*s,\s*a\)') |
+    ForEach-Object { $_.Groups[1].Value } |
+    Sort-Object -Unique
+)
+
+foreach ($screen in $catalogScreens) {
+    Write-Host "  $screen" -ForegroundColor Green
 }
 
 # ------------------------------------------------------------
@@ -208,9 +197,6 @@ $lines.Add("=== ROUTER FILE ===")
 $lines.Add($routerFile.FullName)
 $lines.Add("")
 
-$lines.Add("=== MAP FILE ===")
-$lines.Add($mapFile.FullName)
-$lines.Add("")
 
 $lines.Add("=== MAIN FORM ===")
 if ($mainFile) {
@@ -227,10 +213,8 @@ foreach ($screen in $routerScreens) {
 }
 $lines.Add("")
 
-$lines.Add("=== ENTITY MAP ===")
-foreach ($entry in ($mapEntries | Sort-Object Screen)) {
-    $lines.Add("$($entry.Screen) -> $($entry.Entity)")
-}
+$lines.Add("=== REAL SCREEN CATALOG ===")
+foreach ($screen in $catalogScreens) { $lines.Add($screen) }
 $lines.Add("")
 
 $lines.Add("=== FORMS ===")
@@ -253,7 +237,7 @@ Write-Host "============================================" -ForegroundColor Cyan
 
 Write-Host ""
 Write-Host "Router screens : $($routerScreens.Count)"
-Write-Host "Entity mappings: $($mapEntries.Count)"
+Write-Host "Catalog entries : $($catalogScreens.Count)"
 Write-Host "Forms          : $($forms.Count)"
 Write-Host "C# files       : $($csFiles.Count)"
 
