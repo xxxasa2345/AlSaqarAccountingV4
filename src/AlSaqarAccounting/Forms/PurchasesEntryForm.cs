@@ -424,7 +424,10 @@ public sealed class PurchasesEntryForm : Form
         var header = loaded.Header.Rows[0];
 
         SetComboValue(_supplierCombo, GetInt(header, "SupplierID"));
-        SetComboValue(_storeCombo, GetInt(header, "StoreID"));
+        var storeId = GetInt(header, "StoreID");
+        if (storeId <= 0 && loaded.Details.Rows.Count > 0)
+            storeId = GetInt(loaded.Details.Rows[0], "StoreID");
+        SetComboValue(_storeCombo, storeId);
         var paymentType = GetInt(header, "Order_Paymant_Type");
         if (paymentType >= 1 && paymentType <= 3)
             _paymentCombo.SelectedIndex = paymentType - 1;
