@@ -132,7 +132,7 @@ WHERE ID = @ID;";
         if (string.IsNullOrWhiteSpace(store.Store_Name))
             throw new ArgumentException("اسم المخزن مطلوب"); // "اسم المخزن مطلوب"
         if (store.Store_Name.Trim().Length > 200)
-            throw new ArgumentException(" 200 "); // "اسم المخزن طويل جدا"
+            throw new ArgumentException("اسم المخزن طويل جدا"); // "اسم المخزن طويل جدا"
     }
 
     private static string GetMachineMac()
