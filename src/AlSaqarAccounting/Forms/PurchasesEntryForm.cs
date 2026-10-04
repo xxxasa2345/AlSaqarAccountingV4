@@ -301,6 +301,8 @@ public sealed class PurchasesEntryForm : Form
 
             if (_invoiceId.HasValue)
                 await LoadExistingAsync();
+            else
+                OnPaymentChanged();
         }
         catch (Exception ex)
         {
@@ -534,8 +536,10 @@ public sealed class PurchasesEntryForm : Form
                     UnitPrice = Convert.ToDecimal(line["سعر الشراء"]),
                     TotalPrice = Convert.ToDecimal(line["الإجمالي"]),
                     VAT = Convert.ToDecimal(line["الضريبة 15%"]),
-                    NetUnitPrice = Convert.ToDecimal(line["سعر الشراء"]),
-                    NetTotalPrice = Convert.ToDecimal(line["الإجمالي"]),
+                    NetUnitPrice = Convert.ToDecimal(line["سعر الشراء"]) +
+                                   Convert.ToDecimal(line["الضريبة 15%"]) / Math.Max(1m, Convert.ToDecimal(line["الكمية"])),
+                    NetTotalPrice = Convert.ToDecimal(line["الإجمالي"]) +
+                                    Convert.ToDecimal(line["الضريبة 15%"]),
                     VAT_Discount = 0,
                     Bounce = 0,
                     DiscNum = 0,
