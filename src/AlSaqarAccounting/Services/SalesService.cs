@@ -75,7 +75,7 @@ public sealed class SalesService
 
     /// <summary>Inserts a full sales invoice (header + lines) through the
     /// original 61-parameter procedure of GTSdb2026.</summary>
-    public async Task CreateAsync(
+    public async Task<int> CreateAsync(
         SalesInvoice invoice,
         AppSession session,
         CancellationToken cancellationToken = default)
@@ -156,9 +156,10 @@ public sealed class SalesService
             .Set("@SalesMan", NullIfEmpty(invoice.SalesMan))
             .Set("@Items", items);
 
-        await _db.ExecuteStoredProcedureNonQueryAsync(
-            "dbo.Insert_Order_Order_ALL", contract.BuildParameters(), cancellationToken)
-            .ConfigureAwait(false);
+        return await _db.ExecuteStoredProcedureReturnValueAsync(
+            "dbo.Insert_Order_Order_ALL",
+            contract.BuildParameters(),
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Deletes a sales invoice through the original delete procedure.
