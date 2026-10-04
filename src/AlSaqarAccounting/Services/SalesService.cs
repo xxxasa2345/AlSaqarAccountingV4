@@ -207,7 +207,7 @@ public sealed class SalesService
     private static decimal ClampToZero(decimal value) => value < 0 ? 0 : value;
 
     private static string? NullIfEmpty(string? value)
-        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        => string.IsNullOrWhiteSpace(value) ? null : value!.Trim();
 }
 
 /// <summary>Branch-level settings used by the sales entry screen.</summary>
