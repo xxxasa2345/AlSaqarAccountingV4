@@ -74,7 +74,7 @@ END";
             @"SELECT TOP (1) LicenseId, LicenseType, ProductName, CompanyName, CustomerName,
                      IssuedOn, ExpiresOn, MaxUsers, MachineFingerprint, IsActive
               FROM dbo.App_Licenses WHERE LicenseKeyHash=@Hash;",
-            p => p.AddWithValue("@Hash", HashKey(local)), cancellationToken).ConfigureAwait(false);
+            p => p.AddWithValue("@Hash", HashKey(local!)), cancellationToken).ConfigureAwait(false);
 
         if (row == null) return LicenseStatus.Invalid("مفتاح الترخيص غير موجود في قاعدة البيانات.");
         if (!row.IsActive) return LicenseStatus.Invalid("الترخيص غير نشط.");
