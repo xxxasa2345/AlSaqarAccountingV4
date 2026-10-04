@@ -8,10 +8,6 @@ using AlSaqarAccounting.UI;
 
 namespace AlSaqarAccounting.Forms;
 
-/// <summary>
-/// Professional Arabic ERP shell. The services bar is driven by User_Screens
-/// and keeps all navigation and permission decisions in ScreenRouter.
-/// </summary>
 public sealed class MainForm : Form
 {
     private readonly AppSession _session;
@@ -33,7 +29,7 @@ public sealed class MainForm : Form
     private readonly Panel _home = new()
     {
         Dock = DockStyle.Fill,
-        BackColor = ErpTheme.SurfaceSoft
+        BackColor = Color.White
     };
     private readonly TextBox _search = new();
 
@@ -42,50 +38,25 @@ public sealed class MainForm : Form
 
     private static readonly string[] PreferredServices =
     {
-        // ترتيب ERP عملي: التشغيل اليومي أولاً، ثم المخزون والحسابات، ثم الإدارة.
-        "الرئيسية",
-        "المبيعات والمشتريات",
-        "المخزون",
-        "الحسابات",
-        "العملاء والموردون",
-        "الأصناف والمخازن",
-        "التقارير",
-        "العقود",
-        "التصنيع",
-        "الإيجارات",
-        "المطاعم",
-        "الموارد البشرية",
-        "الصيانة",
-        "الأمن والصلاحيات",
-        "النظام والإعدادات"
+        "الرئيسية", "المبيعات والمشتريات", "المخزون", "الحسابات",
+        "العملاء والموردون", "الأصناف والمخازن", "التقارير", "العقود",
+        "التصنيع", "الإيجارات", "المطاعم", "الموارد البشرية",
+        "الصيانة", "الأمن والصلاحيات", "النظام والإعدادات"
     };
 
     private static readonly Dictionary<string, string> ServiceIcons =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            ["الرئيسية"] = "⌂",
-            ["الحسابات"] = "▦",
-            ["العملاء والموردون"] = "◎",
-            ["الأصناف والمخازن"] = "▤",
-            ["المبيعات والمشتريات"] = "▣",
-            ["المخزون"] = "⇄",
-            ["التصنيع"] = "⚙",
-            ["العقود"] = "□",
-            ["الإيجارات"] = "⌂",
-            ["المطاعم"] = "◈",
-            ["الموارد البشرية"] = "♙",
-            ["الصيانة"] = "🔧",
-            ["التقارير"] = "▥",
-            ["الأمن والصلاحيات"] = "⚿",
+            ["الرئيسية"] = "⌂", ["الحسابات"] = "▦", ["العملاء والموردون"] = "◎",
+            ["الأصناف والمخازن"] = "▤", ["المبيعات والمشتريات"] = "▣",
+            ["المخزون"] = "⇄", ["التصنيع"] = "⚙", ["العقود"] = "□",
+            ["الإيجارات"] = "⌂", ["المطاعم"] = "◈", ["الموارد البشرية"] = "♙",
+            ["الصيانة"] = "🔧", ["التقارير"] = "▥", ["الأمن والصلاحيات"] = "⚿",
             ["النظام والإعدادات"] = "☰"
         };
 
-    public MainForm(
-        AppSession session,
-        SchemaService schema,
-        StoredProcedureExecutor sp,
-        SecurityService security,
-        string connectionString)
+    public MainForm(AppSession session, SchemaService schema, StoredProcedureExecutor sp,
+        SecurityService security, string connectionString)
     {
         _session = session;
         _schema = schema;
@@ -118,18 +89,16 @@ public sealed class MainForm : Form
         var workspace = new Panel
         {
             Dock = DockStyle.Fill,
-            BackColor = ErpTheme.SurfaceSoft,
+            BackColor = Color.White,
             Padding = new Padding(12, 10, 12, 8)
         };
 
         workspace.Controls.Add(_home);
-
         Controls.Add(workspace);
         Controls.Add(_screenBar);
         Controls.Add(_servicesBar);
         Controls.Add(_header);
         Controls.Add(_statusStrip);
-
         MainMenuStrip = _menu;
     }
 
@@ -143,66 +112,50 @@ public sealed class MainForm : Form
     {
         _header.Dock = DockStyle.Top;
         _header.Height = 82;
-        _header.BackColor = ErpTheme.Surface;
+        _header.BackColor = Color.White;
         _header.Padding = new Padding(18, 10, 18, 10);
         _header.BorderStyle = BorderStyle.FixedSingle;
 
-        var brandPanel = new Panel
-        {
-            Dock = DockStyle.Right,
-            Width = 300,
-            Padding = new Padding(4)
-        };
-
+        var brandPanel = new Panel { Dock = DockStyle.Right, Width = 300, Padding = new Padding(4) };
         var brand = new Label
         {
             Text = "الصقر للمحاسبة",
             Dock = DockStyle.Top,
             Height = 34,
             Font = new Font("Tahoma", 17f, FontStyle.Bold),
-            ForeColor = ErpTheme.Accent,
+            ForeColor = Color.Black,
             TextAlign = ContentAlignment.MiddleRight
         };
-
         var subtitle = new Label
         {
             Text = "نظام تخطيط وإدارة موارد المنشأة",
             Dock = DockStyle.Bottom,
             Height = 24,
             Font = new Font("Tahoma", 9f),
-            ForeColor = ErpTheme.Muted,
+            ForeColor = Color.Black,
             TextAlign = ContentAlignment.MiddleRight
         };
-
         brandPanel.Controls.Add(subtitle);
         brandPanel.Controls.Add(brand);
 
-        var userPanel = new Panel
-        {
-            Dock = DockStyle.Left,
-            Width = 305,
-            Padding = new Padding(6, 2, 6, 2)
-        };
-
+        var userPanel = new Panel { Dock = DockStyle.Left, Width = 305, Padding = new Padding(6, 2, 6, 2) };
         var userLine = new Label
         {
             Text = $"المستخدم: {_session.UserName}",
             Dock = DockStyle.Top,
             Height = 28,
             Font = new Font("Tahoma", 9.5f, FontStyle.Bold),
-            ForeColor = ErpTheme.Text,
+            ForeColor = Color.Black,
             TextAlign = ContentAlignment.MiddleLeft
         };
-
         var branchLine = new Label
         {
             Text = $"الفرع: {_session.BranchId?.ToString() ?? "-"}    |    المجموعة: {_session.GroupId?.ToString() ?? "-"}",
             Dock = DockStyle.Top,
             Height = 22,
-            ForeColor = ErpTheme.Muted,
+            ForeColor = Color.Black,
             TextAlign = ContentAlignment.MiddleLeft
         };
-
         userPanel.Controls.Add(branchLine);
         userPanel.Controls.Add(userLine);
 
@@ -212,7 +165,7 @@ public sealed class MainForm : Form
             FlowDirection = FlowDirection.RightToLeft,
             WrapContents = false,
             Padding = new Padding(12, 6, 12, 6),
-            BackColor = ErpTheme.SurfaceSoft,
+            BackColor = Color.White,
             Margin = new Padding(8, 0, 8, 0)
         };
 
@@ -221,7 +174,7 @@ public sealed class MainForm : Form
             Text = "مساحة العمل",
             AutoSize = true,
             Font = new Font("Tahoma", 10f, FontStyle.Bold),
-            ForeColor = ErpTheme.Muted,
+            ForeColor = Color.Black,
             Margin = new Padding(4, 10, 18, 0)
         };
 
@@ -237,7 +190,7 @@ public sealed class MainForm : Form
             Text = "بحث سريع",
             AutoSize = true,
             Font = new Font("Tahoma", 9f, FontStyle.Bold),
-            ForeColor = ErpTheme.Muted,
+            ForeColor = Color.Black,
             Margin = new Padding(4, 10, 4, 0)
         };
 
@@ -265,7 +218,7 @@ public sealed class MainForm : Form
         _servicesBar.WrapContents = false;
         _servicesBar.AutoScroll = true;
         _servicesBar.Padding = new Padding(10, 7, 10, 7);
-        _servicesBar.BackColor = ErpTheme.Navigation;
+        _servicesBar.BackColor = Color.White;
         _servicesBar.RightToLeft = RightToLeft.Yes;
         _servicesBar.BorderStyle = BorderStyle.FixedSingle;
     }
@@ -278,7 +231,7 @@ public sealed class MainForm : Form
         _screenBar.WrapContents = false;
         _screenBar.AutoScroll = true;
         _screenBar.Padding = new Padding(10, 5, 10, 5);
-        _screenBar.BackColor = ErpTheme.Surface;
+        _screenBar.BackColor = Color.White;
         _screenBar.RightToLeft = RightToLeft.Yes;
         _screenBar.BorderStyle = BorderStyle.FixedSingle;
     }
@@ -291,15 +244,17 @@ public sealed class MainForm : Form
         _clock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         _clock.Spring = true;
         _clock.TextAlign = ContentAlignment.MiddleLeft;
+        _statusStrip.BackColor = Color.White;
+        _statusStrip.ForeColor = Color.Black;
 
         _statusStrip.Items.Add(_status);
-        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = "│" });
+        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = "│", ForeColor = Color.Black });
         _statusStrip.Items.Add(_screenCount);
-        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = "│" });
-        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = $"الفرع: {_session.BranchId?.ToString() ?? "-"}" });
-        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = "│" });
-        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = $"المجموعة: {_session.GroupId?.ToString() ?? "-"}" });
-        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = "│" });
+        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = "│", ForeColor = Color.Black });
+        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = $"الفرع: {_session.BranchId?.ToString() ?? "-"}", ForeColor = Color.Black });
+        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = "│", ForeColor = Color.Black });
+        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = $"المجموعة: {_session.GroupId?.ToString() ?? "-"}", ForeColor = Color.Black });
+        _statusStrip.Items.Add(new ToolStripStatusLabel { Text = "│", ForeColor = Color.Black });
         _statusStrip.Items.Add(_clock);
     }
 
@@ -313,7 +268,6 @@ public sealed class MainForm : Form
             Margin = new Padding(4),
             Font = new Font("Tahoma", 8.5f, FontStyle.Bold)
         };
-
         ErpTheme.ConfigureToolbarButton(button, primary);
         button.Click += click;
         return button;
@@ -322,28 +276,21 @@ public sealed class MainForm : Form
     private void RebuildServicesBar()
     {
         _servicesBar.Controls.Clear();
-
-        var available = _screens
-            .Where(s => s.AllowEnter)
+        var available = _screens.Where(s => s.AllowEnter)
             .Select(s => s.ModuleDisplayName)
             .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Distinct(StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
+            .Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 
-        var services = PreferredServices
-            .Where(name => name == "الرئيسية" || available.Any(x => string.Equals(x, name, StringComparison.OrdinalIgnoreCase)))
-            .ToList();
+        var services = PreferredServices.Where(name => name == "الرئيسية" ||
+            available.Any(x => string.Equals(x, name, StringComparison.OrdinalIgnoreCase))).ToList();
 
         foreach (var extra in available.Where(x => !services.Any(s => string.Equals(s, x, StringComparison.OrdinalIgnoreCase)))
-                              .OrderBy(x => x, StringComparer.CurrentCultureIgnoreCase))
-        {
+                     .OrderBy(x => x, StringComparer.CurrentCultureIgnoreCase))
             services.Add(extra);
-        }
 
         foreach (var service in services)
         {
             var active = string.Equals(service, _selectedService, StringComparison.OrdinalIgnoreCase);
-
             var button = new Button
             {
                 Text = $"{GetServiceIcon(service)}  {service}",
@@ -358,19 +305,10 @@ public sealed class MainForm : Form
             button.Click += (_, _) =>
             {
                 _selectedService = service;
-                if (service == "الرئيسية")
-                {
-                    ShowHome();
-                }
-                else
-                {
-                    RebuildScreenBar();
-                    HideHomeForService();
-                }
-
+                if (service == "الرئيسية") ShowHome();
+                else { RebuildScreenBar(); HideHomeForService(); }
                 RebuildServicesBar();
             };
-
             _servicesBar.Controls.Add(button);
         }
     }
@@ -379,9 +317,10 @@ public sealed class MainForm : Form
     {
         button.FlatStyle = FlatStyle.Flat;
         button.FlatAppearance.BorderSize = 1;
-        button.FlatAppearance.BorderColor = active ? ErpTheme.Accent : Color.FromArgb(70, 88, 108);
-        button.BackColor = active ? ErpTheme.Accent : ErpTheme.Navigation;
-        button.ForeColor = Color.White;
+        button.FlatAppearance.BorderColor = Color.Black;
+        button.FlatAppearance.MouseOverBackColor = Color.FromArgb(242, 242, 242);
+        button.BackColor = Color.White;
+        button.ForeColor = Color.Black;
         button.Cursor = Cursors.Hand;
         button.TextAlign = ContentAlignment.MiddleCenter;
         button.Padding = new Padding(8, 0, 8, 0);
@@ -393,28 +332,19 @@ public sealed class MainForm : Form
     private void RebuildScreenBar()
     {
         _screenBar.Controls.Clear();
-
-        if (string.IsNullOrWhiteSpace(_selectedService) || _selectedService == "الرئيسية")
-            return;
+        if (string.IsNullOrWhiteSpace(_selectedService) || _selectedService == "الرئيسية") return;
 
         var filter = _search.Text.Trim();
-
-        var screens = _screens
-            .Where(s => s.AllowEnter)
+        var screens = _screens.Where(s => s.AllowEnter)
             .Where(s => string.Equals(s.ModuleDisplayName, _selectedService, StringComparison.OrdinalIgnoreCase))
             .Where(s => string.IsNullOrWhiteSpace(filter) ||
                         s.ScreenName.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0 ||
                         s.ModuleDisplayName.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
-            .OrderBy(s => s.ScreenNum ?? int.MaxValue)
-            .ThenBy(s => s.Id)
-            .ToList();
+            .OrderBy(s => s.ScreenNum ?? int.MaxValue).ThenBy(s => s.Id).ToList();
 
         foreach (var screen in screens)
         {
-            var name = string.IsNullOrWhiteSpace(screen.ScreenName)
-                ? $"شاشة #{screen.Id}"
-                : screen.ScreenName;
-
+            var name = string.IsNullOrWhiteSpace(screen.ScreenName) ? $"شاشة #{screen.Id}" : screen.ScreenName;
             var button = new Button
             {
                 Text = name,
@@ -425,23 +355,20 @@ public sealed class MainForm : Form
                 Margin = new Padding(4, 2, 4, 2),
                 Font = new Font("Tahoma", 8.5f, FontStyle.Bold)
             };
-
-            ErpTheme.ConfigureToolbarButton(button, false);
+            ErpTheme.ConfigureToolbarButton(button);
             button.Click += (_, _) => OpenAccessScreen(screen);
             _screenBar.Controls.Add(button);
         }
 
         if (screens.Count == 0)
-        {
             _screenBar.Controls.Add(new Label
             {
                 Text = "لا توجد شاشة متاحة لهذه الخدمة.",
                 AutoSize = true,
-                ForeColor = ErpTheme.Muted,
+                ForeColor = Color.Black,
                 Font = new Font("Tahoma", 9f),
                 Padding = new Padding(8, 9, 8, 0)
             });
-        }
     }
 
     private void HideHomeForService()
@@ -453,38 +380,22 @@ public sealed class MainForm : Form
     private void WireEvents()
     {
         Shown += async (_, _) => await LoadSecurityAsync();
-
         _search.TextChanged += (_, _) =>
         {
-            if (_selectedService == "الرئيسية")
-                BuildDashboard();
-            else
-                RebuildScreenBar();
+            if (_selectedService == "الرئيسية") BuildDashboard();
+            else RebuildScreenBar();
         };
 
         var timer = new System.Windows.Forms.Timer { Interval = 1000 };
         timer.Tick += (_, _) => _clock.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         timer.Start();
-
         FormClosed += (_, _) => timer.Dispose();
 
         KeyDown += (_, e) =>
         {
-            if (e.KeyCode == Keys.F5)
-            {
-                e.Handled = true;
-                _ = LoadSecurityAsync();
-            }
-            else if (e.KeyCode == Keys.F10)
-            {
-                e.Handled = true;
-                ShowHome();
-            }
-            else if (e.KeyCode == Keys.Escape)
-            {
-                e.Handled = true;
-                CloseCurrentScreen();
-            }
+            if (e.KeyCode == Keys.F5) { e.Handled = true; _ = LoadSecurityAsync(); }
+            else if (e.KeyCode == Keys.F10) { e.Handled = true; ShowHome(); }
+            else if (e.KeyCode == Keys.Escape) { e.Handled = true; CloseCurrentScreen(); }
         };
     }
 
@@ -498,14 +409,11 @@ public sealed class MainForm : Form
 
             _status.Text = $"المستخدم: {_session.UserName}";
             _screenCount.Text = $"الشاشات: {_screens.Count:N0}";
-            _status.ToolTipText =
-                $"المستخدم: {_session.UserName}\r\n" +
+            _status.ToolTipText = $"المستخدم: {_session.UserName}\r\n" +
                 $"الفرع: {_session.BranchId?.ToString() ?? "-"}\r\n" +
                 $"المجموعة: {groupName ?? _session.GroupId?.ToString() ?? "-"}";
 
-            if (string.IsNullOrWhiteSpace(_selectedService))
-                _selectedService = "الرئيسية";
-
+            if (string.IsNullOrWhiteSpace(_selectedService)) _selectedService = "الرئيسية";
             RebuildServicesBar();
             RebuildScreenBar();
             BuildDashboard();
@@ -514,17 +422,10 @@ public sealed class MainForm : Form
         {
             _screens.Clear();
             _screenCount.Text = "الشاشات: 0";
-            MessageBox.Show(
-                this,
-                "تعذر تحميل الصلاحيات:\r\n" + ex.GetBaseException().Message,
-                "الصلاحيات",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show(this, "تعذر تحميل الصلاحيات:\r\n" + ex.GetBaseException().Message,
+                "الصلاحيات", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-        finally
-        {
-            UseWaitCursor = false;
-        }
+        finally { UseWaitCursor = false; }
     }
 
     private void OpenAccessScreen(ScreenAccess access)
@@ -541,26 +442,15 @@ public sealed class MainForm : Form
         {
             _router.TryOpen(this, access, out var message);
             if (!string.IsNullOrWhiteSpace(message))
-            {
-                MessageBox.Show(this, message, "فتح الشاشة",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+                MessageBox.Show(this, message, "فتح الشاشة", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        finally
-        {
-            UseWaitCursor = false;
-        }
+        finally { UseWaitCursor = false; }
     }
 
     private void CloseCurrentScreen()
     {
         var active = ActiveMdiChild;
-        if (active is not null)
-        {
-            active.Close();
-            return;
-        }
-
+        if (active is not null) { active.Close(); return; }
         ShowHome();
     }
 
@@ -581,9 +471,7 @@ public sealed class MainForm : Form
     private void ShowHome()
     {
         _selectedService = "الرئيسية";
-        foreach (var child in MdiChildren)
-            child.Close();
-
+        foreach (var child in MdiChildren) child.Close();
         _home.Visible = true;
         _home.BringToFront();
         RebuildServicesBar();
@@ -600,7 +488,8 @@ public sealed class MainForm : Form
             Dock = DockStyle.Fill,
             ColumnCount = 1,
             RowCount = 5,
-            Padding = new Padding(18)
+            Padding = new Padding(18),
+            BackColor = Color.White
         };
 
         outer.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
@@ -614,7 +503,7 @@ public sealed class MainForm : Form
             Text = "لوحة التحكم الرئيسية",
             Dock = DockStyle.Fill,
             Font = new Font("Tahoma", 23f, FontStyle.Bold),
-            ForeColor = ErpTheme.Text,
+            ForeColor = Color.Black,
             TextAlign = ContentAlignment.MiddleRight
         };
 
@@ -623,34 +512,24 @@ public sealed class MainForm : Form
             Text = "إدارة الحسابات والمخزون والمبيعات والمشتريات من واجهة تشغيل موحدة",
             Dock = DockStyle.Fill,
             Font = new Font("Tahoma", 10f),
-            ForeColor = ErpTheme.Muted,
+            ForeColor = Color.Black,
             TextAlign = ContentAlignment.MiddleRight
         };
 
         outer.Controls.Add(title, 0, 0);
         outer.Controls.Add(subtitle, 0, 1);
 
-        var cards = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 4,
-            RowCount = 1
-        };
+        var cards = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, BackColor = Color.White };
+        for (var i = 0; i < 4; i++) cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
 
-        for (var i = 0; i < 4; i++)
-            cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
-
-        var moduleCount = _screens
-            .Select(s => s.ModuleDisplayName)
+        var moduleCount = _screens.Select(s => s.ModuleDisplayName)
             .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Distinct(StringComparer.CurrentCultureIgnoreCase)
-            .Count();
+            .Distinct(StringComparer.CurrentCultureIgnoreCase).Count();
 
         cards.Controls.Add(ErpTheme.CreateCard("الشاشات المسموح بها", _screens.Count.ToString("N0"), "الصلاحيات الحالية"), 0, 0);
         cards.Controls.Add(ErpTheme.CreateCard("الخدمات", moduleCount.ToString("N0"), "الوحدات المتاحة"), 1, 0);
         cards.Controls.Add(ErpTheme.CreateCard("الفرع", _session.BranchId?.ToString() ?? "-", "الفرع الحالي"), 2, 0);
         cards.Controls.Add(ErpTheme.CreateCard("الحالة", "متصل", "قاعدة GTSdb2026"), 3, 0);
-
         outer.Controls.Add(cards, 0, 2);
 
         var quickTitle = new Label
@@ -658,10 +537,9 @@ public sealed class MainForm : Form
             Text = "الاختصارات التشغيلية",
             Dock = DockStyle.Fill,
             Font = new Font("Tahoma", 12f, FontStyle.Bold),
-            ForeColor = ErpTheme.Text,
+            ForeColor = Color.Black,
             TextAlign = ContentAlignment.MiddleRight
         };
-
         outer.Controls.Add(quickTitle, 0, 3);
 
         var quick = new FlowLayoutPanel
@@ -671,10 +549,9 @@ public sealed class MainForm : Form
             WrapContents = true,
             AutoScroll = true,
             Padding = new Padding(4),
-            BackColor = ErpTheme.Surface
+            BackColor = Color.White
         };
 
-        // اختصارات الصفحة الرئيسية مرتبة حسب الاستخدام اليومي في ERP.
         var quickNames = new[]
         {
             "الكاشير", "الفواتير", "المبيعات", "المشتريات",
@@ -685,11 +562,8 @@ public sealed class MainForm : Form
 
         foreach (var name in quickNames)
         {
-            var screen = _screens.FirstOrDefault(s =>
-                string.Equals(s.ScreenName, name, StringComparison.OrdinalIgnoreCase));
-
-            if (screen is null || !screen.AllowEnter)
-                continue;
+            var screen = _screens.FirstOrDefault(s => string.Equals(s.ScreenName, name, StringComparison.OrdinalIgnoreCase));
+            if (screen is null || !screen.AllowEnter) continue;
 
             var button = new Button
             {
@@ -699,7 +573,6 @@ public sealed class MainForm : Form
                 Margin = new Padding(5),
                 Font = new Font("Tahoma", 9f, FontStyle.Bold)
             };
-
             ErpTheme.ConfigureToolbarButton(button, true);
             button.Click += (_, _) => OpenAccessScreen(screen);
             quick.Controls.Add(button);
@@ -709,10 +582,9 @@ public sealed class MainForm : Form
         {
             Dock = DockStyle.Fill,
             BorderStyle = BorderStyle.FixedSingle,
-            BackColor = ErpTheme.Surface,
+            BackColor = Color.White,
             Padding = new Padding(10)
         };
-
         workspace.Controls.Add(quick);
         outer.Controls.Add(workspace, 0, 4);
         _home.Controls.Add(outer);
@@ -723,10 +595,7 @@ public sealed class MainForm : Form
         try
         {
             var service = new LicenseService(new DbExecutor(new SqlConnectionFactory(_connectionString)));
-            using var form = new LicenseManagementForm(_session, service)
-            {
-                StartPosition = FormStartPosition.CenterParent
-            };
+            using var form = new LicenseManagementForm(_session, service) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(this);
         }
         catch (Exception ex)
