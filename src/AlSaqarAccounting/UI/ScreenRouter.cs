@@ -17,30 +17,38 @@ public sealed class ScreenRouter
     {
         message = string.Empty;
         if (!access.AllowEnter) { message = "لا تملك صلاحية فتح هذه الشاشة."; return false; }
+
+        var screenName = ScreenAccess.CleanScreenName(screenName);
+        if (string.IsNullOrWhiteSpace(screenName))
+        {
+            message = "اسم الشاشة غير صالح.";
+            return false;
+        }
+
         var db = new DbExecutor(new SqlConnectionFactory(_connectionString));
 
-        if (string.Equals(access.ScreenName, "إدارة التراخيص", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(access.ScreenName, "التراخيص", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(screenName, "إدارة التراخيص", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(screenName, "التراخيص", StringComparison.OrdinalIgnoreCase))
         {
             using var form = new LicenseManagementForm(_session, new LicenseService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
-        if (IsPasswordScreen(access.ScreenName))
+        if (IsPasswordScreen(screenName))
         {
             using var form = new ChangePasswordForm(_session, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
-        if (IsScreenCatalogScreen(access.ScreenName))
+        if (IsScreenCatalogScreen(screenName))
         {
             using var form = new UserScreensForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
-        if (IsPermissionScreen(access.ScreenName))
+        if (IsPermissionScreen(screenName))
         {
             using var form = new UserPermissionsForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
@@ -49,41 +57,41 @@ public sealed class ScreenRouter
 
         // Original GTSErpSystem places user-management screens in the Security
         // module. Keep those separate from item groups.
-        if (IsUserScreen(access.ScreenName))
+        if (IsUserScreen(screenName))
         {
             using var form = new UserManagementForm(_session, access, new UserManagementService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
-        if (IsSecurityGroupPermissionScreen(access.ScreenName))
+        if (IsSecurityGroupPermissionScreen(screenName))
         {
             using var form = new UserPermissionsForm(_session, access, new SecurityAdministrationService(db))
             { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
-        if (IsUserGroupScreen(access.ScreenName))
+        if (IsUserGroupScreen(screenName))
         {
             using var form = new UserGroupsForm(_session, access, new UserGroupsService(db)) { StartPosition = FormStartPosition.CenterParent };
             form.ShowDialog(owner); return true;
         }
 
-        if (string.Equals(access.ScreenName, "FrmUnit", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(screenName, "FrmUnit", StringComparison.OrdinalIgnoreCase))
         {
             var form = new ItemUnitForm(_session, access, new ItemUnitService(db));
             return OpenMdi(owner, form);
         }
-        if (TryResolveItemMaster(access.ScreenName, out var tableName, out var displayName))
+        if (TryResolveItemMaster(screenName, out var tableName, out var displayName))
         {
             var form = new ItemMasterForm(_session, access, new ItemMasterService(db), tableName, displayName);
             return OpenMdi(owner, form);
         }
-        if (string.Equals(access.ScreenName, "FrmItems", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(screenName, "FrmItems", StringComparison.OrdinalIgnoreCase))
         {
             var form = new ItemsForm(_session, access, new ItemsService(db));
             return OpenMdi(owner, form);
         }
-        if (string.Equals(access.ScreenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) || string.Equals(access.ScreenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(screenName, "InvoicesForm", StringComparison.OrdinalIgnoreCase) || string.Equals(screenName, "الفواتير", StringComparison.OrdinalIgnoreCase))
         {
             var form = new InvoicesForm(_session, access, new InvoiceService(db), new SalesService(db), new StoresService(db), new CustomerService(db), new SupplierService(db), new ItemsService(db), new PurchasesService(db), new CustSupService(db));
             return OpenMdi(owner, form);
@@ -91,20 +99,20 @@ public sealed class ScreenRouter
         // Bind verified legacy ERP screens before the generic catalog/fallback.
         // These mappings use the original GTSdb2026 SELECT procedures and therefore
         // show real database data instead of DynamicErpScreenForm placeholders.
-        if (LegacyScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var legacyScreen)
+        if (LegacyScreenCatalog.TryCreate(screenName, _connectionString, _session, access, out var legacyScreen)
             && legacyScreen is not null)
         {
             return OpenMdi(owner, legacyScreen);
         }
 
-        if (RealScreenCatalog.TryCreate(access.ScreenName, _connectionString, _session, access, out var realScreen) && realScreen is not null)
+        if (RealScreenCatalog.TryCreate(screenName, _connectionString, _session, access, out var realScreen) && realScreen is not null)
         {
             return OpenMdi(owner, realScreen);
         }
         // لا توجد شاشة تجريبية/شكلية كخيار أخير.
         // أي شاشة لم تُربط بعد بشاشة ERP تشغيلية حقيقية تُرفض بوضوح
         // بدل عرض DynamicErpScreenForm أو أي صفحة وهمية.
-        message = $"الشاشة «{access.ScreenName}» لم تُربط بعد بشاشة تشغيلية حقيقية.";
+        message = $"الشاشة «{screenName}» لم تُربط بعد بشاشة تشغيلية حقيقية.";
         return false;
     }
 
