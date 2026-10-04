@@ -89,7 +89,7 @@ if (-not $catalogFile) {
 
 $catalogText = Get-Content $catalogFile.FullName -Raw
 $catalogScreens = @(
-    [regex]::Matches($catalogText, '["([^"]+)"]s*=s*(cs,s*s,s*a)') |
+    [regex]::Matches($catalogText, '\["([^"]+)"\]\s*=\s*\(cs,\s*s,\s*a\)') |
     ForEach-Object { $_.Groups[1].Value } |
     Sort-Object -Unique
 )
@@ -237,7 +237,7 @@ Write-Host "============================================" -ForegroundColor Cyan
 
 Write-Host ""
 Write-Host "Router screens : $($routerScreens.Count)"
-Write-Host "Entity mappings: $($mapEntries.Count)"
+Write-Host "Catalog entries : $($catalogScreens.Count)"
 Write-Host "Forms          : $($forms.Count)"
 Write-Host "C# files       : $($csFiles.Count)"
 
