@@ -54,7 +54,7 @@ public sealed class ContractsForm : Form
         var header = new Panel { Dock = DockStyle.Top, Height = 120, Padding = new Padding(12), BackColor = Color.FromArgb(245, 247, 250) };
         var title = new Label
         {
-            Text = "", // "إدارة العقود"
+            Text = "إدارة العقود", // "إدارة العقود"
             Dock = DockStyle.Top,
             Height = 38,
             Font = new Font("Tahoma", 18, FontStyle.Bold),
@@ -71,7 +71,7 @@ public sealed class ContractsForm : Form
         var searchRow = new TableLayoutPanel { Dock = DockStyle.Bottom, Height = 32, ColumnCount = 2 };
         searchRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         searchRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90));
-        var refresh = new Button { Text = "", Dock = DockStyle.Fill, Enabled = _access.AllowEnter }; // "تحديث"
+        var refresh = new Button { Text = "تحديث", Dock = DockStyle.Fill, Enabled = _access.AllowEnter }; // "تحديث"
         refresh.Click += async (_, _) => await LoadAsync();
         _search.Dock = DockStyle.Fill;
         _search.RightToLeft = RightToLeft.Yes;
@@ -88,19 +88,19 @@ public sealed class ContractsForm : Form
         editor.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
         editor.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
 
-        AddField(editor, "", _supplierName, 0, 0); // "اسم المورد"
-        AddField(editor, "", _supplierPhone, 1, 0); // "هاتف المورد"
-        AddField(editor, "", _contractNum, 2, 0); // "رقم العقد"
-        AddField(editor, "", _purchaseDate, 3, 0); // "تاريخ الشراء"
-        AddField(editor, "", _costOrder, 0, 1); // "تكلفة الطلب"
-        AddField(editor, "", _tax, 1, 1); // "الضريبة"
-        AddField(editor, "", _totalPrices, 2, 1); // "الإجمالي"
-        AddField(editor, "", _net, 3, 1); // "الصافي"
-        AddField(editor, "", _note, 0, 2, true); // "ملاحظات"
+        AddField(editor, "اسم المورد", _supplierName, 0, 0); // "اسم المورد"
+        AddField(editor, "هاتف المورد", _supplierPhone, 1, 0); // "هاتف المورد"
+        AddField(editor, "رقم العقد", _contractNum, 2, 0); // "رقم العقد"
+        AddField(editor, "تاريخ الشراء", _purchaseDate, 3, 0); // "تاريخ الشراء"
+        AddField(editor, "تكلفة الطلب", _costOrder, 0, 1); // "تكلفة الطلب"
+        AddField(editor, "الضريبة", _tax, 1, 1); // "الضريبة"
+        AddField(editor, "الإجمالي", _totalPrices, 2, 1); // "الإجمالي"
+        AddField(editor, "الصافي", _net, 3, 1); // "الصافي"
+        AddField(editor, "ملاحظات", _note, 0, 2, true); // "ملاحظات"
         editor.SetColumnSpan(_note, 3);
 
-        var save = new Button { Text = "", Width = 100, Height = 32, Enabled = _access.AllowSave || _access.AllowEdit }; // "حفظ"
-        var cancel = new Button { Text = "", Width = 100, Height = 32 }; // "إلغاء"
+        var save = new Button { Text = "حفظ", Width = 100, Height = 32, Enabled = _access.AllowSave || _access.AllowEdit }; // "حفظ"
+        var cancel = new Button { Text = "إلغاء", Width = 100, Height = 32 }; // "إلغاء"
         save.Click += async (_, _) => await SaveAsync();
         cancel.Click += (_, _) => ClearEditor();
         editor.Controls.Add(save, 2, 3);
@@ -108,9 +108,9 @@ public sealed class ContractsForm : Form
 
         // Toolbar
         var toolbar = new FlowLayoutPanel { Dock = DockStyle.Bottom, Height = 44, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(6), WrapContents = false };
-        AddToolbarButton(toolbar, "", _access.AllowEdit, BeginEditAsync); // "تعديل"
-        AddToolbarButton(toolbar, "", _access.AllowDelete, DeleteAsync); // "حذف"
-        AddToolbarButton(toolbar, "", _access.AllowExport, ExportCsv); // "تصدير CSV"
+        AddToolbarButton(toolbar, "تعديل", _access.AllowEdit, BeginEditAsync); // "تعديل"
+        AddToolbarButton(toolbar, "حذف", _access.AllowDelete, DeleteAsync); // "حذف"
+        AddToolbarButton(toolbar, "تصدير CSV", _access.AllowExport, ExportCsv); // "تصدير CSV"
 
         // Grid
         _grid.Dock = DockStyle.Fill;
@@ -210,15 +210,15 @@ public sealed class ContractsForm : Form
         }
         
         // Rename columns
-        if (_grid.Columns.Contains("SupplierName")) _grid.Columns["SupplierName"].HeaderText = ""; // "اسم المورد"
-        if (_grid.Columns.Contains("SupplierPhone")) _grid.Columns["SupplierPhone"].HeaderText = ""; // "هاتف المورد"
-        if (_grid.Columns.Contains("NoteNum")) _grid.Columns["NoteNum"].HeaderText = ""; // "رقم العقد"
-        if (_grid.Columns.Contains("Purchases_Date")) _grid.Columns["Purchases_Date"].HeaderText = ""; // "تاريخ الشراء"
-        if (_grid.Columns.Contains("CostOrder")) _grid.Columns["CostOrder"].HeaderText = ""; // "تكلفة الطلب"
-        if (_grid.Columns.Contains("Tax")) _grid.Columns["Tax"].HeaderText = ""; // "الضريبة"
-        if (_grid.Columns.Contains("TotalPrices")) _grid.Columns["TotalPrices"].HeaderText = ""; // "الإجمالي"
-        if (_grid.Columns.Contains("Net")) _grid.Columns["Net"].HeaderText = ""; // "الصافي"
-        if (_grid.Columns.Contains("Note")) _grid.Columns["Note"].HeaderText = ""; // "ملاحظات"
+        if (_grid.Columns.Contains("SupplierName")) _grid.Columns["SupplierName"].HeaderText = "اسم المورد"; // "اسم المورد"
+        if (_grid.Columns.Contains("SupplierPhone")) _grid.Columns["SupplierPhone"].HeaderText = "هاتف المورد"; // "هاتف المورد"
+        if (_grid.Columns.Contains("NoteNum")) _grid.Columns["NoteNum"].HeaderText = "رقم العقد"; // "رقم العقد"
+        if (_grid.Columns.Contains("Purchases_Date")) _grid.Columns["Purchases_Date"].HeaderText = "تاريخ الشراء"; // "تاريخ الشراء"
+        if (_grid.Columns.Contains("CostOrder")) _grid.Columns["CostOrder"].HeaderText = "تكلفة الطلب"; // "تكلفة الطلب"
+        if (_grid.Columns.Contains("Tax")) _grid.Columns["Tax"].HeaderText = "الضريبة"; // "الضريبة"
+        if (_grid.Columns.Contains("TotalPrices")) _grid.Columns["TotalPrices"].HeaderText = "الإجمالي"; // "الإجمالي"
+        if (_grid.Columns.Contains("Net")) _grid.Columns["Net"].HeaderText = "الصافي"; // "الصافي"
+        if (_grid.Columns.Contains("Note")) _grid.Columns["Note"].HeaderText = "ملاحظات"; // "ملاحظات"
     }
 
     private void ApplyFilter()
@@ -283,7 +283,7 @@ public sealed class ContractsForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ"
         }
         finally { UseWaitCursor = false; }
     }
@@ -313,7 +313,7 @@ public sealed class ContractsForm : Form
         var id = Convert.ToInt32(row.Row["ID"]);
         var name = Convert.ToString(row.Row["SupplierName"]) ?? string.Empty;
         
-        if (MessageBox.Show(this, $" {id}\r\n{name}", "", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) // "هل تريد حذف العقد؟"
+        if (MessageBox.Show(this, $" {id}\r\n{name}", "هل تريد حذف العقد؟", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) // "هل تريد حذف العقد؟"
             return;
         
         try
@@ -325,7 +325,7 @@ public sealed class ContractsForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, ex.GetBaseException().Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ في الحذف"
+            MessageBox.Show(this, ex.GetBaseException().Message, "خطأ في الحذف", MessageBoxButtons.OK, MessageBoxIcon.Error); // "خطأ في الحذف"
         }
         finally { UseWaitCursor = false; }
     }
