@@ -18,7 +18,7 @@ public sealed class ScreenRouter
         message = string.Empty;
         if (!access.AllowEnter) { message = "لا تملك صلاحية فتح هذه الشاشة."; return false; }
 
-        var screenName = ScreenAccess.CleanScreenName(screenName);
+        var screenName = ScreenAccess.CleanScreenName(access.ScreenName);
         if (string.IsNullOrWhiteSpace(screenName))
         {
             message = "اسم الشاشة غير صالح.";
