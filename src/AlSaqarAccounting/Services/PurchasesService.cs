@@ -303,7 +303,7 @@ public sealed class PurchasesService
             cancellationToken);
 
     private static string? NullIfEmpty(string? value)
-        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        => string.IsNullOrWhiteSpace(value) ? null : value!.Trim();
 
     private static string GetMachineAddress()
     {
