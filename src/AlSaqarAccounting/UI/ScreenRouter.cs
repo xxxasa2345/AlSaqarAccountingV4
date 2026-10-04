@@ -1,4 +1,3 @@
-using System.Reflection;
 using AlSaqarAccounting.Core;
 using AlSaqarAccounting.Services;
 using AlSaqarAccounting.Forms;
@@ -107,13 +106,6 @@ public sealed class ScreenRouter
             using (realScreen) { realScreen.StartPosition = FormStartPosition.CenterParent; realScreen.ShowDialog(owner); }
             return true;
         }
-        var type = FindFormType(access.ScreenName);
-        if (type is not null && type != typeof(DynamicErpScreenForm))
-        {
-            if (TryCreateForm(type, access, out var form, out var formError) && form is not null)
-            { using (form) { form.StartPosition = FormStartPosition.CenterParent; form.ShowDialog(owner); } return true; }
-            message = formError ?? "الشاشة الأصلية موجودة لكن تعذر إنشاؤها.";
-        }
         // لا توجد شاشة تجريبية/شكلية كخيار أخير.
         // أي شاشة لم تُربط بعد بشاشة ERP تشغيلية حقيقية تُرفض بوضوح
         // بدل عرض DynamicErpScreenForm أو أي صفحة وهمية.
@@ -198,72 +190,4 @@ public sealed class ScreenRouter
         }
     }
 
-    private static Type? FindFormType(string screenName)
-    {
-        if (string.IsNullOrWhiteSpace(screenName)) return null;
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().OrderByDescending(a => a == typeof(ScreenRouter).Assembly))
-        {
-            Type[] types;
-            try { types = assembly.GetTypes(); } catch (ReflectionTypeLoadException ex) { types = ex.Types.Where(t => t is not null).Cast<Type>().ToArray(); }
-            var match = types.FirstOrDefault(t => typeof(Form).IsAssignableFrom(t) && !t.IsAbstract && string.Equals(t.Name, screenName.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (match is not null) return match;
-        }
-        return null;
-    }
-
-    private bool TryCreateForm(Type type, ScreenAccess access, out Form? form, out string? error)
-    {
-        form = null; error = null;
-        try
-        {
-            foreach (var ctor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).OrderBy(c => c.GetParameters().Length))
-            {
-                var parameters = ctor.GetParameters();
-                if (parameters.Length == 0)
-                {
-                    form = (Form?)ctor.Invoke(null);
-                    if (form is not null) return true;
-                }
-
-                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(AppSession))
-                {
-                    form = (Form?)ctor.Invoke(new object?[] { _session });
-                    if (form is not null) return true;
-                }
-
-                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(ScreenAccess))
-                {
-                    form = (Form?)ctor.Invoke(new object?[] { access });
-                    if (form is not null) return true;
-                }
-
-                if (parameters.Length == 1 &&
-                    (parameters[0].ParameterType == typeof(int) || parameters[0].ParameterType == typeof(int?)) &&
-                    access.ScreenNum.HasValue)
-                {
-                    form = (Form?)ctor.Invoke(new object?[] { access.ScreenNum.Value });
-                    if (form is not null) return true;
-                }
-
-                if (parameters.Length == 2 &&
-                    parameters[0].ParameterType == typeof(AppSession) &&
-                    parameters[1].ParameterType == typeof(ScreenAccess))
-                {
-                    form = (Form?)ctor.Invoke(new object?[] { _session, access });
-                    if (form is not null) return true;
-                }
-
-                if (parameters.Length == 2 &&
-                    parameters[0].ParameterType == typeof(AppSession) &&
-                    (parameters[1].ParameterType == typeof(int) || parameters[1].ParameterType == typeof(int?)) &&
-                    access.ScreenNum.HasValue)
-                {
-                    form = (Form?)ctor.Invoke(new object?[] { _session, access.ScreenNum.Value });
-                    if (form is not null) return true;
-                }
-            }
-            error = $"الشاشة {type.Name} موجودة لكن لا يوجد Constructor مدعوم حاليًا."; return false;
-        }
-        catch (Exception ex) { error = ex.GetBaseException().Message; return false; }
-    }
 }
