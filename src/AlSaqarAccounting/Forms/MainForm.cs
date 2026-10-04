@@ -338,13 +338,13 @@ public sealed class MainForm : Form
         var screens = _screens.Where(s => s.AllowEnter)
             .Where(s => string.Equals(s.ModuleDisplayName, _selectedService, StringComparison.OrdinalIgnoreCase))
             .Where(s => string.IsNullOrWhiteSpace(filter) ||
-                        s.ScreenName.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        ScreenAccess.CleanScreenName(s.ScreenName).IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0 ||
                         s.ModuleDisplayName.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
             .OrderBy(s => s.ScreenNum ?? int.MaxValue).ThenBy(s => s.Id).ToList();
 
         foreach (var screen in screens)
         {
-            var name = string.IsNullOrWhiteSpace(screen.ScreenName) ? $"شاشة #{screen.Id}" : screen.ScreenName;
+            var name = string.IsNullOrWhiteSpace(screen.ScreenName) ? $"شاشة #{screen.Id}" : ScreenAccess.CleanScreenName(screen.ScreenName);
             var button = new Button
             {
                 Text = name,
