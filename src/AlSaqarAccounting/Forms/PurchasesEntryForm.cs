@@ -477,12 +477,7 @@ public sealed class PurchasesEntryForm : Form
     private static string GetString(DataRow row, string column)
         => row.Table.Columns.Contains(column) && row[column] != DBNull.Value ? Convert.ToString(row[column]) ?? string.Empty : string.Empty;
 
-    private static void SetDate(DataRow row, string column)
-    {
-        // التاريخ يضبطه المستدعي بعد إنشاء النموذج.
-    }
-
-    private void SetDate(DataRow row, string column, bool unused = false)
+    private void SetDate(DataRow row, string column)
     {
         if (row.Table.Columns.Contains(column) && row[column] != DBNull.Value &&
             DateTime.TryParse(Convert.ToString(row[column]), out var value))
