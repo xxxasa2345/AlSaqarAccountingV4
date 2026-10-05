@@ -32,14 +32,23 @@ public sealed class AuthorizationService
         PermissionAction action,
         CancellationToken cancellationToken = default)
     {
-        if (session.UserId <= 0)
-            throw new UnauthorizedAccessException("جلسة المستخدم غير صالحة.");
+        if (!await CanAsync(session, screenId, action, cancellationToken).ConfigureAwait(false))
+            throw new UnauthorizedAccessException($"لا تملك صلاحية {GetActionName(action)} لهذه الشاشة.");
+    }
 
-        if (!session.GroupId.HasValue || session.GroupId.Value <= 0)
-            throw new UnauthorizedAccessException("المستخدم غير مرتبط بمجموعة صلاحيات.");
-
-        if (screenId <= 0)
-            throw new ArgumentOutOfRangeException(nameof(screenId), "معرف الشاشة غير صالح.");
+    /// <summary>
+    /// Performs the same database-backed permission check without throwing.
+    /// Screen routing uses this immediately before opening a form so a stale
+    /// menu cannot bypass a permission change made after login.
+    /// </summary>
+    public async Task<bool> CanAsync(
+        AppSession session,
+        int screenId,
+        PermissionAction action,
+        CancellationToken cancellationToken = default)
+    {
+        if (session.UserId <= 0 || !session.GroupId.HasValue || session.GroupId.Value <= 0 || screenId <= 0)
+            return false;
 
         const string sql = @"
 SELECT TOP (1)
@@ -51,31 +60,26 @@ SELECT TOP (1)
     ISNULL(p.Allow_Export, 0),
     ISNULL(p.Allow_Branch, 0)
 FROM dbo.User_Login AS u
-INNER JOIN dbo.User_Permission AS p
-    ON p.GroupID = u.GroupID
-INNER JOIN dbo.User_Screens AS s
-    ON s.ID = p.ScreenID
+INNER JOIN dbo.User_Permission AS p ON p.GroupID = u.GroupID
+INNER JOIN dbo.User_Screens AS s ON s.ID = p.ScreenID
 WHERE u.ID = @UserId
   AND ISNULL(u.IsActive, 0) = 1
   AND u.GroupID = @GroupId
   AND p.ScreenID = @ScreenId
   AND ISNULL(s.ISShow, 1) = 1;";
 
-        var table = await _db.QueryAsync(
-            sql,
-            p =>
-            {
-                p.Add("@UserId", SqlDbType.Int).Value = session.UserId;
-                p.Add("@GroupId", SqlDbType.Int).Value = session.GroupId.Value;
-                p.Add("@ScreenId", SqlDbType.Int).Value = screenId;
-            },
-            cancellationToken).ConfigureAwait(false);
+        var table = await _db.QueryAsync(sql, p =>
+        {
+            p.Add("@UserId", SqlDbType.Int).Value = session.UserId;
+            p.Add("@GroupId", SqlDbType.Int).Value = session.GroupId.Value;
+            p.Add("@ScreenId", SqlDbType.Int).Value = screenId;
+        }, cancellationToken).ConfigureAwait(false);
 
         if (table.Rows.Count == 0)
-            throw new UnauthorizedAccessException("لا توجد صلاحية لهذا الإجراء على الشاشة الحالية.");
+            return false;
 
         var row = table.Rows[0];
-        var allowed = action switch
+        return action switch
         {
             PermissionAction.Enter => ToBool(row[0]),
             PermissionAction.Save => ToBool(row[1]),
@@ -86,9 +90,6 @@ WHERE u.ID = @UserId
             PermissionAction.Branch => ToBool(row[6]),
             _ => false
         };
-
-        if (!allowed)
-            throw new UnauthorizedAccessException($"لا تملك صلاحية {GetActionName(action)} لهذه الشاشة.");
     }
 
     private static bool ToBool(object value)
