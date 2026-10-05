@@ -18,6 +18,30 @@ public sealed class ScreenRouter
         message = string.Empty;
         if (!access.AllowEnter) { message = "لا تملك صلاحية فتح هذه الشاشة."; return false; }
 
+        // Re-check the current permission in the database immediately before
+        // opening the form. The menu is only a cached view of the user's access;
+        // it must never become an authorization bypass after permissions change.
+        try
+        {
+            var authorization = new AuthorizationService(
+                new DbExecutor(new SqlConnectionFactory(_connectionString)));
+            var allowedNow = authorization
+                .CanAsync(_session, access.Id, PermissionAction.Enter)
+                .GetAwaiter()
+                .GetResult();
+
+            if (!allowedNow)
+            {
+                message = "تم تغيير صلاحياتك أو إيقاف هذه الشاشة. أعد تحميل الصلاحيات ثم حاول مرة أخرى.";
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = "تعذر التحقق من صلاحية الشاشة من قاعدة البيانات: " + ex.GetBaseException().Message;
+            return false;
+        }
+
         var screenName = ScreenAccess.CleanScreenName(access.ScreenName);
         if (string.IsNullOrWhiteSpace(screenName))
         {
